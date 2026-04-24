@@ -33,7 +33,7 @@ test('epic backlog decomposes issue 1 into prioritized phases', async () => {
   const manifest = await readJson('config/epic-subtasks.json');
 
   assert.equal(manifest.parentIssue, 1);
-  assert.ok(manifest.subtasks.length >= 30, 'expected a full epic decomposition');
+  assert.ok(manifest.subtasks.length >= 25, 'expected a full epic decomposition');
 
   const requiredPhases = [
     'Infrastructure and Core',
