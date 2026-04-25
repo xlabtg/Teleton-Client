@@ -157,9 +157,12 @@ test('agent autonomy modes match the epic acceptance criteria', async () => {
 
 test('proxy settings model covers MTProto and SOCKS5 without hardcoded secrets', async () => {
   const { PROXY_PROTOCOLS, validateProxyConfig } = await import('../src/foundation/proxy-settings.mjs');
+  const { PROXY_ROUTE_TYPES, createProxyManager } = await import('../src/foundation/proxy-manager.mjs');
 
   assert.deepEqual(PROXY_PROTOCOLS, ['mtproto', 'socks5']);
+  assert.deepEqual(PROXY_ROUTE_TYPES, ['direct', 'mtproto', 'socks5']);
   assert.equal(validateProxyConfig({ protocol: 'mtproto', host: 'proxy.example', port: 443, secret: 'env:TELETON_MTPROTO_SECRET' }).valid, true);
   assert.equal(validateProxyConfig({ protocol: 'socks5', host: '127.0.0.1', port: 1080 }).valid, true);
   assert.equal(validateProxyConfig({ protocol: 'mtproto', host: 'proxy.example', port: 443, secret: 'hardcoded-secret' }).valid, false);
+  assert.equal(createProxyManager().chooseRoute({ direct: true }).type, 'direct');
 });
