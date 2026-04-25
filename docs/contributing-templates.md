@@ -19,3 +19,9 @@ Use the implementation subtask template for tasks decomposed from the Teleton Cl
 Pull requests should summarize the change, link the issue, list tests, call out risks, and include screenshots or recordings for UI work. PR descriptions should stay current as implementation details change.
 
 Never include secrets, production credentials, access tokens, Telegram API hashes, private keys, or private message content in issues, pull requests, logs, screenshots, or fixtures.
+
+## Ownership Rules
+
+Repository ownership is defined in `.github/CODEOWNERS`. Changes to security and privacy documentation, CI and release automation, package metadata, platform integration boundaries, shared client code, and CODEOWNERS itself must be reviewed by a human maintainer before merge.
+
+When ownership needs to change, update `.github/CODEOWNERS` in the same pull request as the related repository-area change and explain why the new owner mapping is appropriate.
