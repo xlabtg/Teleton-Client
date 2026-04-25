@@ -20,6 +20,16 @@ npm run decompose:dry-run
 
 No dependency installation is required for the current foundation package because it uses only Node.js built-ins.
 
+## Pre-commit Checks
+
+Enable the repository hook path once per clone:
+
+```sh
+npm run prepare:hooks
+```
+
+The pre-commit hook runs the same foundation checks as CI before allowing a commit.
+
 ## Epic Decomposition
 
 Preview the planned subissues without changing GitHub:

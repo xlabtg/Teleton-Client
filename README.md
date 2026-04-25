@@ -22,6 +22,12 @@ npm run validate:foundation
 npm run decompose:dry-run
 ```
 
+Enable local pre-commit checks with:
+
+```sh
+npm run prepare:hooks
+```
+
 ## Architecture Direction
 
 The project is intended to evolve through these layers:

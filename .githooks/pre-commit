@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+set -eu
+
+npm test
+npm run validate:foundation
+npm run decompose:dry-run
