@@ -7,28 +7,43 @@ function isPlainObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
-function normalizeHealthInputs(input = {}) {
-  const direct = input.direct ?? input.directReachable ?? true;
-  const proxies = isPlainObject(input.proxies) ? input.proxies : {};
+const DEFAULT_FAILURE_COOLDOWN_MS = 30_000;
 
-  return {
-    direct: direct === true,
-    proxies
-  };
-}
-
-function proxyReachable(health, proxy) {
-  const value = health.proxies[proxy.id];
-
+function normalizeReachability(value) {
   if (typeof value === 'boolean') {
-    return value;
+    return {
+      reachable: value,
+      latencyMs: null
+    };
   }
 
   if (isPlainObject(value)) {
-    return value.reachable === true || value.healthy === true;
+    return {
+      reachable: value.reachable === true || value.healthy === true,
+      latencyMs: Number.isFinite(value.latencyMs) && value.latencyMs >= 0 ? value.latencyMs : null
+    };
   }
 
-  return false;
+  return {
+    reachable: false,
+    latencyMs: null
+  };
+}
+
+function normalizeHealthInputs(input = {}) {
+  const direct = input.direct ?? input.directReachable ?? true;
+  const proxies = isPlainObject(input.proxies) ? input.proxies : {};
+  const now = Number.isFinite(input.now) ? input.now : Date.now();
+
+  return {
+    direct: normalizeReachability(direct),
+    proxies,
+    now
+  };
+}
+
+function proxyHealth(health, proxy) {
+  return normalizeReachability(health.proxies[proxy.id]);
 }
 
 function routeForProxy(proxy) {
@@ -61,6 +76,7 @@ export function createDirectRoute() {
 
 export function createProxyManager(initialSettings = {}) {
   let settings = normalizeSettings(initialSettings);
+  const failureWindows = new Map();
 
   function orderedProxyCandidates() {
     if (settings.proxy.enabled !== true) {
@@ -71,6 +87,44 @@ export function createProxyManager(initialSettings = {}) {
     const remaining = settings.proxy.entries.filter((entry) => entry.id !== settings.proxy.activeProxyId);
 
     return activeProxy ? [activeProxy, ...remaining] : remaining;
+  }
+
+  function failureWindow(proxyId, now) {
+    const window = failureWindows.get(proxyId);
+    if (!window) {
+      return null;
+    }
+
+    if (window.expiresAt <= now) {
+      failureWindows.delete(proxyId);
+      return null;
+    }
+
+    return window;
+  }
+
+  function rankedProxyCandidates(health) {
+    return orderedProxyCandidates()
+      .map((proxy, index) => ({
+        proxy,
+        index,
+        health: proxyHealth(health, proxy)
+      }))
+      .filter((candidate) => candidate.health.reachable && !failureWindow(candidate.proxy.id, health.now))
+      .sort((left, right) => {
+        if (settings.proxy.autoSwitchEnabled !== true) {
+          return left.index - right.index;
+        }
+
+        const leftLatency = left.health.latencyMs ?? Number.POSITIVE_INFINITY;
+        const rightLatency = right.health.latencyMs ?? Number.POSITIVE_INFINITY;
+
+        if (leftLatency !== rightLatency) {
+          return leftLatency - rightLatency;
+        }
+
+        return left.index - right.index;
+      });
   }
 
   return Object.freeze({
@@ -92,17 +146,40 @@ export function createProxyManager(initialSettings = {}) {
     chooseRoute(healthInput = {}) {
       const health = normalizeHealthInputs(healthInput);
 
-      if (health.direct) {
+      if (health.direct.reachable && settings.proxy.enabled !== true) {
         return createDirectRoute();
       }
 
-      for (const proxy of orderedProxyCandidates()) {
-        if (proxyReachable(health, proxy)) {
-          return Object.freeze(routeForProxy(proxy));
-        }
+      const [candidate] = rankedProxyCandidates(health);
+      if (candidate) {
+        return Object.freeze(routeForProxy(candidate.proxy));
+      }
+
+      if (health.direct.reachable) {
+        return createDirectRoute();
       }
 
       return null;
+    },
+    recordProxyFailure(proxyId, options = {}) {
+      const now = Number.isFinite(options.now) ? options.now : Date.now();
+      const cooldownMs = Number.isFinite(options.cooldownMs) ? Math.max(0, options.cooldownMs) : DEFAULT_FAILURE_COOLDOWN_MS;
+
+      failureWindows.set(proxyId, {
+        failedAt: now,
+        expiresAt: now + cooldownMs
+      });
+
+      return {
+        proxyId,
+        failedAt: now,
+        cooldownMs,
+        expiresAt: now + cooldownMs
+      };
+    },
+    recordProxySuccess(proxyId) {
+      failureWindows.delete(proxyId);
+      return { proxyId };
     }
   });
 }
