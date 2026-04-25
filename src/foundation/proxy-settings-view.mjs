@@ -13,6 +13,13 @@ const DEFAULT_DRAFT = Object.freeze({
 
 const SECURE_REFERENCE_PATTERN = /\b(?:env|keychain|keystore|secret):[A-Za-z0-9_.:/-]+/g;
 
+export const CONNECTION_QUALITY_STATES = Object.freeze(['testing', 'direct', 'proxy', 'degraded', 'offline']);
+
+export const CONNECTION_QUALITY_THRESHOLDS = Object.freeze({
+  goodLatencyMs: 250,
+  degradedLatencyMs: 1000
+});
+
 function clone(value) {
   return structuredClone(value);
 }
@@ -125,11 +132,117 @@ function defaultProxyTest() {
   };
 }
 
+function normalizeReachability(value) {
+  if (typeof value === 'boolean') {
+    return {
+      reachable: value,
+      latencyMs: null
+    };
+  }
+
+  if (value !== null && typeof value === 'object') {
+    const latencyMs = Number.isFinite(value.latencyMs) ? value.latencyMs : null;
+
+    return {
+      reachable: value.reachable === true || value.healthy === true,
+      latencyMs
+    };
+  }
+
+  return {
+    reachable: false,
+    latencyMs: null
+  };
+}
+
+function latencyTone(latencyMs) {
+  if (latencyMs === null) {
+    return 'success';
+  }
+
+  return latencyMs > CONNECTION_QUALITY_THRESHOLDS.goodLatencyMs ? 'warning' : 'success';
+}
+
+function routeLabel(route) {
+  if (route.type === 'mtproto') {
+    return 'MTProto proxy connection';
+  }
+
+  if (route.type === 'socks5') {
+    return 'SOCKS5 proxy connection';
+  }
+
+  return 'Proxy connection';
+}
+
+function createConnectionQuality(settings, healthInput = {}) {
+  if (healthInput.testing !== false) {
+    return Object.freeze({
+      state: 'testing',
+      route: 'testing',
+      label: 'Checking connection...',
+      detail: 'Testing direct and proxy routes.',
+      tone: 'info',
+      latencyMs: null,
+      proxyId: null
+    });
+  }
+
+  const direct = normalizeReachability(healthInput.direct ?? healthInput.directReachable);
+  if (direct.reachable) {
+    const degraded = direct.latencyMs !== null && direct.latencyMs > CONNECTION_QUALITY_THRESHOLDS.degradedLatencyMs;
+
+    return Object.freeze({
+      state: degraded ? 'degraded' : 'direct',
+      route: 'direct',
+      label: degraded ? 'Degraded direct connection' : 'Direct connection',
+      detail: degraded ? 'Direct route is reachable with high latency.' : 'Direct route is reachable.',
+      tone: degraded ? 'warning' : latencyTone(direct.latencyMs),
+      latencyMs: direct.latencyMs,
+      proxyId: null
+    });
+  }
+
+  const proxies = healthInput.proxies && typeof healthInput.proxies === 'object' ? healthInput.proxies : {};
+  const active = settings.proxy.entries.find((entry) => entry.id === settings.proxy.activeProxyId);
+  const candidates = active
+    ? [active, ...settings.proxy.entries.filter((entry) => entry.id !== active.id)]
+    : settings.proxy.entries;
+
+  if (settings.proxy.enabled === true) {
+    for (const proxy of candidates) {
+      const proxyHealth = normalizeReachability(proxies[proxy.id]);
+      if (proxyHealth.reachable) {
+        return Object.freeze({
+          state: 'proxy',
+          route: proxy.protocol,
+          label: routeLabel({ type: proxy.protocol }),
+          detail: `Connected through configured proxy ${proxy.id}.`,
+          tone: latencyTone(proxyHealth.latencyMs),
+          latencyMs: proxyHealth.latencyMs,
+          proxyId: proxy.id
+        });
+      }
+    }
+  }
+
+  return Object.freeze({
+    state: 'offline',
+    route: 'offline',
+    label: 'Offline',
+    detail: 'No direct or proxy route is reachable.',
+    tone: 'danger',
+    latencyMs: null,
+    proxyId: null
+  });
+}
+
 export function createProxySettingsView(options = {}) {
   const manager = createProxyManager(options.initialSettings);
   const testProxyAdapter = options.testProxy ?? defaultProxyTest;
   let draft = entryToDraft(options.draft);
   let tests = {};
+  let connectionHealth = { testing: true };
 
   function state() {
     const settings = manager.getSettings();
@@ -144,6 +257,7 @@ export function createProxySettingsView(options = {}) {
         valid: form.valid,
         errors: [...form.errors]
       },
+      connectionQuality: createConnectionQuality(settings, connectionHealth),
       tests: clone(tests),
       route: routeFromSettings(settings)
     };
@@ -166,6 +280,10 @@ export function createProxySettingsView(options = {}) {
         ...draft,
         ...values
       };
+      return state();
+    },
+    updateConnectionQuality(health = {}) {
+      connectionHealth = clone(health);
       return state();
     },
     editProxy(proxyId) {

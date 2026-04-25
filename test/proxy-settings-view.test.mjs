@@ -89,3 +89,77 @@ test('proxy settings view reports validation and test failures without exposing 
   assert.equal(tested.tests.office.message, 'Authentication failed for [redacted]');
   assert.doesNotMatch(JSON.stringify(tested), /keychain:proxy-password/);
 });
+
+test('proxy settings view exposes safe connection quality indicator states', () => {
+  const view = createProxySettingsView({
+    initialSettings: {
+      proxy: {
+        enabled: true,
+        activeProxyId: 'office',
+        entries: [
+          {
+            id: 'office',
+            protocol: 'socks5',
+            host: '10.0.0.5',
+            port: 1080,
+            usernameRef: 'keychain:proxy-user',
+            passwordRef: 'keychain:proxy-password'
+          }
+        ]
+      }
+    }
+  });
+
+  assert.deepEqual(view.getState().connectionQuality, {
+    state: 'testing',
+    route: 'testing',
+    label: 'Checking connection...',
+    detail: 'Testing direct and proxy routes.',
+    tone: 'info',
+    latencyMs: null,
+    proxyId: null
+  });
+
+  let state = view.updateConnectionQuality({
+    testing: false,
+    direct: { reachable: true, latencyMs: 80 }
+  });
+  assert.equal(state.connectionQuality.state, 'direct');
+  assert.equal(state.connectionQuality.route, 'direct');
+  assert.equal(state.connectionQuality.label, 'Direct connection');
+  assert.equal(state.connectionQuality.tone, 'success');
+
+  state = view.updateConnectionQuality({
+    testing: false,
+    direct: { reachable: false },
+    proxies: {
+      office: { reachable: true, latencyMs: 260 }
+    }
+  });
+  assert.equal(state.connectionQuality.state, 'proxy');
+  assert.equal(state.connectionQuality.route, 'socks5');
+  assert.equal(state.connectionQuality.proxyId, 'office');
+  assert.equal(state.connectionQuality.label, 'SOCKS5 proxy connection');
+  assert.equal(state.connectionQuality.tone, 'warning');
+  assert.doesNotMatch(JSON.stringify(state.connectionQuality), /keychain:proxy-password/);
+
+  state = view.updateConnectionQuality({
+    testing: false,
+    direct: { reachable: true, latencyMs: 1800 }
+  });
+  assert.equal(state.connectionQuality.state, 'degraded');
+  assert.equal(state.connectionQuality.label, 'Degraded direct connection');
+  assert.equal(state.connectionQuality.tone, 'warning');
+
+  state = view.updateConnectionQuality({
+    testing: false,
+    direct: { reachable: false },
+    proxies: {
+      office: { reachable: false, message: 'Authentication failed for keychain:proxy-password' }
+    }
+  });
+  assert.equal(state.connectionQuality.state, 'offline');
+  assert.equal(state.connectionQuality.label, 'Offline');
+  assert.equal(state.connectionQuality.detail, 'No direct or proxy route is reachable.');
+  assert.doesNotMatch(JSON.stringify(state.connectionQuality), /keychain:proxy-password/);
+});
