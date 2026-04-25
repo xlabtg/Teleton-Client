@@ -10,7 +10,7 @@ This repository is in the foundation phase. The current implementation establish
 - Machine-readable backlog for the Teleton Client foundation epic.
 - Published GitHub subissues for the issue `#1` decomposition, tracked in the manifest.
 - Dry-run and idempotent GitHub issue creation script for decomposing issue `#1`.
-- Shared agent mode and proxy settings models with tests.
+- Shared cross-platform settings model for language, theme, notifications, agent mode, proxy, and secure references.
 - Baseline TDLib client adapter contract with mock-backed tests.
 - CI workflow for foundation checks.
 - Required project documents: `README.md`, `PRIVACY.md`, `LICENSE`, and `BUILD-GUIDE.md`.
