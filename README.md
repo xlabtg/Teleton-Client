@@ -9,6 +9,7 @@ This repository is in the foundation phase. The current implementation establish
 - Dependency-free Node.js validation and test suite.
 - Machine-readable backlog for the Teleton Client foundation epic.
 - Published GitHub subissues for the issue `#1` decomposition, tracked in the manifest.
+- GitHub issue and pull request templates for reproducible, secret-free contributions.
 - Dry-run and idempotent GitHub issue creation script for decomposing issue `#1`.
 - Shared cross-platform settings model for language, theme, notifications, agent mode, proxy, and secure references.
 - Baseline TDLib client adapter contract with mock-backed tests.
@@ -40,6 +41,10 @@ The project is intended to evolve through these layers:
 5. Security and privacy controls for credentials, user consent, and auditability.
 
 See `docs/architecture.md`, `docs/backlog.md`, and `docs/tdlib-adapter.md` for the current foundation plan.
+
+## Contribution Templates
+
+Use the GitHub issue templates for feature tasks, bug reports, and generated implementation subtasks. Pull requests should use the repository template to link issues, list tests, call out risks, and include screenshots for UI changes. See `docs/contributing-templates.md` for template expectations.
 
 ## Issue Decomposition
 

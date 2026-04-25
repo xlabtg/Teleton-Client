@@ -12,8 +12,12 @@ const requiredFiles = [
   'LICENSE',
   '.githooks/pre-commit',
   '.github/workflows/ci.yml',
+  '.github/ISSUE_TEMPLATE/bug_report.yml',
+  '.github/ISSUE_TEMPLATE/feature_task.yml',
   '.github/ISSUE_TEMPLATE/subtask.yml',
+  '.github/pull_request_template.md',
   'config/epic-subtasks.json',
+  'docs/contributing-templates.md',
   'docs/architecture.md',
   'docs/backlog.md',
   'docs/tdlib-adapter.md'

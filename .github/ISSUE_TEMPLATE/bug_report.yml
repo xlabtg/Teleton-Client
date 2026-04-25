@@ -1,0 +1,70 @@
+name: Bug report
+description: Report a reproducible Teleton Client defect.
+title: "[Bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for defects with a clear actual result and expected result. Do not include secrets, production credentials, access tokens, Telegram API hashes, private keys, or user-private message content.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Describe the bug and the affected area.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Provide the smallest reliable reproduction.
+      placeholder: |
+        1. Run ...
+        2. Open ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: Describe what should happen.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Describe what happens instead, including relevant error messages.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include OS, Node.js version, package manager, app platform, and relevant dependency versions.
+      placeholder: |
+        - OS:
+        - Node.js:
+        - Platform:
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Add redacted logs, screenshots, or traces. Remove secrets, credentials, tokens, and private message content before posting.
+    validations:
+      required: false
+  - type: textarea
+    id: tests
+    attributes:
+      label: Tests or checks tried
+      description: List automated or manual checks already run, and whether they passed.
+      placeholder: |
+        - [ ] npm test
+        - [ ] npm run validate:foundation
+    validations:
+      required: false
