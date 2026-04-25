@@ -15,10 +15,11 @@ Teleton Client is planned as a layered client where protocol, automation, wallet
 ## Boundaries
 
 - TDLib credentials must be supplied at runtime and never committed.
+- TDLib callers use the shared `authenticate`, `getChatList`, `sendMessage`, and `subscribeUpdates` adapter contract so Android, iOS, desktop, and web-compatible bridges expose the same boundary.
 - Agent mode defaults to `off`; cloud and hybrid modes require explicit activation.
 - Proxy secrets are represented as secure references such as `env:NAME`, `keychain:name`, or `keystore:name`.
 - TON signing requires user confirmation and platform secure storage or wallet-provider approval.
 
 ## Foundation Status
 
-This PR implements only the foundation layer and epic decomposition workflow. Platform UI shells, live TDLib integration, live agent runtime, and live TON operations remain tracked by the generated subtasks in `config/epic-subtasks.json`.
+This PR implements only the foundation layer, epic decomposition workflow, and baseline TDLib adapter boundary. Platform UI shells, live TDLib integration, live agent runtime, and live TON operations remain tracked by the generated subtasks in `config/epic-subtasks.json`.

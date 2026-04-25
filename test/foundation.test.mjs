@@ -22,7 +22,8 @@ test('foundation artifacts required by issue 1 are present', () => {
     '.githooks/pre-commit',
     '.github/workflows/ci.yml',
     '.github/ISSUE_TEMPLATE/subtask.yml',
-    'config/epic-subtasks.json'
+    'config/epic-subtasks.json',
+    'docs/tdlib-adapter.md'
   ];
 
   for (const requiredFile of requiredFiles) {

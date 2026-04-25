@@ -8,6 +8,19 @@ Teleton Client is currently in the repository foundation phase. The present code
 - GitHub CLI (`gh`) for creating GitHub issues from the epic backlog.
 - A GitHub account with write access to `xlabtg/Teleton-Client` when running issue creation.
 
+## TDLib Build Targets
+
+The current repository does not compile TDLib yet. The baseline adapter boundary in `src/tdlib/client-adapter.mjs` defines the platform-neutral contract that future native builds must implement for Android, iOS, desktop, and web-compatible callers.
+
+Future TDLib build work should produce:
+
+- Android native artifacts for supported NDK ABIs.
+- iOS device and simulator artifacts packaged for the app wrapper.
+- desktop artifacts for Linux, macOS, and Windows through a native module or helper process.
+- a web-compatible bridge that calls a trusted local service or backend instead of shipping raw TDLib credentials into a browser runtime.
+
+TDLib is distributed under the Boost Software License 1.0 (`BSL-1.0`). Future build scripts must preserve upstream license notices, record the TDLib source revision, and document local patches or packaging changes. See `docs/tdlib-adapter.md` for the adapter boundary and credential-handling rules.
+
 ## Local Checks
 
 Run the same checks used by CI:
