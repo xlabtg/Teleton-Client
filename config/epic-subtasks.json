@@ -73,6 +73,126 @@
       ]
     },
     {
+      "id": "004",
+      "title": "[004] Configure pre-commit hooks for code checks",
+      "phase": "Infrastructure and Core",
+      "priority": 4,
+      "issueNumber": 33,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/33",
+      "labels": ["infrastructure", "ci", "ai-solvable", "good first issue"],
+      "scope": "Add repository pre-commit hooks that run the fast local checks expected before opening a pull request.",
+      "implementationSteps": [
+        "Define the hook entry point and document how contributors install it.",
+        "Run formatting, tests, and foundation validation through the hook where available.",
+        "Keep the hook deterministic and free of network-only dependencies."
+      ],
+      "acceptanceCriteria": [
+        "Pre-commit hooks can be installed with the documented command.",
+        "The hook blocks commits when foundation validation fails.",
+        "Contributors can run the same checks manually outside Git hooks."
+      ]
+    },
+    {
+      "id": "005",
+      "title": "[005] Add pull request and issue templates",
+      "phase": "Infrastructure and Core",
+      "priority": 5,
+      "issueNumber": 34,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/34",
+      "labels": ["documentation", "infrastructure", "ai-solvable", "good first issue"],
+      "scope": "Create GitHub templates that capture reproducible task, bug, and pull request information for Teleton Client work.",
+      "implementationSteps": [
+        "Add issue templates for feature tasks, bugs, and generated subtasks.",
+        "Add a pull request template covering summary, tests, risks, and screenshots where relevant.",
+        "Document template expectations for contributors."
+      ],
+      "acceptanceCriteria": [
+        "New issues offer structured templates for common contribution types.",
+        "Pull requests prompt authors for tests and issue references.",
+        "Templates do not require secrets or production credentials."
+      ]
+    },
+    {
+      "id": "006",
+      "title": "[006] Configure automated semantic versioning",
+      "phase": "Infrastructure and Core",
+      "priority": 6,
+      "issueNumber": 35,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/35",
+      "labels": ["release", "ci", "infrastructure", "ai-solvable"],
+      "scope": "Define the semantic versioning and release trigger strategy for future Teleton Client packages.",
+      "implementationSteps": [
+        "Choose the version source of truth for app, package, and release metadata.",
+        "Add validation that release changes follow semantic versioning rules.",
+        "Document how automated version bumps are triggered and reviewed."
+      ],
+      "acceptanceCriteria": [
+        "Version metadata has one documented source of truth.",
+        "CI can validate version consistency before release work merges.",
+        "Release automation avoids publishing from unreviewed pull request code."
+      ]
+    },
+    {
+      "id": "007",
+      "title": "[007] Add CODEOWNERS for automatic reviewer assignment",
+      "phase": "Infrastructure and Core",
+      "priority": 7,
+      "issueNumber": 36,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/36",
+      "labels": ["infrastructure", "human-review-required"],
+      "scope": "Add CODEOWNERS coverage for repository areas so security, platform, and release changes request the right reviewers.",
+      "implementationSteps": [
+        "Map repository paths to owner groups or maintainers.",
+        "Add CODEOWNERS entries for security, CI, docs, platform wrappers, and shared code.",
+        "Document how ownership changes are reviewed."
+      ],
+      "acceptanceCriteria": [
+        "CODEOWNERS exists and covers high-risk paths.",
+        "Security and release paths require human review ownership.",
+        "Ownership rules are documented for future maintainers."
+      ]
+    },
+    {
+      "id": "008",
+      "title": "[008] Create CONTRIBUTING.md with contributor guidelines",
+      "phase": "Infrastructure and Core",
+      "priority": 8,
+      "issueNumber": 37,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/37",
+      "labels": ["documentation", "infrastructure", "ai-solvable", "good first issue"],
+      "scope": "Write contributor guidance for setup, validation, branch workflow, issue selection, and security expectations.",
+      "implementationSteps": [
+        "Document local setup and validation commands.",
+        "Explain branch, commit, pull request, and review expectations.",
+        "Include guidance for secrets, credentials, and generated artifacts."
+      ],
+      "acceptanceCriteria": [
+        "CONTRIBUTING.md explains how to prepare and validate changes locally.",
+        "Guidance links to templates and foundation documentation.",
+        "Security-sensitive data handling rules are explicit."
+      ]
+    },
+    {
+      "id": "009",
+      "title": "[009] Configure automated changelog generation",
+      "phase": "Infrastructure and Core",
+      "priority": 9,
+      "issueNumber": 38,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/38",
+      "labels": ["documentation", "release", "ci", "ai-solvable"],
+      "scope": "Add a changelog workflow that summarizes merged work by version without exposing private data.",
+      "implementationSteps": [
+        "Choose the changelog format and source labels or commit conventions.",
+        "Add automation or scripts that generate release notes from merged pull requests.",
+        "Document manual review steps before publishing release notes."
+      ],
+      "acceptanceCriteria": [
+        "Changelog generation can run locally or in CI.",
+        "Generated entries link to merged pull requests or issues.",
+        "Release notes require review before publication."
+      ]
+    },
+    {
       "id": "010",
       "title": "[010] Implement ProxyManager detection, fallback, and persistence",
       "phase": "Connectivity Layer",
@@ -130,6 +250,146 @@
         "Users can add, test, enable, disable, and remove proxy configurations.",
         "Failed proxy tests show a clear error without exposing secrets.",
         "UI state is covered by tests or review screenshots."
+      ]
+    },
+    {
+      "id": "013",
+      "title": "[013] Add connection quality indicator UI",
+      "phase": "Connectivity Layer",
+      "priority": 13,
+      "issueNumber": 39,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/39",
+      "labels": ["ui", "connectivity", "ai-solvable"],
+      "scope": "Expose connection health and route quality in the UI so users can understand direct and proxy connectivity state.",
+      "implementationSteps": [
+        "Define shared connection quality states and thresholds.",
+        "Add UI state for direct, proxy, degraded, offline, and testing modes.",
+        "Cover state transitions with unit or screenshot-backed tests."
+      ],
+      "acceptanceCriteria": [
+        "Users can see the current connection quality at a glance.",
+        "The indicator distinguishes direct and proxy routes.",
+        "Failure states avoid exposing proxy secrets."
+      ]
+    },
+    {
+      "id": "014",
+      "title": "[014] Add network error logging",
+      "phase": "Connectivity Layer",
+      "priority": 14,
+      "issueNumber": 40,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/40",
+      "labels": ["connectivity", "proxy", "ai-solvable"],
+      "scope": "Add structured logging for network and proxy errors while redacting credentials and user content.",
+      "implementationSteps": [
+        "Define network error categories and log fields.",
+        "Redact proxy secrets, phone numbers, tokens, and message content.",
+        "Add tests for redaction and error classification."
+      ],
+      "acceptanceCriteria": [
+        "Connectivity failures produce actionable structured logs.",
+        "Secret-like values are redacted from logs.",
+        "Tests cover representative direct, MTProto, and SOCKS5 failures."
+      ]
+    },
+    {
+      "id": "015",
+      "title": "[015] Auto-select the fastest proxy from configured entries",
+      "phase": "Connectivity Layer",
+      "priority": 15,
+      "issueNumber": 41,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/41",
+      "labels": ["proxy", "connectivity", "ai-solvable"],
+      "scope": "Select the best configured proxy based on recent health and latency checks with deterministic fallback behavior.",
+      "implementationSteps": [
+        "Track health, latency, and failure windows for each configured proxy.",
+        "Rank eligible proxies without leaking secrets to logs or telemetry.",
+        "Add tests for tie-breaking, failure cooldowns, and direct fallback."
+      ],
+      "acceptanceCriteria": [
+        "Proxy selection prefers healthy low-latency routes.",
+        "Selection is deterministic when proxy metrics tie.",
+        "Users can disable automatic proxy switching."
+      ]
+    },
+    {
+      "id": "016",
+      "title": "[016] Add HTTP CONNECT proxy support",
+      "phase": "Connectivity Layer",
+      "priority": 16,
+      "issueNumber": 42,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/42",
+      "labels": ["proxy", "connectivity", "tdlib", "ai-solvable"],
+      "scope": "Extend proxy configuration and TDLib mapping to support HTTP CONNECT proxies where platform networking permits it.",
+      "implementationSteps": [
+        "Add HTTP CONNECT to proxy settings validation and serialization.",
+        "Map HTTP proxy settings to the supported TDLib or platform adapter path.",
+        "Test validation, enable, disable, and unsupported-platform errors."
+      ],
+      "acceptanceCriteria": [
+        "HTTP CONNECT proxy settings can be represented without breaking existing proxy types.",
+        "Unsupported platform behavior returns a clear error.",
+        "Proxy credentials are not logged in plaintext."
+      ]
+    },
+    {
+      "id": "017",
+      "title": "[017] Add speed tests for each proxy",
+      "phase": "Connectivity Layer",
+      "priority": 17,
+      "issueNumber": 43,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/43",
+      "labels": ["proxy", "testing", "connectivity", "ai-solvable"],
+      "scope": "Provide repeatable per-proxy speed and reachability checks for user-managed proxy entries.",
+      "implementationSteps": [
+        "Define a safe probe target and timeout strategy for proxy checks.",
+        "Record latency and reachability without collecting message content.",
+        "Add mocked tests for success, timeout, and failure cases."
+      ],
+      "acceptanceCriteria": [
+        "Users can test individual proxy entries before enabling them.",
+        "Speed tests report latency and failure reason categories.",
+        "Tests run locally without external network access by default."
+      ]
+    },
+    {
+      "id": "018",
+      "title": "[018] Add proxy usage statistics",
+      "phase": "Connectivity Layer",
+      "priority": 18,
+      "issueNumber": 44,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/44",
+      "labels": ["proxy", "connectivity", "privacy", "ai-solvable"],
+      "scope": "Track local proxy usage statistics that help users evaluate reliability without sending private telemetry.",
+      "implementationSteps": [
+        "Define local counters for attempts, successes, failures, latency, and last-used time.",
+        "Store statistics separately from proxy secrets.",
+        "Add reset and export behavior for diagnostics."
+      ],
+      "acceptanceCriteria": [
+        "Proxy statistics are stored locally by default.",
+        "Users can clear collected proxy statistics.",
+        "Statistics never include message contents or proxy secrets."
+      ]
+    },
+    {
+      "id": "019",
+      "title": "[019] Curate optional public MTProto proxy catalog",
+      "phase": "Connectivity Layer",
+      "priority": 19,
+      "issueNumber": 45,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/45",
+      "labels": ["proxy", "connectivity", "human-review-required"],
+      "scope": "Design an optional catalog of public MTProto proxies with clear trust warnings and review requirements.",
+      "implementationSteps": [
+        "Define catalog metadata, freshness, and source verification requirements.",
+        "Add UI and settings behavior that keeps public proxy usage opt-in.",
+        "Document abuse, privacy, and reliability risks for reviewers."
+      ],
+      "acceptanceCriteria": [
+        "Public proxy catalog use is optional and disabled by default.",
+        "Catalog entries include source and freshness metadata.",
+        "Human review is required before shipping public proxy sources."
       ]
     },
     {
@@ -213,6 +473,126 @@
       ]
     },
     {
+      "id": "024",
+      "title": "[024] Implement Teleton Agent plugin system",
+      "phase": "Teleton Agent Integration",
+      "priority": 24,
+      "issueNumber": 46,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/46",
+      "labels": ["agent", "ai-solvable"],
+      "scope": "Define a plugin system that lets Teleton Agent capabilities be enabled, disabled, and inspected safely from the client.",
+      "implementationSteps": [
+        "Define plugin manifest, permissions, lifecycle, and compatibility fields.",
+        "Add enable, disable, list, and health-check flows through the agent bridge.",
+        "Add tests for invalid manifests and permission boundaries."
+      ],
+      "acceptanceCriteria": [
+        "Plugins declare permissions before they can be enabled.",
+        "Disabled plugins cannot receive events or perform actions.",
+        "Plugin lifecycle behavior is covered by tests."
+      ]
+    },
+    {
+      "id": "025",
+      "title": "[025] Add custom LLM provider support",
+      "phase": "Teleton Agent Integration",
+      "priority": 25,
+      "issueNumber": 47,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/47",
+      "labels": ["agent", "settings", "ai-solvable"],
+      "scope": "Allow users to configure approved local or cloud LLM providers for Teleton Agent without committing credentials.",
+      "implementationSteps": [
+        "Define provider configuration schemas and secret reference handling.",
+        "Add validation for local, cloud, and custom endpoint providers.",
+        "Document privacy implications for each provider mode."
+      ],
+      "acceptanceCriteria": [
+        "Provider credentials are stored through secure references only.",
+        "Invalid provider configurations return actionable validation errors.",
+        "Cloud provider use requires explicit user opt-in."
+      ]
+    },
+    {
+      "id": "026",
+      "title": "[026] Implement agent configuration export and import",
+      "phase": "Teleton Agent Integration",
+      "priority": 26,
+      "issueNumber": 48,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/48",
+      "labels": ["agent", "settings", "privacy", "ai-solvable"],
+      "scope": "Support portable agent configuration export and import while excluding local secrets and private memory data.",
+      "implementationSteps": [
+        "Define exportable configuration fields and excluded secret fields.",
+        "Implement import validation, versioning, and migration behavior.",
+        "Add tests for redaction, malformed imports, and version compatibility."
+      ],
+      "acceptanceCriteria": [
+        "Exports do not contain tokens, keys, or local memory contents.",
+        "Imports validate schema version before applying changes.",
+        "Users can preview changes before importing configuration."
+      ]
+    },
+    {
+      "id": "027",
+      "title": "[027] Add agent resource monitoring for CPU and memory",
+      "phase": "Teleton Agent Integration",
+      "priority": 27,
+      "issueNumber": 49,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/49",
+      "labels": ["agent", "runtime", "ai-solvable"],
+      "scope": "Expose Teleton Agent CPU, memory, process, and health information to the client and diagnostics logs.",
+      "implementationSteps": [
+        "Define resource metrics available from each supported runtime.",
+        "Add sampling, thresholds, and degraded-state reporting.",
+        "Test behavior for normal, high-resource, and unavailable metric states."
+      ],
+      "acceptanceCriteria": [
+        "The client can display agent resource status.",
+        "High CPU or memory usage produces a clear degraded state.",
+        "Resource monitoring does not include message content."
+      ]
+    },
+    {
+      "id": "028",
+      "title": "[028] Add notifications for agent actions",
+      "phase": "Teleton Agent Integration",
+      "priority": 28,
+      "issueNumber": 50,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/50",
+      "labels": ["agent", "ui", "ai-solvable"],
+      "scope": "Notify users when Teleton Agent proposes, starts, completes, or needs approval for actions.",
+      "implementationSteps": [
+        "Define action notification types and priority levels.",
+        "Connect agent events to UI and platform notification channels.",
+        "Add tests for approval-required and background notification states."
+      ],
+      "acceptanceCriteria": [
+        "Users receive visible notifications for approval-required agent actions.",
+        "Informational notifications respect user notification settings.",
+        "Notification text avoids leaking private message content on lock screens."
+      ]
+    },
+    {
+      "id": "029",
+      "title": "[029] Add reversible agent action history",
+      "phase": "Teleton Agent Integration",
+      "priority": 29,
+      "issueNumber": 51,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/51",
+      "labels": ["agent", "security", "ai-solvable"],
+      "scope": "Record agent actions and provide rollback or compensation hooks where the underlying action supports reversal.",
+      "implementationSteps": [
+        "Define action history records, retention, and privacy boundaries.",
+        "Add rollback metadata for reversible actions and clear markers for irreversible actions.",
+        "Test history filtering, retention, and rollback eligibility."
+      ],
+      "acceptanceCriteria": [
+        "Agent actions are recorded with status, actor, and timestamp.",
+        "Reversible actions expose a rollback path before retention expires.",
+        "Irreversible actions are clearly marked before execution."
+      ]
+    },
+    {
       "id": "030",
       "title": "[030] Connect TON SDK adapter for basic wallet operations",
       "phase": "TON Blockchain Module",
@@ -290,6 +670,126 @@
         "Local mock tests run without secrets.",
         "Testnet checks are gated behind explicit environment variables.",
         "CI cannot accidentally print wallet secrets."
+      ]
+    },
+    {
+      "id": "034",
+      "title": "[034] Add NFT gallery support",
+      "phase": "TON Blockchain Module",
+      "priority": 34,
+      "issueNumber": 52,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/52",
+      "labels": ["ton", "wallet", "ui", "ai-solvable"],
+      "scope": "Display TON NFT collections and items through a safe, cacheable gallery experience.",
+      "implementationSteps": [
+        "Define NFT metadata and media loading boundaries.",
+        "Add adapter methods for collection, item, and ownership lookup.",
+        "Add UI states for loading, empty, failed, and verified metadata."
+      ],
+      "acceptanceCriteria": [
+        "Users can view owned NFTs from a connected TON wallet.",
+        "Untrusted NFT metadata is sanitized before display.",
+        "Gallery tests cover empty, loading, and malformed metadata states."
+      ]
+    },
+    {
+      "id": "035",
+      "title": "[035] Add TON staking through the client interface",
+      "phase": "TON Blockchain Module",
+      "priority": 35,
+      "issueNumber": 53,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/53",
+      "labels": ["ton", "wallet", "human-review-required"],
+      "scope": "Design and implement TON staking flows with explicit risk disclosure and transaction confirmation.",
+      "implementationSteps": [
+        "Define supported staking provider boundaries and risk metadata.",
+        "Add stake, unstake, and rewards preview flows without automatic signing.",
+        "Document review requirements for financial and provider assumptions."
+      ],
+      "acceptanceCriteria": [
+        "Staking actions require explicit user confirmation before signing.",
+        "Provider risks and fees are visible before transaction approval.",
+        "Human review is required before enabling staking in a release."
+      ]
+    },
+    {
+      "id": "036",
+      "title": "[036] Integrate TON DNS for domain names",
+      "phase": "TON Blockchain Module",
+      "priority": 36,
+      "issueNumber": 54,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/54",
+      "labels": ["ton", "ai-solvable"],
+      "scope": "Resolve and display TON DNS names for wallet addresses and supported TON resources.",
+      "implementationSteps": [
+        "Add TON DNS resolver methods to the blockchain adapter.",
+        "Cache successful resolutions with expiration and failure handling.",
+        "Add tests for valid, missing, expired, and spoof-like DNS records."
+      ],
+      "acceptanceCriteria": [
+        "TON DNS names resolve to expected wallet or resource records.",
+        "The UI distinguishes verified resolutions from raw addresses.",
+        "Failed resolution falls back to the original address safely."
+      ]
+    },
+    {
+      "id": "037",
+      "title": "[037] Add Jetton token support",
+      "phase": "TON Blockchain Module",
+      "priority": 37,
+      "issueNumber": 55,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/55",
+      "labels": ["ton", "wallet", "ai-solvable"],
+      "scope": "Support Jetton balances, metadata, and transfer preparation in the TON wallet module.",
+      "implementationSteps": [
+        "Define Jetton metadata and balance models.",
+        "Add adapter methods for balance lookup and transfer draft creation.",
+        "Add tests for unknown tokens, malformed metadata, and transfer validation."
+      ],
+      "acceptanceCriteria": [
+        "Users can view Jetton balances for a connected wallet.",
+        "Jetton transfers require the same confirmation controls as TON transfers.",
+        "Unknown token metadata is handled safely."
+      ]
+    },
+    {
+      "id": "038",
+      "title": "[038] Implement filterable transaction history",
+      "phase": "TON Blockchain Module",
+      "priority": 38,
+      "issueNumber": 56,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/56",
+      "labels": ["ton", "wallet", "ui", "ai-solvable"],
+      "scope": "Add TON transaction history with filters for type, token, status, date range, and counterparty.",
+      "implementationSteps": [
+        "Define normalized transaction history records across TON and Jetton activity.",
+        "Add filtering, pagination, and empty-state behavior.",
+        "Test filter combinations and malformed transaction data."
+      ],
+      "acceptanceCriteria": [
+        "Users can filter transaction history by core transaction attributes.",
+        "History pagination is deterministic and testable.",
+        "Failed or pending transactions are clearly distinguished."
+      ]
+    },
+    {
+      "id": "039",
+      "title": "[039] Add multi-wallet support",
+      "phase": "TON Blockchain Module",
+      "priority": 39,
+      "issueNumber": 57,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/57",
+      "labels": ["ton", "wallet", "security", "ai-solvable"],
+      "scope": "Allow users to manage multiple TON wallets while keeping account selection and signing boundaries explicit.",
+      "implementationSteps": [
+        "Define wallet identity, labels, active wallet state, and secure references.",
+        "Add wallet add, remove, switch, and rename flows.",
+        "Test transaction preparation against the selected wallet."
+      ],
+      "acceptanceCriteria": [
+        "Users can switch between multiple wallets intentionally.",
+        "Transaction confirmation shows the wallet that will sign.",
+        "Removing a wallet does not leak or orphan private keys."
       ]
     },
     {
@@ -373,6 +873,126 @@
       ]
     },
     {
+      "id": "044",
+      "title": "[044] Implement responsive tablet UI",
+      "phase": "Platform Wrappers",
+      "priority": 44,
+      "issueNumber": 58,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/58",
+      "labels": ["ui", "platform", "ai-solvable"],
+      "scope": "Adapt core Teleton Client layouts for tablet viewports with ergonomic navigation and readable split panes.",
+      "implementationSteps": [
+        "Define tablet breakpoints and layout rules for chats, settings, agent, and wallet views.",
+        "Add responsive navigation and pane behavior for portrait and landscape modes.",
+        "Capture screenshot or layout tests for representative tablet sizes."
+      ],
+      "acceptanceCriteria": [
+        "Tablet layouts avoid overlapping content in portrait and landscape.",
+        "Primary chat, agent, and wallet workflows remain reachable without desktop-only controls.",
+        "Responsive behavior is documented or covered by tests."
+      ]
+    },
+    {
+      "id": "045",
+      "title": "[045] Add web app support as a PWA",
+      "phase": "Platform Wrappers",
+      "priority": 45,
+      "issueNumber": 59,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/59",
+      "labels": ["platform", "ui", "ai-solvable"],
+      "scope": "Define and implement the baseline progressive web app wrapper for supported browser environments.",
+      "implementationSteps": [
+        "Add web app manifest, service worker strategy, and installability requirements.",
+        "Document browser support constraints for TDLib, agent IPC, notifications, and secure storage.",
+        "Add validation for offline shell and update behavior."
+      ],
+      "acceptanceCriteria": [
+        "The web app can be installed where supported by the browser.",
+        "Unsupported native capabilities have clear fallback behavior.",
+        "PWA assets and metadata pass local validation."
+      ]
+    },
+    {
+      "id": "046",
+      "title": "[046] Implement cross-device synchronization",
+      "phase": "Platform Wrappers",
+      "priority": 46,
+      "issueNumber": 60,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/60",
+      "labels": ["sync", "platform", "privacy", "ai-solvable"],
+      "scope": "Implement opt-in synchronization for safe settings and state across devices without syncing secrets by default.",
+      "implementationSteps": [
+        "Build on the settings synchronization design and define sync payload versions.",
+        "Add conflict resolution, encryption, and device identity handling.",
+        "Test sync disablement, merge behavior, and excluded secret fields."
+      ],
+      "acceptanceCriteria": [
+        "Synchronization is off unless the user opts in.",
+        "Secret fields and local-only agent memory are excluded from sync payloads.",
+        "Conflict resolution behavior is deterministic and tested."
+      ]
+    },
+    {
+      "id": "047",
+      "title": "[047] Add push notifications across platforms",
+      "phase": "Platform Wrappers",
+      "priority": 47,
+      "issueNumber": 61,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/61",
+      "labels": ["platform", "ui", "ai-solvable"],
+      "scope": "Add a cross-platform push notification model for messages, agent approvals, and wallet events.",
+      "implementationSteps": [
+        "Define notification categories, payload redaction, and user preferences.",
+        "Map notification behavior to Android, iOS, desktop, and web capabilities.",
+        "Add tests or platform notes for permission and disabled-notification states."
+      ],
+      "acceptanceCriteria": [
+        "Notification payloads avoid exposing sensitive content by default.",
+        "Users can disable notification categories.",
+        "Platform-specific permission failures are handled clearly."
+      ]
+    },
+    {
+      "id": "048",
+      "title": "[048] Add offline mode with later synchronization",
+      "phase": "Platform Wrappers",
+      "priority": 48,
+      "issueNumber": 62,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/62",
+      "labels": ["sync", "platform", "ai-solvable"],
+      "scope": "Support offline read and queued write behavior where protocol and platform constraints allow safe synchronization later.",
+      "implementationSteps": [
+        "Define offline-capable data, queued actions, and unsupported action behavior.",
+        "Add retry, conflict, and cancellation handling for queued operations.",
+        "Test reconnect behavior and queue persistence boundaries."
+      ],
+      "acceptanceCriteria": [
+        "Users can distinguish offline cached state from live state.",
+        "Queued actions are visible and cancellable before synchronization.",
+        "Sensitive queued data is stored securely."
+      ]
+    },
+    {
+      "id": "049",
+      "title": "[049] Add gesture and keyboard shortcut support",
+      "phase": "Platform Wrappers",
+      "priority": 49,
+      "issueNumber": 63,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/63",
+      "labels": ["ui", "platform", "desktop", "ai-solvable"],
+      "scope": "Add platform-appropriate gestures and keyboard shortcuts for high-frequency messenger, agent, and wallet workflows.",
+      "implementationSteps": [
+        "Define a shared action map for shortcuts and gestures.",
+        "Implement platform adapters for desktop shortcuts and mobile gestures.",
+        "Add collision checks and accessibility documentation."
+      ],
+      "acceptanceCriteria": [
+        "Common workflows have documented shortcuts or gestures where appropriate.",
+        "Shortcut conflicts are detected or documented per platform.",
+        "Users can disable risky shortcuts for transaction or agent actions."
+      ]
+    },
+    {
       "id": "050",
       "title": "[050] Audit tokens, keys, rotation, and secure storage",
       "phase": "Security and Licenses",
@@ -430,6 +1050,146 @@
         "PRIVACY.md describes current and planned data flows.",
         "Agent mode defaults and controls are documented.",
         "Policy is updated whenever data flow behavior changes."
+      ]
+    },
+    {
+      "id": "053",
+      "title": "[053] Implement two-factor authentication controls",
+      "phase": "Security and Licenses",
+      "priority": 53,
+      "issueNumber": 64,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/64",
+      "labels": ["security", "settings", "ai-solvable"],
+      "scope": "Represent and manage two-factor authentication state and recovery guidance in supported authentication flows.",
+      "implementationSteps": [
+        "Define the client state model for password-required and recovery-required auth steps.",
+        "Add settings and auth UI hooks for two-factor prompts and recovery guidance.",
+        "Test successful, failed, and cancelled two-factor flows with mocks."
+      ],
+      "acceptanceCriteria": [
+        "Two-factor prompts never log passwords or recovery data.",
+        "Users receive clear feedback for invalid or cancelled two-factor attempts.",
+        "Mocked tests cover the two-factor authentication state machine."
+      ]
+    },
+    {
+      "id": "054",
+      "title": "[054] Add hardware security key support",
+      "phase": "Security and Licenses",
+      "priority": 54,
+      "issueNumber": 65,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/65",
+      "labels": ["security", "human-review-required"],
+      "scope": "Design hardware security key support for high-risk actions and account protection where platform APIs permit it.",
+      "implementationSteps": [
+        "Identify supported hardware key protocols and platform APIs.",
+        "Add abstraction boundaries for registration, challenge, and verification flows.",
+        "Document fallback behavior and human review requirements."
+      ],
+      "acceptanceCriteria": [
+        "Hardware key flows are gated behind supported platform capability checks.",
+        "Fallback authentication behavior is explicit when hardware keys are unavailable.",
+        "Human security review is required before release enablement."
+      ]
+    },
+    {
+      "id": "055",
+      "title": "[055] Create security audit system",
+      "phase": "Security and Licenses",
+      "priority": 55,
+      "issueNumber": 66,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/66",
+      "labels": ["security", "compliance", "human-review-required"],
+      "scope": "Add repeatable security audit checks for secrets, dependency risk, permission boundaries, and release readiness.",
+      "implementationSteps": [
+        "Define audit categories and required evidence for each release gate.",
+        "Add automated checks where possible for secrets and dependency metadata.",
+        "Document manual audit sign-off requirements."
+      ],
+      "acceptanceCriteria": [
+        "Security audit output can be attached to release review.",
+        "Automated checks fail on common secret patterns.",
+        "Manual review items are tracked before public release."
+      ]
+    },
+    {
+      "id": "056",
+      "title": "[056] Implement automatic token refresh",
+      "phase": "Security and Licenses",
+      "priority": 56,
+      "issueNumber": 67,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/67",
+      "labels": ["security", "ai-solvable"],
+      "scope": "Refresh supported tokens before expiry while preserving secure storage and explicit failure states.",
+      "implementationSteps": [
+        "Inventory token types used by Telegram, agent providers, sync, and TON integrations.",
+        "Add refresh scheduling, backoff, and invalid-token handling.",
+        "Test expiry, refresh failure, and revoked-token states."
+      ],
+      "acceptanceCriteria": [
+        "Refreshable tokens renew without exposing plaintext credentials.",
+        "Refresh failures move the affected integration into a clear re-authentication state.",
+        "Tests cover expired, revoked, and network-failed refresh attempts."
+      ]
+    },
+    {
+      "id": "057",
+      "title": "[057] Add encrypted message database storage",
+      "phase": "Security and Licenses",
+      "priority": 57,
+      "issueNumber": 68,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/68",
+      "labels": ["security", "privacy", "ai-solvable"],
+      "scope": "Encrypt local message database storage and document key management requirements across platforms.",
+      "implementationSteps": [
+        "Select encryption boundaries for cached messages, indexes, and attachments metadata.",
+        "Integrate platform secure storage for database encryption keys.",
+        "Add tests for locked, unlocked, migrated, and failed-decryption states."
+      ],
+      "acceptanceCriteria": [
+        "Message database content is encrypted at rest.",
+        "Database keys are stored through platform secure storage providers.",
+        "Failure states do not delete user data without explicit consent."
+      ]
+    },
+    {
+      "id": "058",
+      "title": "[058] Implement secure data deletion",
+      "phase": "Security and Licenses",
+      "priority": 58,
+      "issueNumber": 69,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/69",
+      "labels": ["security", "privacy", "human-review-required"],
+      "scope": "Add secure deletion flows for local account data, cached media, agent memory, and wallet-related local state.",
+      "implementationSteps": [
+        "Define deletion scopes and platform-specific storage locations.",
+        "Add confirmation, progress, and recovery-window behavior where appropriate.",
+        "Document limitations of secure deletion on each platform filesystem."
+      ],
+      "acceptanceCriteria": [
+        "Users can request deletion for account, cache, agent, and wallet local data scopes.",
+        "Deletion confirmations clearly describe irreversible effects.",
+        "Platform limitations receive human security review."
+      ]
+    },
+    {
+      "id": "059",
+      "title": "[059] Create SECURITY.md documentation",
+      "phase": "Security and Licenses",
+      "priority": 59,
+      "issueNumber": 70,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/70",
+      "labels": ["security", "documentation", "human-review-required"],
+      "scope": "Publish security policy documentation for reporting vulnerabilities, supported versions, and responsible disclosure.",
+      "implementationSteps": [
+        "Add SECURITY.md with vulnerability reporting and supported version guidance.",
+        "Document expectations for secrets, private reports, and disclosure timelines.",
+        "Link security policy from contributor and release documentation."
+      ],
+      "acceptanceCriteria": [
+        "SECURITY.md exists and explains how to report vulnerabilities privately.",
+        "Supported versions and disclosure expectations are documented.",
+        "Human maintainers review the security policy before release."
       ]
     },
     {

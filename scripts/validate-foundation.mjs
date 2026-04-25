@@ -36,7 +36,14 @@ const requiredPhases = [
 assert.equal(manifest.parentIssue, 1, 'manifest must point to issue 1');
 assert.equal(manifest.repository, 'xlabtg/Teleton-Client', 'manifest repository must match upstream');
 assert.deepEqual(manifest.priorityOrder, requiredPhases, 'priority order must match the epic');
-assert.ok(manifest.subtasks.length >= 25, 'manifest must include all epic subtasks');
+assert.equal(manifest.subtasks.length, 63, 'manifest must include all 63 epic subtasks');
+
+const requiredIds = Array.from({ length: 63 }, (_, index) => String(index + 1).padStart(3, '0'));
+assert.deepEqual(
+  manifest.subtasks.map((subtask) => subtask.id),
+  requiredIds,
+  'manifest must keep the complete ordered task id sequence'
+);
 
 const ids = new Set();
 const titles = new Set();
