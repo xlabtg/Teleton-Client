@@ -1,0 +1,122 @@
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+
+import {
+  SETTINGS_PLATFORM_WRAPPERS,
+  SETTINGS_SCHEMA_VERSION,
+  TELETON_SETTINGS_SCHEMA,
+  createPlatformSettings,
+  createTeletonSettings,
+  migrateTeletonSettings,
+  validateTeletonSettings
+} from '../src/foundation/settings-model.mjs';
+
+test('settings defaults are serializable and keep agent and proxy disabled', () => {
+  const settings = createTeletonSettings();
+
+  assert.equal(settings.schemaVersion, SETTINGS_SCHEMA_VERSION);
+  assert.equal(TELETON_SETTINGS_SCHEMA.version, SETTINGS_SCHEMA_VERSION);
+  assert.deepEqual(JSON.parse(JSON.stringify(TELETON_SETTINGS_SCHEMA.defaults)), settings);
+  assert.equal(settings.language, 'system');
+  assert.equal(settings.theme, 'system');
+  assert.equal(settings.agent.mode, 'off');
+  assert.equal(settings.proxy.enabled, false);
+  assert.equal(settings.proxy.activeProxyId, null);
+  assert.deepEqual(settings.proxy.entries, []);
+  assert.equal(settings.notifications.enabled, true);
+  assert.equal(settings.security.redactSensitiveNotifications, true);
+  assert.deepEqual(JSON.parse(JSON.stringify(settings)), settings);
+});
+
+test('settings validation rejects invalid proxy, notification, agent, and secret preferences', () => {
+  const result = validateTeletonSettings({
+    agent: { mode: 'autopilot' },
+    proxy: {
+      enabled: true,
+      activeProxyId: 'primary',
+      entries: [
+        {
+          id: 'primary',
+          protocol: 'mtproto',
+          host: 'proxy.example',
+          port: 70000,
+          secretRef: 'plain-secret'
+        }
+      ]
+    },
+    notifications: {
+      quietHours: {
+        enabled: true,
+        start: '25:00',
+        end: '07:00'
+      }
+    },
+    security: {
+      secretRefs: {
+        cloudAgentToken: 'raw-token'
+      }
+    }
+  });
+
+  assert.equal(result.valid, false);
+  assert.match(result.errors.join('\n'), /Unsupported agent mode/);
+  assert.match(result.errors.join('\n'), /Proxy entry primary/);
+  assert.match(result.errors.join('\n'), /Proxy port must be an integer/);
+  assert.match(result.errors.join('\n'), /secure reference/);
+  assert.match(result.errors.join('\n'), /Quiet hours start/);
+});
+
+test('settings model produces valid platform snapshots for every wrapper', () => {
+  assert.deepEqual(SETTINGS_PLATFORM_WRAPPERS, ['android', 'ios', 'desktop', 'web']);
+
+  for (const platform of SETTINGS_PLATFORM_WRAPPERS) {
+    const settings = createPlatformSettings(platform, {
+      language: 'en-US',
+      theme: 'dark',
+      notifications: { sounds: false }
+    });
+
+    assert.equal(settings.platform, platform);
+    assert.equal(settings.language, 'en-US');
+    assert.equal(settings.theme, 'dark');
+    assert.equal(settings.notifications.sounds, false);
+    assert.equal(validateTeletonSettings(settings).valid, true);
+    assert.deepEqual(JSON.parse(JSON.stringify(settings)), settings);
+  }
+
+  assert.throws(() => createPlatformSettings('wearable'), /Unsupported settings platform/);
+});
+
+test('settings migration upgrades legacy payloads and rejects unsupported future schemas', () => {
+  const migrated = migrateTeletonSettings({
+    agentMode: 'local',
+    language: 'ru',
+    theme: 'light',
+    notificationsEnabled: false,
+    proxy: {
+      enabled: true,
+      activeProxyId: 'office',
+      entries: [
+        {
+          id: 'office',
+          protocol: 'socks5',
+          host: '127.0.0.1',
+          port: 1080,
+          usernameRef: 'keychain:proxy-user',
+          passwordRef: 'keychain:proxy-password'
+        }
+      ]
+    }
+  });
+
+  assert.equal(migrated.schemaVersion, SETTINGS_SCHEMA_VERSION);
+  assert.equal(migrated.agent.mode, 'local');
+  assert.equal(migrated.notifications.enabled, false);
+  assert.equal(migrated.proxy.enabled, true);
+  assert.equal(migrated.proxy.entries[0].usernameRef, 'keychain:proxy-user');
+  assert.equal(validateTeletonSettings(migrated).valid, true);
+
+  const future = validateTeletonSettings({ schemaVersion: SETTINGS_SCHEMA_VERSION + 1 });
+  assert.equal(future.valid, false);
+  assert.match(future.errors.join('\n'), /newer than this client supports/);
+});
