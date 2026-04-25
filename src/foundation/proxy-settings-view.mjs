@@ -87,7 +87,7 @@ function validateDraft(draft) {
 }
 
 function listItem(entry, activeProxyId, enabled) {
-  const protocolName = entry.protocol === 'mtproto' ? 'MTProto' : 'SOCKS5';
+  const protocolName = entry.protocol === 'mtproto' ? 'MTProto' : entry.protocol === 'http-connect' ? 'HTTP CONNECT' : 'SOCKS5';
 
   return {
     id: entry.id,
@@ -178,6 +178,10 @@ function routeLabel(route) {
 
   if (route.type === 'socks5') {
     return 'SOCKS5 proxy connection';
+  }
+
+  if (route.type === 'http-connect') {
+    return 'HTTP CONNECT proxy connection';
   }
 
   return 'Proxy connection';

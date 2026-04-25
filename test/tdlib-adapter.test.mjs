@@ -205,6 +205,55 @@ test('TDLib proxy commands map MTProto and SOCKS5 settings without plaintext sec
   assert.doesNotMatch(JSON.stringify(adapter.getCommands()), /hardcoded-secret|proxy-password-value/);
 });
 
+test('TDLib proxy commands map HTTP CONNECT settings where the platform supports them', async () => {
+  const adapter = createMockTdlibClientAdapter({ platform: 'desktop' });
+
+  const result = await adapter.enableProxy({
+    protocol: 'http-connect',
+    host: 'proxy.corp',
+    port: 8080,
+    usernameRef: 'keychain:http-user',
+    passwordRef: 'keychain:http-password'
+  });
+
+  assert.equal(result.proxyId, 1);
+  assert.deepEqual(adapter.getCommands().at(-1), {
+    method: 'enableProxy',
+    command: {
+      '@type': 'addProxy',
+      server: 'proxy.corp',
+      port: 8080,
+      enable: true,
+      type: {
+        '@type': 'proxyTypeHttp',
+        httpOnly: true,
+        usernameRef: 'keychain:http-user',
+        passwordRef: 'keychain:http-password'
+      }
+    }
+  });
+  assert.doesNotMatch(JSON.stringify(adapter.getCommands()), /http-password-value/);
+});
+
+test('TDLib adapter returns a clear error for HTTP CONNECT on unsupported platforms', async () => {
+  const adapter = createMockTdlibClientAdapter({ platform: 'web' });
+
+  await assert.rejects(
+    () => adapter.enableProxy({
+      protocol: 'http-connect',
+      host: 'proxy.corp',
+      port: 8080,
+      usernameRef: 'keychain:http-user'
+    }),
+    (error) => {
+      assert.equal(error.code, 'unsupported_proxy_platform');
+      assert.match(error.message, /HTTP CONNECT proxy is not supported on web/);
+      assert.doesNotMatch(JSON.stringify(error), /http-user/);
+      return true;
+    }
+  );
+});
+
 test('TDLib proxy validation rejects invalid settings before native calls', async () => {
   const validation = validateTdlibProxyConfig({
     protocol: 'mtproto',

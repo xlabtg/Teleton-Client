@@ -2,6 +2,7 @@ export const NETWORK_ERROR_CATEGORIES = Object.freeze([
   'direct_connection_failed',
   'mtproto_proxy_failed',
   'socks5_proxy_failed',
+  'http_connect_proxy_failed',
   'proxy_configuration_failed',
   'network_operation_failed'
 ]);
@@ -64,6 +65,10 @@ export function classifyNetworkError(context = {}) {
 
   if (protocol === 'socks5') {
     return 'socks5_proxy_failed';
+  }
+
+  if (protocol === 'http-connect') {
+    return 'http_connect_proxy_failed';
   }
 
   if (protocol === 'direct' || operation.includes('direct')) {

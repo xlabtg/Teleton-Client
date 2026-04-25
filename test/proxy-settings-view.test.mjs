@@ -168,3 +168,36 @@ test('proxy settings view exposes safe connection quality indicator states', () 
   assert.equal(state.connectionQuality.detail, 'No direct or proxy route is reachable.');
   assert.doesNotMatch(JSON.stringify(state.connectionQuality), /keychain:proxy-password/);
 });
+
+test('proxy settings view supports HTTP CONNECT draft and safe list display', () => {
+  const view = createProxySettingsView();
+
+  let state = view.updateDraft({
+    id: 'corp-http',
+    protocol: 'http-connect',
+    host: 'proxy.corp',
+    port: '8080',
+    usernameRef: 'keychain:http-user',
+    passwordRef: 'keychain:http-password'
+  });
+  assert.equal(state.form.valid, true);
+
+  state = view.saveDraft();
+  assert.equal(state.list.items[0].label, 'HTTP CONNECT proxy.corp:8080');
+  assert.equal(state.list.items[0].usernameConfigured, true);
+  assert.equal(state.list.items[0].passwordConfigured, true);
+  assert.equal(state.list.items[0].passwordRef, undefined);
+
+  state = view.enableProxy('corp-http');
+  assert.equal(state.route.type, 'http-connect');
+  assert.equal(state.route.usernameConfigured, true);
+
+  state = view.updateConnectionQuality({
+    testing: false,
+    direct: { reachable: false },
+    proxies: {
+      'corp-http': { reachable: true, latencyMs: 180 }
+    }
+  });
+  assert.equal(state.connectionQuality.label, 'HTTP CONNECT proxy connection');
+});

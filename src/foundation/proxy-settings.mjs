@@ -1,4 +1,4 @@
-export const PROXY_PROTOCOLS = Object.freeze(['mtproto', 'socks5']);
+export const PROXY_PROTOCOLS = Object.freeze(['mtproto', 'socks5', 'http-connect']);
 
 const SECURE_REFERENCE_PATTERN = /^(env|keychain|keystore|secret):[A-Za-z0-9_.:/-]+$/;
 
@@ -32,10 +32,11 @@ export function validateProxyConfig(config = {}) {
     }
   }
 
-  if (normalized.protocol === 'socks5') {
+  if (normalized.protocol === 'socks5' || normalized.protocol === 'http-connect') {
+    const label = normalized.protocol === 'http-connect' ? 'HTTP CONNECT' : 'SOCKS5';
     for (const field of ['username', 'password']) {
       if (config[field] !== undefined && !isSecureReference(config[field])) {
-        errors.push(`SOCKS5 ${field} must be stored as a secure reference when provided.`);
+        errors.push(`${label} ${field} must be stored as a secure reference when provided.`);
       }
     }
   }

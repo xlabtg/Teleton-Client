@@ -1,7 +1,7 @@
 import { createTeletonSettings } from './settings-model.mjs';
 import { validateProxyConfig } from './proxy-settings.mjs';
 
-export const PROXY_ROUTE_TYPES = Object.freeze(['direct', 'mtproto', 'socks5']);
+export const PROXY_ROUTE_TYPES = Object.freeze(['direct', 'mtproto', 'socks5', 'http-connect']);
 
 function isPlainObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
