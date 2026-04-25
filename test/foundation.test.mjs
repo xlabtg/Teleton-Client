@@ -53,8 +53,17 @@ test('epic backlog decomposes issue 1 into prioritized phases', async () => {
   const titles = manifest.subtasks.map((subtask) => subtask.title);
   assert.equal(new Set(titles).size, titles.length, 'subtask titles must be unique');
 
+  const issueNumbers = manifest.subtasks.map((subtask) => subtask.issueNumber);
+  assert.equal(new Set(issueNumbers).size, issueNumbers.length, 'published issue numbers must be unique');
+
   for (const subtask of manifest.subtasks) {
     assert.ok(Number.isInteger(subtask.priority), `${subtask.title} needs integer priority`);
+    assert.ok(Number.isInteger(subtask.issueNumber), `${subtask.title} needs a published issue number`);
+    assert.equal(
+      subtask.issueUrl,
+      `https://github.com/${manifest.repository}/issues/${subtask.issueNumber}`,
+      `${subtask.title} needs a matching issue URL`
+    );
     assert.ok(subtask.acceptanceCriteria.length >= 2, `${subtask.title} needs acceptance criteria`);
     assert.ok(subtask.labels.includes('ai-solvable') || subtask.labels.includes('human-review-required'));
   }

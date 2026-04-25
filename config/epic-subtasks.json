@@ -17,6 +17,8 @@
       "title": "[001] Configure repository structure, CI, linters, and pre-commit",
       "phase": "Infrastructure and Core",
       "priority": 1,
+      "issueNumber": 5,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/5",
       "labels": ["foundation", "infrastructure", "ci", "ai-solvable", "good first issue"],
       "scope": "Create the repository skeleton, baseline documentation, automated checks, and contributor workflow for future Teleton Client development.",
       "implementationSteps": [
@@ -35,6 +37,8 @@
       "title": "[002] Integrate TDLib build plan and baseline client adapter",
       "phase": "Infrastructure and Core",
       "priority": 2,
+      "issueNumber": 6,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/6",
       "labels": ["tdlib", "foundation", "ai-solvable"],
       "scope": "Define and implement the first TDLib adapter boundary for Android, iOS, desktop, and web-compatible callers.",
       "implementationSteps": [
@@ -53,6 +57,8 @@
       "title": "[003] Implement cross-platform settings model",
       "phase": "Infrastructure and Core",
       "priority": 3,
+      "issueNumber": 7,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/7",
       "labels": ["settings", "foundation", "ai-solvable"],
       "scope": "Create a shared settings model for proxy, language, theme, notifications, agent mode, and security preferences.",
       "implementationSteps": [
@@ -71,6 +77,8 @@
       "title": "[010] Implement ProxyManager detection, fallback, and persistence",
       "phase": "Connectivity Layer",
       "priority": 10,
+      "issueNumber": 8,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/8",
       "labels": ["proxy", "connectivity", "ai-solvable"],
       "scope": "Build a ProxyManager that selects direct or proxy connectivity based on reachability checks and saved user configuration.",
       "implementationSteps": [
@@ -89,6 +97,8 @@
       "title": "[011] Integrate MTProto and SOCKS5 proxy settings with TDLib",
       "phase": "Connectivity Layer",
       "priority": 11,
+      "issueNumber": 9,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/9",
       "labels": ["tdlib", "proxy", "connectivity", "ai-solvable"],
       "scope": "Map validated proxy settings to TDLib proxy APIs and verify behavior through mocked native bindings.",
       "implementationSteps": [
@@ -107,6 +117,8 @@
       "title": "[012] Build proxy settings UI for add, test, enable, and disable",
       "phase": "Connectivity Layer",
       "priority": 12,
+      "issueNumber": 10,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/10",
       "labels": ["ui", "proxy", "connectivity", "ai-solvable"],
       "scope": "Create the user workflow for managing MTProto and SOCKS5 proxies across supported UI shells.",
       "implementationSteps": [
@@ -125,6 +137,8 @@
       "title": "[020] Configure local Teleton Agent runtime on all platforms",
       "phase": "Teleton Agent Integration",
       "priority": 20,
+      "issueNumber": 11,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/11",
       "labels": ["agent", "runtime", "ai-solvable"],
       "scope": "Define how the Teleton Agent starts locally, reports health, and stops cleanly for each platform wrapper.",
       "implementationSteps": [
@@ -143,6 +157,8 @@
       "title": "[021] Implement IPC bridge for agent events and UI notifications",
       "phase": "Teleton Agent Integration",
       "priority": 21,
+      "issueNumber": 12,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/12",
       "labels": ["agent", "ipc", "ai-solvable"],
       "scope": "Create a WebSocket or HTTP IPC bridge that lets UI layers exchange messages, tasks, and consent requests with Teleton Agent.",
       "implementationSteps": [
@@ -161,6 +177,8 @@
       "title": "[022] Build agent settings screen for mode, model, privacy, and action limits",
       "phase": "Teleton Agent Integration",
       "priority": 22,
+      "issueNumber": 13,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/13",
       "labels": ["agent", "settings", "ui", "ai-solvable"],
       "scope": "Expose user controls for off, local, cloud, and hybrid agent modes with model and privacy preferences.",
       "implementationSteps": [
@@ -179,6 +197,8 @@
       "title": "[023] Encrypt local agent memory through OS secure storage",
       "phase": "Teleton Agent Integration",
       "priority": 23,
+      "issueNumber": 14,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/14",
       "labels": ["agent", "security", "privacy", "ai-solvable"],
       "scope": "Protect local agent memory, vector indexes, and credentials using platform secure storage keys.",
       "implementationSteps": [
@@ -197,6 +217,8 @@
       "title": "[030] Connect TON SDK adapter for basic wallet operations",
       "phase": "TON Blockchain Module",
       "priority": 30,
+      "issueNumber": 15,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/15",
       "labels": ["ton", "wallet", "ai-solvable"],
       "scope": "Create a TON adapter that supports balance lookup, receive address display, and transfer preparation without exposing private keys.",
       "implementationSteps": [
@@ -215,6 +237,8 @@
       "title": "[031] Integrate swap tools through STON.fi and DeDust adapters",
       "phase": "TON Blockchain Module",
       "priority": 31,
+      "issueNumber": 16,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/16",
       "labels": ["ton", "swap", "agent", "ai-solvable"],
       "scope": "Expose swap quote and transaction preparation tools for Teleton Agent with safe user confirmation.",
       "implementationSteps": [
@@ -233,6 +257,8 @@
       "title": "[032] Build TON transaction confirmation UI",
       "phase": "TON Blockchain Module",
       "priority": 32,
+      "issueNumber": 17,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/17",
       "labels": ["ton", "ui", "security", "ai-solvable"],
       "scope": "Create a confirmation workflow for TON transactions using biometric or password approval, limits, and history.",
       "implementationSteps": [
@@ -251,6 +277,8 @@
       "title": "[033] Add TON testnet coverage for wallet flows",
       "phase": "TON Blockchain Module",
       "priority": 33,
+      "issueNumber": 18,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/18",
       "labels": ["ton", "testing", "ai-solvable"],
       "scope": "Create repeatable testnet checks for balance, receive, transfer draft, and confirmation paths.",
       "implementationSteps": [
@@ -269,6 +297,8 @@
       "title": "[040] Implement Android wrapper for build, notifications, background work, and deep links",
       "phase": "Platform Wrappers",
       "priority": 40,
+      "issueNumber": 19,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/19",
       "labels": ["android", "platform", "ai-solvable"],
       "scope": "Create the Android wrapper that integrates shared messaging, settings, agent, proxy, and TON features.",
       "implementationSteps": [
@@ -287,6 +317,8 @@
       "title": "[041] Implement iOS wrapper with Push, Keychain, and background tasks",
       "phase": "Platform Wrappers",
       "priority": 41,
+      "issueNumber": 20,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/20",
       "labels": ["ios", "platform", "human-review-required"],
       "scope": "Create the iOS wrapper and document App Store compliance constraints for messaging, agent automation, and wallet behavior.",
       "implementationSteps": [
@@ -305,6 +337,8 @@
       "title": "[042] Implement desktop wrapper with tray, shortcuts, and autostart",
       "phase": "Platform Wrappers",
       "priority": 42,
+      "issueNumber": 21,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/21",
       "labels": ["desktop", "platform", "ai-solvable"],
       "scope": "Create the desktop wrapper for Linux, macOS, and Windows with expected desktop messenger behavior.",
       "implementationSteps": [
@@ -323,6 +357,8 @@
       "title": "[043] Design optional cross-device settings synchronization",
       "phase": "Platform Wrappers",
       "priority": 43,
+      "issueNumber": 22,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/22",
       "labels": ["settings", "sync", "privacy", "ai-solvable"],
       "scope": "Design opt-in settings synchronization across devices without leaking secrets or forcing cloud dependency.",
       "implementationSteps": [
@@ -341,6 +377,8 @@
       "title": "[050] Audit tokens, keys, rotation, and secure storage",
       "phase": "Security and Licenses",
       "priority": 50,
+      "issueNumber": 23,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/23",
       "labels": ["security", "privacy", "human-review-required"],
       "scope": "Audit the repository and runtime design for hardcoded tokens, key handling, rotation, and storage requirements.",
       "implementationSteps": [
@@ -359,6 +397,8 @@
       "title": "[051] Verify licenses for TDLib, Telegram client references, Teleton Agent, and TON",
       "phase": "Security and Licenses",
       "priority": 51,
+      "issueNumber": 24,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/24",
       "labels": ["license", "compliance", "human-review-required"],
       "scope": "Create and review a license matrix for all planned upstream dependencies and reference implementations.",
       "implementationSteps": [
@@ -377,6 +417,8 @@
       "title": "[052] Publish privacy policy for local processing and data flows",
       "phase": "Security and Licenses",
       "priority": 52,
+      "issueNumber": 25,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/25",
       "labels": ["privacy", "documentation", "human-review-required"],
       "scope": "Maintain a privacy policy that explains Telegram, proxy, agent, cloud, and TON data flows.",
       "implementationSteps": [
@@ -395,6 +437,8 @@
       "title": "[060] Add unit tests for ProxyManager, TON adapter, and IPC bridge",
       "phase": "Testing and Release",
       "priority": 60,
+      "issueNumber": 26,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/26",
       "labels": ["testing", "ai-solvable"],
       "scope": "Create fast unit tests for shared connectivity, TON, and agent IPC contracts.",
       "implementationSteps": [
@@ -413,6 +457,8 @@
       "title": "[061] Add end-to-end tests for auth, messaging, agent reply, and TON transaction",
       "phase": "Testing and Release",
       "priority": 61,
+      "issueNumber": 27,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/27",
       "labels": ["testing", "e2e", "ai-solvable"],
       "scope": "Define and automate end-to-end scenarios for core user workflows once platform shells exist.",
       "implementationSteps": [
@@ -431,6 +477,8 @@
       "title": "[062] Build release packages for APK, IPA, DMG, EXE, and AppImage",
       "phase": "Testing and Release",
       "priority": 62,
+      "issueNumber": 28,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/28",
       "labels": ["release", "ci", "human-review-required"],
       "scope": "Create release automation for mobile and desktop artifacts with signing separated from public CI.",
       "implementationSteps": [
@@ -449,6 +497,8 @@
       "title": "[063] Prepare source publication, documentation, and release readiness",
       "phase": "Testing and Release",
       "priority": 63,
+      "issueNumber": 29,
+      "issueUrl": "https://github.com/xlabtg/Teleton-Client/issues/29",
       "labels": ["release", "documentation", "human-review-required"],
       "scope": "Finalize source publication requirements, documentation completeness, and release gate checks.",
       "implementationSteps": [
