@@ -4,6 +4,7 @@ export const TDLIB_PLATFORMS = Object.freeze(['android', 'ios', 'desktop', 'web'
 export const TDLIB_UPDATE_TYPES = Object.freeze(['authorizationState', 'connectionState', 'chatList', 'message']);
 
 const REQUIRED_IMPLEMENTATION_METHODS = ['authenticate', 'getChatList', 'sendMessage', 'subscribeUpdates'];
+const OPTIONAL_PROXY_METHODS = ['enableProxy', 'updateProxy', 'disableProxy', 'removeProxy'];
 const MAX_CHAT_LIST_LIMIT = 100;
 const MAX_MESSAGE_TEXT_LENGTH = 4096;
 
@@ -41,6 +42,17 @@ function assertBridgeImplementation(implementation) {
       `TDLib adapter implementation is missing methods: ${missingMethods.join(', ')}.`,
       'invalid_implementation',
       missingMethods
+    );
+  }
+
+  const invalidProxyMethods = OPTIONAL_PROXY_METHODS.filter(
+    (method) => implementation[method] !== undefined && typeof implementation[method] !== 'function'
+  );
+  if (invalidProxyMethods.length > 0) {
+    throw new TdlibAdapterError(
+      `TDLib adapter proxy implementation methods must be functions: ${invalidProxyMethods.join(', ')}.`,
+      'invalid_implementation',
+      invalidProxyMethods
     );
   }
 }
@@ -141,6 +153,131 @@ export function validateTdlibMessageDraft(input = {}) {
   };
 }
 
+export function validateTdlibProxyConfig(input = {}) {
+  const errors = [];
+  const protocol = String(input.protocol ?? '').trim().toLowerCase();
+  const host = String(input.host ?? '').trim();
+  const port = input.port;
+  const proxy = {
+    protocol,
+    host,
+    port
+  };
+
+  if (!['mtproto', 'socks5'].includes(protocol)) {
+    errors.push(`Unsupported proxy protocol: ${input.protocol}`);
+  }
+
+  if (!host) {
+    errors.push('Proxy host is required.');
+  }
+
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    errors.push('Proxy port must be an integer between 1 and 65535.');
+  }
+
+  if (protocol === 'mtproto') {
+    const secretRef = input.secretRef ?? input.secret;
+    if (!isSecureReference(secretRef)) {
+      errors.push('MTProto secretRef must be a secure reference such as env:TELETON_MTPROTO_SECRET.');
+    } else {
+      proxy.secretRef = secretRef;
+    }
+  }
+
+  if (protocol === 'socks5') {
+    for (const field of ['username', 'password']) {
+      const refField = `${field}Ref`;
+      const value = input[refField] ?? input[field];
+      if (value === undefined) {
+        continue;
+      }
+
+      if (!isSecureReference(value)) {
+        errors.push(`SOCKS5 ${refField} must be a secure reference when provided.`);
+      } else {
+        proxy[refField] = value;
+      }
+    }
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+    proxy
+  };
+}
+
+function validateProxyId(proxyId) {
+  const errors = [];
+  if (!Number.isInteger(proxyId) || proxyId < 1) {
+    errors.push('TDLib proxy id must be a positive integer.');
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+    proxyId
+  };
+}
+
+function proxyTypeFor(proxy) {
+  if (proxy.protocol === 'mtproto') {
+    return {
+      '@type': 'proxyTypeMtproto',
+      secretRef: proxy.secretRef
+    };
+  }
+
+  const type = {
+    '@type': 'proxyTypeSocks5'
+  };
+
+  if (proxy.usernameRef !== undefined) {
+    type.usernameRef = proxy.usernameRef;
+  }
+
+  if (proxy.passwordRef !== undefined) {
+    type.passwordRef = proxy.passwordRef;
+  }
+
+  return type;
+}
+
+export function createTdlibAddProxyCommand(proxy) {
+  return {
+    '@type': 'addProxy',
+    server: proxy.host,
+    port: proxy.port,
+    enable: true,
+    type: proxyTypeFor(proxy)
+  };
+}
+
+export function createTdlibEditProxyCommand(proxyId, proxy) {
+  return {
+    '@type': 'editProxy',
+    proxy_id: proxyId,
+    server: proxy.host,
+    port: proxy.port,
+    enable: true,
+    type: proxyTypeFor(proxy)
+  };
+}
+
+export function createTdlibDisableProxyCommand() {
+  return {
+    '@type': 'disableProxy'
+  };
+}
+
+export function createTdlibRemoveProxyCommand(proxyId) {
+  return {
+    '@type': 'removeProxy',
+    proxy_id: proxyId
+  };
+}
+
 function validateUpdateSubscription(listener, input = {}) {
   const errors = [];
 
@@ -214,6 +351,55 @@ export function createTdlibClientAdapter(implementation, options = {}) {
       }
 
       return unsubscribe;
+    },
+    async enableProxy(input = {}) {
+      const validation = validateTdlibProxyConfig(input);
+      if (!validation.valid) {
+        throw adapterError(validation.errors, 'invalid_proxy_config');
+      }
+
+      const command = createTdlibAddProxyCommand(validation.proxy);
+      if (typeof implementation.enableProxy !== 'function') {
+        return command;
+      }
+
+      return implementation.enableProxy(command);
+    },
+    async updateProxy(proxyId, input = {}) {
+      const idValidation = validateProxyId(proxyId);
+      const proxyValidation = validateTdlibProxyConfig(input);
+      const errors = [...idValidation.errors, ...proxyValidation.errors];
+      if (errors.length > 0) {
+        throw adapterError(errors, 'invalid_proxy_config');
+      }
+
+      const command = createTdlibEditProxyCommand(idValidation.proxyId, proxyValidation.proxy);
+      if (typeof implementation.updateProxy !== 'function') {
+        return command;
+      }
+
+      return implementation.updateProxy(idValidation.proxyId, command);
+    },
+    async disableProxy() {
+      const command = createTdlibDisableProxyCommand();
+      if (typeof implementation.disableProxy !== 'function') {
+        return command;
+      }
+
+      return implementation.disableProxy(command);
+    },
+    async removeProxy(proxyId) {
+      const validation = validateProxyId(proxyId);
+      if (!validation.valid) {
+        throw adapterError(validation.errors, 'invalid_proxy_id');
+      }
+
+      const command = createTdlibRemoveProxyCommand(validation.proxyId);
+      if (typeof implementation.removeProxy !== 'function') {
+        return command;
+      }
+
+      return implementation.removeProxy(validation.proxyId, command);
     }
   });
 }
@@ -236,6 +422,7 @@ export function createMockTdlibClientAdapter(seed = {}) {
   const commands = [];
   const subscribers = new Set();
   let nextMessageId = 1;
+  let nextProxyId = 1;
 
   function publish(update) {
     for (const subscription of subscribers) {
@@ -291,6 +478,25 @@ export function createMockTdlibClientAdapter(seed = {}) {
       return () => {
         subscribers.delete(subscriber);
       };
+    },
+    async enableProxy(command) {
+      commands.push({ method: 'enableProxy', command: structuredClone(command) });
+      const proxyId = nextProxyId;
+      nextProxyId += 1;
+
+      return { proxyId };
+    },
+    async updateProxy(proxyId, command) {
+      commands.push({ method: 'updateProxy', proxyId, command: structuredClone(command) });
+      return { proxyId };
+    },
+    async disableProxy(command) {
+      commands.push({ method: 'disableProxy', command: structuredClone(command) });
+      return { disabled: true };
+    },
+    async removeProxy(proxyId, command) {
+      commands.push({ method: 'removeProxy', proxyId, command: structuredClone(command) });
+      return { proxyId, removed: true };
     }
   };
 

@@ -11,12 +11,19 @@ The shared TDLib adapter is the first boundary between platform callers and a fu
 
 ## Contract
 
-The adapter exposes four operations:
+The adapter exposes core client operations:
 
 - `authenticate(request)` validates Telegram credential references before the platform bridge begins TDLib authorization.
 - `getChatList(query)` returns a bounded page of chats with an adapter-owned cursor.
 - `sendMessage(draft)` validates chat and text inputs before the platform bridge sends a message.
 - `subscribeUpdates(listener, options)` registers a typed update listener and returns an unsubscribe function.
+
+The adapter also exposes proxy lifecycle operations that build TDLib-compatible commands before the native bridge sends them:
+
+- `enableProxy(config)` validates MTProto or SOCKS5 settings and maps them to `addProxy`.
+- `updateProxy(proxyId, config)` validates an existing TDLib proxy id and maps settings to `editProxy`.
+- `disableProxy()` maps to `disableProxy`.
+- `removeProxy(proxyId)` validates the TDLib proxy id and maps to `removeProxy`.
 
 Authentication accepts secure references only:
 
@@ -30,9 +37,11 @@ Authentication accepts secure references only:
 
 The shared adapter rejects raw `apiId`, `api_id`, `apiHash`, `api_hash`, `phoneNumber`, and `botToken` values. Platform bridges are responsible for resolving references through environment variables, keychains, keystores, secret managers, or equivalent local secure storage.
 
+Proxy settings follow the same rule. MTProto requires `secretRef`, while SOCKS5 accepts optional `usernameRef` and `passwordRef`. Raw proxy secrets and credentials are rejected before native bridge calls. Platform bridges must resolve those references inside platform secure storage and pass the resolved values only to TDLib-native APIs, never back through shared logs or command snapshots.
+
 ## Mock Testing
 
-`createMockTdlibClientAdapter` implements the same public contract without TDLib, Telegram network access, phone numbers, bot tokens, or live user credentials. Tests can seed chat fixtures, send mock messages, and subscribe to mock updates while preserving the same validation path used by native bridge adapters.
+`createMockTdlibClientAdapter` implements the same public contract without TDLib, Telegram network access, phone numbers, bot tokens, proxy secrets, or live user credentials. Tests can seed chat fixtures, send mock messages, subscribe to mock updates, and verify proxy command mapping while preserving the same validation path used by native bridge adapters.
 
 ## Build Targets
 
