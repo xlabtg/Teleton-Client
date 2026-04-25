@@ -1,2 +1,54 @@
-# Teleton-Client
-Universal AI messenger based on Telegram with TON support
+# Teleton Client
+
+Teleton Client is a planned cross-platform Telegram-compatible messenger foundation that combines TDLib, a user-controlled Teleton AI agent, proxy-aware connectivity, and TON blockchain support.
+
+This repository is in the foundation phase. The current implementation establishes the project structure, CI checks, privacy/build documentation, issue templates, and a machine-readable epic decomposition that can be converted into GitHub subissues.
+
+## Current Capabilities
+
+- Dependency-free Node.js validation and test suite.
+- Machine-readable backlog for the Teleton Client foundation epic.
+- Dry-run and GitHub issue creation script for decomposing issue `#1`.
+- Shared agent mode and proxy settings models with tests.
+- CI workflow for foundation checks.
+- Required project documents: `README.md`, `PRIVACY.md`, `LICENSE`, and `BUILD-GUIDE.md`.
+
+## Quick Start
+
+```sh
+npm test
+npm run validate:foundation
+npm run decompose:dry-run
+```
+
+## Architecture Direction
+
+The project is intended to evolve through these layers:
+
+1. Platform UI layers for Android, iOS, desktop, and web.
+2. TDLib bindings for Telegram protocol, cache, and synchronization.
+3. Teleton Agent orchestration through local IPC and optional cloud/hybrid modes.
+4. TON blockchain integrations for wallet, transfers, swaps, NFTs, staking, and DNS.
+5. Security and privacy controls for credentials, user consent, and auditability.
+
+See `docs/architecture.md` and `docs/backlog.md` for the current foundation plan.
+
+## Issue Decomposition
+
+Preview the subissues generated from the epic:
+
+```sh
+npm run decompose:dry-run
+```
+
+Create the subissues after review:
+
+```sh
+node scripts/decompose-epic.mjs --create --repo xlabtg/Teleton-Client
+```
+
+The script skips duplicate issue titles and creates missing labels before opening issues. Creation requires write access to the target repository.
+
+## License
+
+The repository is licensed under MIT. Future TDLib, Telegram client, and TON integrations must preserve their upstream license obligations.

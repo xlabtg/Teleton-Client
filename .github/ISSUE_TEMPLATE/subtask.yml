@@ -1,0 +1,56 @@
+name: Teleton implementation subtask
+description: Track an atomic task decomposed from the Teleton Client epic.
+title: "[Subtask] "
+labels:
+  - ai-solvable
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for work that belongs to the Teleton Client foundation epic.
+  - type: input
+    id: parent
+    attributes:
+      label: Parent epic
+      description: Link to the parent epic or tracking issue.
+      placeholder: "#1"
+    validations:
+      required: true
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Phase
+      options:
+        - Infrastructure and Core
+        - Connectivity Layer
+        - Teleton Agent Integration
+        - TON Blockchain Module
+        - Platform Wrappers
+        - Security and Licenses
+        - Testing and Release
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: Describe the bounded implementation work.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: List measurable checks that prove the task is complete.
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
+  - type: textarea
+    id: testing
+    attributes:
+      label: Testing notes
+      description: Describe unit, integration, or manual checks required for this task.
+    validations:
+      required: true

@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - issue-*
+
+permissions:
+  contents: read
+
+jobs:
+  foundation:
+    name: Foundation checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Validate foundation artifacts
+        run: npm run validate:foundation
+
+      - name: Validate epic decomposition dry run
+        run: npm run decompose:dry-run

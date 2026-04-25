@@ -1,0 +1,466 @@
+{
+  "parentIssue": 1,
+  "repository": "xlabtg/Teleton-Client",
+  "sourceIssueUrl": "https://github.com/xlabtg/Teleton-Client/issues/1",
+  "priorityOrder": [
+    "Infrastructure and Core",
+    "Connectivity Layer",
+    "Teleton Agent Integration",
+    "TON Blockchain Module",
+    "Platform Wrappers",
+    "Security and Licenses",
+    "Testing and Release"
+  ],
+  "subtasks": [
+    {
+      "id": "001",
+      "title": "[001] Configure repository structure, CI, linters, and pre-commit",
+      "phase": "Infrastructure and Core",
+      "priority": 1,
+      "labels": ["foundation", "infrastructure", "ci", "ai-solvable", "good first issue"],
+      "scope": "Create the repository skeleton, baseline documentation, automated checks, and contributor workflow for future Teleton Client development.",
+      "implementationSteps": [
+        "Define top-level directories for docs, scripts, shared foundation code, tests, and GitHub metadata.",
+        "Add CI checks for tests and foundation validation.",
+        "Document local build and validation commands."
+      ],
+      "acceptanceCriteria": [
+        "Repository has README, privacy, license, build guide, issue templates, and CI workflow.",
+        "A local command validates required foundation artifacts.",
+        "CI runs the same validation commands on pull requests."
+      ]
+    },
+    {
+      "id": "002",
+      "title": "[002] Integrate TDLib build plan and baseline client adapter",
+      "phase": "Infrastructure and Core",
+      "priority": 2,
+      "labels": ["tdlib", "foundation", "ai-solvable"],
+      "scope": "Define and implement the first TDLib adapter boundary for Android, iOS, desktop, and web-compatible callers.",
+      "implementationSteps": [
+        "Document TDLib build targets and license requirements.",
+        "Create an adapter interface for authentication, chat list, message send, and update subscription.",
+        "Add mock-backed tests for the adapter contract."
+      ],
+      "acceptanceCriteria": [
+        "TDLib build and adapter boundaries are documented.",
+        "Adapter tests run without live Telegram credentials.",
+        "No Telegram api_id, api_hash, or user secrets are committed."
+      ]
+    },
+    {
+      "id": "003",
+      "title": "[003] Implement cross-platform settings model",
+      "phase": "Infrastructure and Core",
+      "priority": 3,
+      "labels": ["settings", "foundation", "ai-solvable"],
+      "scope": "Create a shared settings model for proxy, language, theme, notifications, agent mode, and security preferences.",
+      "implementationSteps": [
+        "Define serializable settings schemas with defaults.",
+        "Validate agent mode, proxy entries, notification preferences, and secure secret references.",
+        "Add migration tests for future schema versions."
+      ],
+      "acceptanceCriteria": [
+        "Settings defaults include agent mode off and no proxy enabled.",
+        "Invalid proxy or secret configuration is rejected with actionable errors.",
+        "Settings model can be used by all platform wrappers."
+      ]
+    },
+    {
+      "id": "010",
+      "title": "[010] Implement ProxyManager detection, fallback, and persistence",
+      "phase": "Connectivity Layer",
+      "priority": 10,
+      "labels": ["proxy", "connectivity", "ai-solvable"],
+      "scope": "Build a ProxyManager that selects direct or proxy connectivity based on reachability checks and saved user configuration.",
+      "implementationSteps": [
+        "Define proxy health check interfaces.",
+        "Persist user proxy preferences through the settings layer.",
+        "Implement deterministic fallback order for direct, MTProto, and SOCKS5 routes."
+      ],
+      "acceptanceCriteria": [
+        "ProxyManager can choose direct, MTProto, or SOCKS5 route from health inputs.",
+        "Fallback decisions are covered by unit tests.",
+        "Saved proxy secrets use secure references instead of raw values."
+      ]
+    },
+    {
+      "id": "011",
+      "title": "[011] Integrate MTProto and SOCKS5 proxy settings with TDLib",
+      "phase": "Connectivity Layer",
+      "priority": 11,
+      "labels": ["tdlib", "proxy", "connectivity", "ai-solvable"],
+      "scope": "Map validated proxy settings to TDLib proxy APIs and verify behavior through mocked native bindings.",
+      "implementationSteps": [
+        "Create TDLib proxy command builders for MTProto and SOCKS5.",
+        "Add tests for enable, disable, update, and remove flows.",
+        "Document platform-specific secure storage expectations."
+      ],
+      "acceptanceCriteria": [
+        "MTProto and SOCKS5 proxy configurations map to TDLib-compatible commands.",
+        "Tests verify invalid proxy settings are rejected before native calls.",
+        "No proxy secret is logged in plaintext."
+      ]
+    },
+    {
+      "id": "012",
+      "title": "[012] Build proxy settings UI for add, test, enable, and disable",
+      "phase": "Connectivity Layer",
+      "priority": 12,
+      "labels": ["ui", "proxy", "connectivity", "ai-solvable"],
+      "scope": "Create the user workflow for managing MTProto and SOCKS5 proxies across supported UI shells.",
+      "implementationSteps": [
+        "Design shared view state for proxy list, edit form, test status, and active route.",
+        "Implement an initial platform UI using the shared settings and ProxyManager APIs.",
+        "Add automated or screenshot-backed verification for key states."
+      ],
+      "acceptanceCriteria": [
+        "Users can add, test, enable, disable, and remove proxy configurations.",
+        "Failed proxy tests show a clear error without exposing secrets.",
+        "UI state is covered by tests or review screenshots."
+      ]
+    },
+    {
+      "id": "020",
+      "title": "[020] Configure local Teleton Agent runtime on all platforms",
+      "phase": "Teleton Agent Integration",
+      "priority": 20,
+      "labels": ["agent", "runtime", "ai-solvable"],
+      "scope": "Define how the Teleton Agent starts locally, reports health, and stops cleanly for each platform wrapper.",
+      "implementationSteps": [
+        "Document supported local runtimes and packaging constraints.",
+        "Create a runtime supervisor interface with start, stop, status, and log hooks.",
+        "Add mock runtime tests for lifecycle behavior."
+      ],
+      "acceptanceCriteria": [
+        "Local agent lifecycle is represented by a tested interface.",
+        "Runtime startup does not require cloud credentials by default.",
+        "Platform-specific packaging gaps are documented."
+      ]
+    },
+    {
+      "id": "021",
+      "title": "[021] Implement IPC bridge for agent events and UI notifications",
+      "phase": "Teleton Agent Integration",
+      "priority": 21,
+      "labels": ["agent", "ipc", "ai-solvable"],
+      "scope": "Create a WebSocket or HTTP IPC bridge that lets UI layers exchange messages, tasks, and consent requests with Teleton Agent.",
+      "implementationSteps": [
+        "Define IPC message envelopes and versioning.",
+        "Implement request, event, error, and cancellation flows.",
+        "Add contract tests using a local mock bridge."
+      ],
+      "acceptanceCriteria": [
+        "IPC contract supports incoming message hooks and agent action proposals.",
+        "UI can distinguish informational updates from confirmation-required actions.",
+        "Malformed messages are rejected and tested."
+      ]
+    },
+    {
+      "id": "022",
+      "title": "[022] Build agent settings screen for mode, model, privacy, and action limits",
+      "phase": "Teleton Agent Integration",
+      "priority": 22,
+      "labels": ["agent", "settings", "ui", "ai-solvable"],
+      "scope": "Expose user controls for off, local, cloud, and hybrid agent modes with model and privacy preferences.",
+      "implementationSteps": [
+        "Use the shared agent settings model.",
+        "Add controls for mode, model provider, data sharing, approval thresholds, and rate limits.",
+        "Verify defaults keep automation disabled."
+      ],
+      "acceptanceCriteria": [
+        "Agent mode options are off, local, cloud, and hybrid.",
+        "The default mode is off.",
+        "Changing cloud or hybrid mode presents privacy impact information before activation."
+      ]
+    },
+    {
+      "id": "023",
+      "title": "[023] Encrypt local agent memory through OS secure storage",
+      "phase": "Teleton Agent Integration",
+      "priority": 23,
+      "labels": ["agent", "security", "privacy", "ai-solvable"],
+      "scope": "Protect local agent memory, vector indexes, and credentials using platform secure storage keys.",
+      "implementationSteps": [
+        "Define the secure storage abstraction for desktop and mobile platforms.",
+        "Encrypt local memory files and validate key rotation behavior.",
+        "Add tests for locked, unlocked, migrated, and missing-key states."
+      ],
+      "acceptanceCriteria": [
+        "Agent memory is encrypted at rest.",
+        "Keys are stored through platform secure storage providers.",
+        "Tests cover failed unlock and migration paths."
+      ]
+    },
+    {
+      "id": "030",
+      "title": "[030] Connect TON SDK adapter for basic wallet operations",
+      "phase": "TON Blockchain Module",
+      "priority": 30,
+      "labels": ["ton", "wallet", "ai-solvable"],
+      "scope": "Create a TON adapter that supports balance lookup, receive address display, and transfer preparation without exposing private keys.",
+      "implementationSteps": [
+        "Select the SDK boundary and wallet provider integration strategy.",
+        "Implement adapter interfaces for balance, address, transaction draft, and status.",
+        "Add testnet-backed or mock-backed tests."
+      ],
+      "acceptanceCriteria": [
+        "Adapter can retrieve wallet balance through a mock or testnet provider.",
+        "Transfer preparation requires explicit confirmation before signing.",
+        "Private keys are never represented as plaintext settings."
+      ]
+    },
+    {
+      "id": "031",
+      "title": "[031] Integrate swap tools through STON.fi and DeDust adapters",
+      "phase": "TON Blockchain Module",
+      "priority": 31,
+      "labels": ["ton", "swap", "agent", "ai-solvable"],
+      "scope": "Expose swap quote and transaction preparation tools for Teleton Agent with safe user confirmation.",
+      "implementationSteps": [
+        "Define quote request and response models.",
+        "Add provider adapters for STON.fi and DeDust.",
+        "Require user confirmation before any transaction is submitted."
+      ],
+      "acceptanceCriteria": [
+        "Agent can request swap quotes without signing transactions.",
+        "Swap transactions are blocked until user confirmation.",
+        "Provider errors are surfaced without leaking wallet secrets."
+      ]
+    },
+    {
+      "id": "032",
+      "title": "[032] Build TON transaction confirmation UI",
+      "phase": "TON Blockchain Module",
+      "priority": 32,
+      "labels": ["ton", "ui", "security", "ai-solvable"],
+      "scope": "Create a confirmation workflow for TON transactions using biometric or password approval, limits, and history.",
+      "implementationSteps": [
+        "Define transaction review state and risk indicators.",
+        "Integrate platform biometric or password confirmation hooks.",
+        "Add history entries for approved, rejected, failed, and pending transactions."
+      ],
+      "acceptanceCriteria": [
+        "Users see amount, recipient, network fee, and provider before approval.",
+        "Biometric or password confirmation is required before signing.",
+        "Transaction history records the final status."
+      ]
+    },
+    {
+      "id": "033",
+      "title": "[033] Add TON testnet coverage for wallet flows",
+      "phase": "TON Blockchain Module",
+      "priority": 33,
+      "labels": ["ton", "testing", "ai-solvable"],
+      "scope": "Create repeatable testnet checks for balance, receive, transfer draft, and confirmation paths.",
+      "implementationSteps": [
+        "Define required testnet environment variables and fixtures.",
+        "Add tests that can run in mock mode locally and testnet mode in protected CI.",
+        "Document how to rotate testnet credentials."
+      ],
+      "acceptanceCriteria": [
+        "Local mock tests run without secrets.",
+        "Testnet checks are gated behind explicit environment variables.",
+        "CI cannot accidentally print wallet secrets."
+      ]
+    },
+    {
+      "id": "040",
+      "title": "[040] Implement Android wrapper for build, notifications, background work, and deep links",
+      "phase": "Platform Wrappers",
+      "priority": 40,
+      "labels": ["android", "platform", "ai-solvable"],
+      "scope": "Create the Android wrapper that integrates shared messaging, settings, agent, proxy, and TON features.",
+      "implementationSteps": [
+        "Select the Android UI/runtime stack.",
+        "Wire notification and background execution constraints.",
+        "Add deep link handling for Telegram and TON flows."
+      ],
+      "acceptanceCriteria": [
+        "Android build produces a runnable debug artifact.",
+        "Notifications and background work use platform-approved APIs.",
+        "Deep links route to the expected shared workflows."
+      ]
+    },
+    {
+      "id": "041",
+      "title": "[041] Implement iOS wrapper with Push, Keychain, and background tasks",
+      "phase": "Platform Wrappers",
+      "priority": 41,
+      "labels": ["ios", "platform", "human-review-required"],
+      "scope": "Create the iOS wrapper and document App Store compliance constraints for messaging, agent automation, and wallet behavior.",
+      "implementationSteps": [
+        "Select the iOS UI/runtime stack.",
+        "Integrate Keychain and push notification boundaries.",
+        "Document App Store review concerns for AI automation and crypto features."
+      ],
+      "acceptanceCriteria": [
+        "iOS build produces a runnable debug artifact.",
+        "Secrets use Keychain-backed storage.",
+        "Compliance notes are reviewed before store submission."
+      ]
+    },
+    {
+      "id": "042",
+      "title": "[042] Implement desktop wrapper with tray, shortcuts, and autostart",
+      "phase": "Platform Wrappers",
+      "priority": 42,
+      "labels": ["desktop", "platform", "ai-solvable"],
+      "scope": "Create the desktop wrapper for Linux, macOS, and Windows with expected desktop messenger behavior.",
+      "implementationSteps": [
+        "Select the desktop UI/runtime stack.",
+        "Add tray menu, notification, shortcut, and autostart capabilities.",
+        "Document packaging targets for DMG, EXE, and AppImage."
+      ],
+      "acceptanceCriteria": [
+        "Desktop build produces a runnable debug artifact.",
+        "Tray and shortcut behavior is testable or manually documented.",
+        "Packaging plan covers macOS, Windows, and Linux."
+      ]
+    },
+    {
+      "id": "043",
+      "title": "[043] Design optional cross-device settings synchronization",
+      "phase": "Platform Wrappers",
+      "priority": 43,
+      "labels": ["settings", "sync", "privacy", "ai-solvable"],
+      "scope": "Design opt-in settings synchronization across devices without leaking secrets or forcing cloud dependency.",
+      "implementationSteps": [
+        "Define which settings are syncable and which remain device-local.",
+        "Design conflict resolution and encryption requirements.",
+        "Add tests for serialization boundaries."
+      ],
+      "acceptanceCriteria": [
+        "Secret material is excluded from sync payloads.",
+        "Users can keep sync disabled.",
+        "Conflict behavior is deterministic and documented."
+      ]
+    },
+    {
+      "id": "050",
+      "title": "[050] Audit tokens, keys, rotation, and secure storage",
+      "phase": "Security and Licenses",
+      "priority": 50,
+      "labels": ["security", "privacy", "human-review-required"],
+      "scope": "Audit the repository and runtime design for hardcoded tokens, key handling, rotation, and storage requirements.",
+      "implementationSteps": [
+        "Add automated scans for common secret patterns.",
+        "Document credential sources and rotation procedures.",
+        "Review platform secure storage implementations."
+      ],
+      "acceptanceCriteria": [
+        "Automated checks reject committed secrets.",
+        "Credential rotation steps are documented.",
+        "Human security review is requested before release."
+      ]
+    },
+    {
+      "id": "051",
+      "title": "[051] Verify licenses for TDLib, Telegram client references, Teleton Agent, and TON",
+      "phase": "Security and Licenses",
+      "priority": 51,
+      "labels": ["license", "compliance", "human-review-required"],
+      "scope": "Create and review a license matrix for all planned upstream dependencies and reference implementations.",
+      "implementationSteps": [
+        "List each upstream project, license, and intended usage.",
+        "Identify copyleft boundaries and source publication obligations.",
+        "Document review sign-off requirements."
+      ],
+      "acceptanceCriteria": [
+        "License matrix covers TDLib, Telegram references, Teleton Agent, and TON SDKs.",
+        "Copyleft obligations are documented before code reuse.",
+        "Human legal review is requested for release readiness."
+      ]
+    },
+    {
+      "id": "052",
+      "title": "[052] Publish privacy policy for local processing and data flows",
+      "phase": "Security and Licenses",
+      "priority": 52,
+      "labels": ["privacy", "documentation", "human-review-required"],
+      "scope": "Maintain a privacy policy that explains Telegram, proxy, agent, cloud, and TON data flows.",
+      "implementationSteps": [
+        "Document default local behavior and explicit cloud opt-in.",
+        "Describe user controls for agent autonomy and transaction approval.",
+        "Review the policy against implemented behavior before release."
+      ],
+      "acceptanceCriteria": [
+        "PRIVACY.md describes current and planned data flows.",
+        "Agent mode defaults and controls are documented.",
+        "Policy is updated whenever data flow behavior changes."
+      ]
+    },
+    {
+      "id": "060",
+      "title": "[060] Add unit tests for ProxyManager, TON adapter, and IPC bridge",
+      "phase": "Testing and Release",
+      "priority": 60,
+      "labels": ["testing", "ai-solvable"],
+      "scope": "Create fast unit tests for shared connectivity, TON, and agent IPC contracts.",
+      "implementationSteps": [
+        "Add tests for direct and proxy route selection.",
+        "Add tests for TON adapter success and failure models.",
+        "Add tests for IPC validation and error handling."
+      ],
+      "acceptanceCriteria": [
+        "Unit tests run locally without network or secrets.",
+        "Coverage includes invalid input and failure paths.",
+        "CI runs the unit test suite."
+      ]
+    },
+    {
+      "id": "061",
+      "title": "[061] Add end-to-end tests for auth, messaging, agent reply, and TON transaction",
+      "phase": "Testing and Release",
+      "priority": 61,
+      "labels": ["testing", "e2e", "ai-solvable"],
+      "scope": "Define and automate end-to-end scenarios for core user workflows once platform shells exist.",
+      "implementationSteps": [
+        "Create test harnesses for auth and messaging flows.",
+        "Add agent reply proposal and confirmation scenarios.",
+        "Add TON transaction draft and confirmation scenarios."
+      ],
+      "acceptanceCriteria": [
+        "E2E tests can run in mock mode without production accounts.",
+        "Protected live checks are gated by explicit credentials.",
+        "Failures capture logs and screenshots when applicable."
+      ]
+    },
+    {
+      "id": "062",
+      "title": "[062] Build release packages for APK, IPA, DMG, EXE, and AppImage",
+      "phase": "Testing and Release",
+      "priority": 62,
+      "labels": ["release", "ci", "human-review-required"],
+      "scope": "Create release automation for mobile and desktop artifacts with signing separated from public CI.",
+      "implementationSteps": [
+        "Define release artifact matrix.",
+        "Add unsigned or debug artifact builds to CI.",
+        "Document signing and publication steps for protected environments."
+      ],
+      "acceptanceCriteria": [
+        "CI builds at least debug artifacts for supported platforms.",
+        "Signing secrets are not available to pull requests.",
+        "Release instructions list each artifact type."
+      ]
+    },
+    {
+      "id": "063",
+      "title": "[063] Prepare source publication, documentation, and release readiness",
+      "phase": "Testing and Release",
+      "priority": 63,
+      "labels": ["release", "documentation", "human-review-required"],
+      "scope": "Finalize source publication requirements, documentation completeness, and release gate checks.",
+      "implementationSteps": [
+        "Review documentation against implemented features.",
+        "Verify license and privacy documents are current.",
+        "Create release checklist for human approval."
+      ],
+      "acceptanceCriteria": [
+        "Release checklist covers tests, licenses, privacy, security, and artifacts.",
+        "Documentation matches shipped behavior.",
+        "Human approval is required before public release."
+      ]
+    }
+  ]
+}
