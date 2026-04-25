@@ -62,6 +62,17 @@ test('GitHub templates collect reproducible, secret-free contribution details', 
   assert.match(guide, /pull request/i);
 });
 
+test('pre-commit hook is installable and runs deterministic local checks', async () => {
+  const hookPath = pathFor('.githooks/pre-commit');
+  assert.equal(existsSync(hookPath), true, 'pre-commit hook should exist');
+
+  const hook = await readFile(hookPath, 'utf8');
+  assert.match(hook, /^#!\/usr\/bin\/env sh\n/, 'pre-commit hook should be directly executable');
+  assert.match(hook, /npm test/, 'pre-commit hook should run the test suite');
+  assert.match(hook, /npm run validate:foundation/, 'pre-commit hook should run foundation validation');
+  assert.match(hook, /npm run decompose:dry-run/, 'pre-commit hook should run the deterministic dry run');
+});
+
 test('epic backlog decomposes issue 1 into prioritized phases', async () => {
   const manifest = await readJson('config/epic-subtasks.json');
 
