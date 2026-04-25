@@ -38,4 +38,18 @@ test('release workflow does not publish from pull request events', async () => {
   assert.doesNotMatch(workflow, /^\s*release:/m, 'validation workflow should not publish packages');
   assert.doesNotMatch(workflow, /npm\s+publish/, 'pull request workflow must not publish packages');
   assert.match(workflow, /npm run validate:release/, 'workflow should validate release metadata');
+  assert.match(workflow, /npm run changelog/, 'workflow should preview generated changelog notes');
+});
+
+test('release documentation includes reviewed changelog generation workflow', async () => {
+  const packageJson = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
+  const releaseStrategy = await readFile(new URL('docs/release-strategy.md', root), 'utf8');
+  const changelog = await readFile(new URL('CHANGELOG.md', root), 'utf8');
+
+  assert.equal(packageJson.scripts.changelog, 'node scripts/generate-changelog.mjs');
+  assert.equal(packageJson.scripts['changelog:write'], 'node scripts/generate-changelog.mjs --write');
+  assert.equal(packageJson.scripts['changelog:check'], 'node scripts/generate-changelog.mjs --check');
+  assert.match(releaseStrategy, /merged pull requests/i);
+  assert.match(releaseStrategy, /manual review|review.*before publishing/i);
+  assert.match(changelog, /reviewed before publication/i);
 });
