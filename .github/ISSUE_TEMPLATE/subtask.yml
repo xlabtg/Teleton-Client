@@ -7,7 +7,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Use this template for work that belongs to the Teleton Client foundation epic.
+        Use this template for work that belongs to the Teleton Client foundation epic. Do not include secrets, production credentials, access tokens, Telegram API hashes, private keys, or user-private message content.
   - type: input
     id: parent
     attributes:
