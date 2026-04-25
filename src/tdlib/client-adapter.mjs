@@ -6,6 +6,7 @@ export const TDLIB_UPDATE_TYPES = Object.freeze(['authorizationState', 'connecti
 
 const REQUIRED_IMPLEMENTATION_METHODS = ['authenticate', 'getChatList', 'sendMessage', 'subscribeUpdates'];
 const OPTIONAL_PROXY_METHODS = ['enableProxy', 'updateProxy', 'disableProxy', 'removeProxy'];
+const HTTP_CONNECT_PROXY_PLATFORMS = Object.freeze(['android', 'ios', 'desktop']);
 const MAX_CHAT_LIST_LIMIT = 100;
 const MAX_MESSAGE_TEXT_LENGTH = 4096;
 
@@ -165,7 +166,7 @@ export function validateTdlibProxyConfig(input = {}) {
     port
   };
 
-  if (!['mtproto', 'socks5'].includes(protocol)) {
+  if (!['mtproto', 'socks5', 'http-connect'].includes(protocol)) {
     errors.push(`Unsupported proxy protocol: ${input.protocol}`);
   }
 
@@ -186,7 +187,8 @@ export function validateTdlibProxyConfig(input = {}) {
     }
   }
 
-  if (protocol === 'socks5') {
+  if (protocol === 'socks5' || protocol === 'http-connect') {
+    const label = protocol === 'http-connect' ? 'HTTP CONNECT' : 'SOCKS5';
     for (const field of ['username', 'password']) {
       const refField = `${field}Ref`;
       const value = input[refField] ?? input[field];
@@ -195,7 +197,7 @@ export function validateTdlibProxyConfig(input = {}) {
       }
 
       if (!isSecureReference(value)) {
-        errors.push(`SOCKS5 ${refField} must be a secure reference when provided.`);
+        errors.push(`${label} ${refField} must be a secure reference when provided.`);
       } else {
         proxy[refField] = value;
       }
@@ -230,6 +232,23 @@ function proxyTypeFor(proxy) {
     };
   }
 
+  if (proxy.protocol === 'http-connect') {
+    const type = {
+      '@type': 'proxyTypeHttp',
+      httpOnly: true
+    };
+
+    if (proxy.usernameRef !== undefined) {
+      type.usernameRef = proxy.usernameRef;
+    }
+
+    if (proxy.passwordRef !== undefined) {
+      type.passwordRef = proxy.passwordRef;
+    }
+
+    return type;
+  }
+
   const type = {
     '@type': 'proxyTypeSocks5'
   };
@@ -243,6 +262,17 @@ function proxyTypeFor(proxy) {
   }
 
   return type;
+}
+
+function assertProxyPlatformSupported(platform, proxy) {
+  if (proxy.protocol !== 'http-connect' || HTTP_CONNECT_PROXY_PLATFORMS.includes(platform)) {
+    return;
+  }
+
+  throw new TdlibAdapterError(
+    `HTTP CONNECT proxy is not supported on ${platform}. Use MTProto, SOCKS5, or a supported platform adapter path.`,
+    'unsupported_proxy_platform'
+  );
 }
 
 export function createTdlibAddProxyCommand(proxy) {
@@ -369,6 +399,7 @@ export function createTdlibClientAdapter(implementation, options = {}) {
         throw adapterError(validation.errors, 'invalid_proxy_config');
       }
 
+      assertProxyPlatformSupported(platform, validation.proxy);
       const command = createTdlibAddProxyCommand(validation.proxy);
       if (typeof implementation.enableProxy !== 'function') {
         return command;
@@ -388,6 +419,7 @@ export function createTdlibClientAdapter(implementation, options = {}) {
         throw adapterError(errors, 'invalid_proxy_config');
       }
 
+      assertProxyPlatformSupported(platform, proxyValidation.proxy);
       const command = createTdlibEditProxyCommand(idValidation.proxyId, proxyValidation.proxy);
       if (typeof implementation.updateProxy !== 'function') {
         return command;

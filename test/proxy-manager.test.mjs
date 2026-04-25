@@ -22,6 +22,14 @@ const proxySettings = {
       port: 1080,
       usernameRef: 'keychain:proxy-user',
       passwordRef: 'keychain:proxy-password'
+    },
+    {
+      id: 'http-office',
+      protocol: 'http-connect',
+      host: 'proxy.internal',
+      port: 8080,
+      usernameRef: 'keychain:http-proxy-user',
+      passwordRef: 'keychain:http-proxy-password'
     }
   ]
 };
@@ -77,9 +85,10 @@ test('proxy manager auto-selects the lowest-latency healthy proxy with determini
     direct: { reachable: false },
     proxies: {
       'mtproto-primary': { healthy: true, latencyMs: 320 },
-      'socks-office': { healthy: true, latencyMs: 120 }
+      'socks-office': { healthy: true, latencyMs: 120 },
+      'http-office': { healthy: true, latencyMs: 80 }
     }
-  }).proxyId, 'socks-office');
+  }).proxyId, 'http-office');
 
   assert.equal(manager.chooseRoute({
     direct: { reachable: false },
@@ -88,6 +97,48 @@ test('proxy manager auto-selects the lowest-latency healthy proxy with determini
       'socks-office': { healthy: true, latencyMs: 100 }
     }
   }).proxyId, 'mtproto-primary');
+});
+
+test('proxy manager represents HTTP CONNECT proxy routes with secure credential references', () => {
+  const manager = createProxyManager({
+    proxy: {
+      enabled: true,
+      autoSwitchEnabled: false,
+      activeProxyId: 'http-office',
+      entries: [proxySettings.entries[2]]
+    }
+  });
+
+  assert.deepEqual(manager.chooseRoute({
+    direct: false,
+    proxies: {
+      'http-office': { healthy: true }
+    }
+  }), {
+    type: 'http-connect',
+    proxyId: 'http-office',
+    host: 'proxy.internal',
+    port: 8080,
+    usernameRef: 'keychain:http-proxy-user',
+    passwordRef: 'keychain:http-proxy-password'
+  });
+
+  const invalid = validateProxyPreferences({
+    enabled: true,
+    activeProxyId: 'raw-http',
+    entries: [
+      {
+        id: 'raw-http',
+        protocol: 'http-connect',
+        host: 'proxy.internal',
+        port: 8080,
+        username: 'plain-user'
+      }
+    ]
+  });
+
+  assert.equal(invalid.valid, false);
+  assert.match(invalid.errors.join('\n'), /HTTP CONNECT username/);
 });
 
 test('proxy manager excludes proxies during failure cooldown and falls back to direct', () => {

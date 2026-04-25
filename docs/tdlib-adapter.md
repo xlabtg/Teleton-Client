@@ -20,7 +20,7 @@ The adapter exposes core client operations:
 
 The adapter also exposes proxy lifecycle operations that build TDLib-compatible commands before the native bridge sends them:
 
-- `enableProxy(config)` validates MTProto or SOCKS5 settings and maps them to `addProxy`.
+- `enableProxy(config)` validates MTProto, SOCKS5, or HTTP CONNECT settings and maps them to `addProxy`.
 - `updateProxy(proxyId, config)` validates an existing TDLib proxy id and maps settings to `editProxy`.
 - `disableProxy()` maps to `disableProxy`.
 - `removeProxy(proxyId)` validates the TDLib proxy id and maps to `removeProxy`.
@@ -37,7 +37,9 @@ Authentication accepts secure references only:
 
 The shared adapter rejects raw `apiId`, `api_id`, `apiHash`, `api_hash`, `phoneNumber`, and `botToken` values. Platform bridges are responsible for resolving references through environment variables, keychains, keystores, secret managers, or equivalent local secure storage.
 
-Proxy settings follow the same rule. MTProto requires `secretRef`, while SOCKS5 accepts optional `usernameRef` and `passwordRef`. Raw proxy secrets and credentials are rejected before native bridge calls. Platform bridges must resolve those references inside platform secure storage and pass the resolved values only to TDLib-native APIs, never back through shared logs or command snapshots.
+Proxy settings follow the same rule. MTProto requires `secretRef`, while SOCKS5 and HTTP CONNECT accept optional `usernameRef` and `passwordRef`. Raw proxy secrets and credentials are rejected before native bridge calls. Platform bridges must resolve those references inside platform secure storage and pass the resolved values only to TDLib-native APIs, never back through shared logs or command snapshots.
+
+HTTP CONNECT maps to TDLib's HTTP proxy type with `httpOnly: true` where platform networking permits it. The shared adapter enables this path for Android, iOS, and desktop bridge callers. Web-compatible callers receive an `unsupported_proxy_platform` error and should use MTProto, SOCKS5, a local companion service, or a trusted backend bridge instead.
 
 ## Mock Testing
 
