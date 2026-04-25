@@ -12,6 +12,18 @@ const DEFAULT_DRAFT = Object.freeze({
 });
 
 const SECURE_REFERENCE_PATTERN = /\b(?:env|keychain|keystore|secret):[A-Za-z0-9_.:/-]+/g;
+const DEFAULT_PROXY_PROBE_TARGET = 'telegram';
+const DEFAULT_PROXY_TEST_TIMEOUT_MS = 5000;
+const PROXY_TEST_FAILURE_REASONS = new Set([
+  'adapter_error',
+  'authentication_failed',
+  'connection_failed',
+  'dns_error',
+  'proxy_unreachable',
+  'timeout',
+  'tls_error',
+  'unknown'
+]);
 
 export const CONNECTION_QUALITY_STATES = Object.freeze(['testing', 'direct', 'proxy', 'degraded', 'offline']);
 
@@ -26,6 +38,53 @@ function clone(value) {
 
 function sanitizeMessage(message) {
   return String(message || 'Proxy test failed.').replaceAll(SECURE_REFERENCE_PATTERN, '[redacted]');
+}
+
+function normalizeProbeOptions(options = {}) {
+  const speedTest = options.speedTest && typeof options.speedTest === 'object' ? options.speedTest : {};
+  const timeoutMs = Number.isFinite(speedTest.timeoutMs) && speedTest.timeoutMs > 0
+    ? Math.trunc(speedTest.timeoutMs)
+    : DEFAULT_PROXY_TEST_TIMEOUT_MS;
+  const target = String(speedTest.target ?? DEFAULT_PROXY_PROBE_TARGET).trim() || DEFAULT_PROXY_PROBE_TARGET;
+  const now = typeof speedTest.now === 'function' ? speedTest.now : Date.now;
+
+  return Object.freeze({
+    target,
+    timeoutMs,
+    now
+  });
+}
+
+function normalizeFailureReason(reason) {
+  const value = String(reason ?? '').trim().toLowerCase().replaceAll(/[^a-z0-9]+/g, '_').replaceAll(/^_|_$/g, '');
+  if (!value) {
+    return 'unknown';
+  }
+
+  return PROXY_TEST_FAILURE_REASONS.has(value) ? value : 'unknown';
+}
+
+function normalizeLatencyMs(value) {
+  return Number.isFinite(value) && value >= 0 ? Math.round(value) : null;
+}
+
+function createProxyTestResult(result, elapsedMs, probe) {
+  const timedOut = elapsedMs >= probe.timeoutMs || result?.reason === 'timeout';
+  const latencyMs = normalizeLatencyMs(timedOut ? elapsedMs : result?.latencyMs ?? elapsedMs);
+  const reachable = result?.reachable === true && !timedOut;
+  const reason = reachable ? null : normalizeFailureReason(timedOut ? 'timeout' : result?.reason);
+  const message = timedOut
+    ? 'Proxy test timed out.'
+    : sanitizeMessage(result?.message ?? (reachable ? 'Connected' : 'Proxy test failed.'));
+
+  return {
+    status: reachable ? 'success' : 'failure',
+    reachable,
+    latencyMs,
+    reason,
+    message,
+    probeTarget: probe.target
+  };
 }
 
 function normalizeId(value, protocol, host, port) {
@@ -252,6 +311,7 @@ function createConnectionQuality(settings, healthInput = {}) {
 export function createProxySettingsView(options = {}) {
   const manager = createProxyManager(options.initialSettings);
   const testProxyAdapter = options.testProxy ?? defaultProxyTest;
+  const probe = normalizeProbeOptions(options);
   let draft = entryToDraft(options.draft);
   let tests = {};
   let connectionHealth = { testing: true };
@@ -344,25 +404,36 @@ export function createProxySettingsView(options = {}) {
         ...tests,
         [proxyId]: {
           status: 'running',
-          message: 'Testing proxy connection...'
+          reachable: false,
+          latencyMs: null,
+          reason: null,
+          message: 'Testing proxy connection...',
+          probeTarget: probe.target
         }
       };
 
       try {
-        const result = await testProxyAdapter(clone(entry));
+        const startedAt = probe.now();
+        const result = await testProxyAdapter(clone(entry), {
+          target: probe.target,
+          timeoutMs: probe.timeoutMs
+        });
+        const elapsedMs = probe.now() - startedAt;
         tests = {
           ...tests,
-          [proxyId]: {
-            status: result?.reachable === true ? 'success' : 'failure',
-            message: sanitizeMessage(result?.message ?? (result?.reachable === true ? 'Connected' : 'Proxy test failed.'))
-          }
+          [proxyId]: createProxyTestResult(result, elapsedMs, probe)
         };
       } catch (error) {
+        const reason = normalizeFailureReason(error.reason ?? error.code ?? 'adapter_error');
         tests = {
           ...tests,
           [proxyId]: {
             status: 'failure',
-            message: sanitizeMessage(error.message)
+            reachable: false,
+            latencyMs: null,
+            reason,
+            message: sanitizeMessage(error.message),
+            probeTarget: probe.target
           }
         };
       }
