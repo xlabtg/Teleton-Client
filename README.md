@@ -14,6 +14,7 @@ This repository is in the foundation phase. The current implementation establish
 - Shared cross-platform settings model for language, theme, notifications, agent mode, proxy, and secure references.
 - Baseline TDLib client adapter contract with mock-backed tests.
 - CI workflow for foundation checks.
+- Documented semantic version source of truth and release metadata validation.
 - Required project documents: `README.md`, `PRIVACY.md`, `LICENSE`, and `BUILD-GUIDE.md`.
 
 ## Quick Start
@@ -21,6 +22,7 @@ This repository is in the foundation phase. The current implementation establish
 ```sh
 npm test
 npm run validate:foundation
+npm run validate:release
 npm run decompose:dry-run
 ```
 
@@ -40,7 +42,7 @@ The project is intended to evolve through these layers:
 4. TON blockchain integrations for wallet, transfers, swaps, NFTs, staking, and DNS.
 5. Security and privacy controls for credentials, user consent, and auditability.
 
-See `docs/architecture.md`, `docs/backlog.md`, and `docs/tdlib-adapter.md` for the current foundation plan.
+See `docs/architecture.md`, `docs/backlog.md`, `docs/tdlib-adapter.md`, and `docs/release-strategy.md` for the current foundation plan.
 
 ## Contribution Templates
 

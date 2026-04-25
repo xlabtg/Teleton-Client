@@ -8,6 +8,7 @@
     "test": "node --test test/*.test.mjs",
     "prepare:hooks": "git config core.hooksPath .githooks",
     "validate:foundation": "node scripts/validate-foundation.mjs",
+    "validate:release": "node scripts/validate-release.mjs",
     "decompose:dry-run": "node scripts/decompose-epic.mjs --dry-run"
   },
   "engines": {

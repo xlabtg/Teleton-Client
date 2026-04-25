@@ -21,11 +21,13 @@ test('foundation artifacts required by issue 1 are present', () => {
     'LICENSE',
     '.githooks/pre-commit',
     '.github/workflows/ci.yml',
+    '.github/workflows/release-validation.yml',
     '.github/ISSUE_TEMPLATE/bug_report.yml',
     '.github/ISSUE_TEMPLATE/feature_task.yml',
     '.github/ISSUE_TEMPLATE/subtask.yml',
     '.github/pull_request_template.md',
     'config/epic-subtasks.json',
+    'docs/release-strategy.md',
     'docs/contributing-templates.md',
     'docs/tdlib-adapter.md'
   ];
@@ -70,6 +72,7 @@ test('pre-commit hook is installable and runs deterministic local checks', async
   assert.match(hook, /^#!\/usr\/bin\/env sh\n/, 'pre-commit hook should be directly executable');
   assert.match(hook, /npm test/, 'pre-commit hook should run the test suite');
   assert.match(hook, /npm run validate:foundation/, 'pre-commit hook should run foundation validation');
+  assert.match(hook, /npm run validate:release/, 'pre-commit hook should run release metadata validation');
   assert.match(hook, /npm run decompose:dry-run/, 'pre-commit hook should run the deterministic dry run');
 });
 

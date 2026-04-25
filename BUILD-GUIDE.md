@@ -28,6 +28,7 @@ Run the same checks used by CI:
 ```sh
 npm test
 npm run validate:foundation
+npm run validate:release
 npm run decompose:dry-run
 ```
 
@@ -42,6 +43,10 @@ npm run prepare:hooks
 ```
 
 The pre-commit hook runs the same foundation checks as CI before allowing a commit.
+
+## Release Metadata
+
+`package.json` is the only version source of truth for the current package, application, and release metadata. Run `npm run validate:release` before changing release metadata so CI can verify stable semantic version format and consistency with `src/foundation/release-metadata.mjs`.
 
 ## Epic Decomposition
 
