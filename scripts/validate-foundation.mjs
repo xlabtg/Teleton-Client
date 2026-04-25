@@ -10,6 +10,7 @@ const requiredFiles = [
   'PRIVACY.md',
   'BUILD-GUIDE.md',
   'LICENSE',
+  '.githooks/pre-commit',
   '.github/workflows/ci.yml',
   '.github/ISSUE_TEMPLATE/subtask.yml',
   'config/epic-subtasks.json',
