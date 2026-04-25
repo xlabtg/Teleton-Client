@@ -15,7 +15,8 @@ const requiredFiles = [
   '.github/ISSUE_TEMPLATE/subtask.yml',
   'config/epic-subtasks.json',
   'docs/architecture.md',
-  'docs/backlog.md'
+  'docs/backlog.md',
+  'docs/tdlib-adapter.md'
 ];
 
 for (const requiredFile of requiredFiles) {
@@ -67,7 +68,7 @@ for (const subtask of manifest.subtasks) {
   assert.ok(Array.isArray(subtask.acceptanceCriteria) && subtask.acceptanceCriteria.length >= 2);
 }
 
-const docsToScan = ['README.md', 'PRIVACY.md', 'BUILD-GUIDE.md', 'docs/architecture.md'];
+const docsToScan = ['README.md', 'PRIVACY.md', 'BUILD-GUIDE.md', 'docs/architecture.md', 'docs/tdlib-adapter.md'];
 const forbiddenPatterns = [
   /api_hash\s*[:=]\s*['"][^'"]+['"]/i,
   /api_id\s*[:=]\s*\d{4,}/i,
