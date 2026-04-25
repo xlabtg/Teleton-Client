@@ -9,6 +9,9 @@
     "prepare:hooks": "git config core.hooksPath .githooks",
     "validate:foundation": "node scripts/validate-foundation.mjs",
     "validate:release": "node scripts/validate-release.mjs",
+    "changelog": "node scripts/generate-changelog.mjs",
+    "changelog:write": "node scripts/generate-changelog.mjs --write",
+    "changelog:check": "node scripts/generate-changelog.mjs --check",
     "decompose:dry-run": "node scripts/decompose-epic.mjs --dry-run"
   },
   "engines": {
