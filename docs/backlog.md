@@ -30,7 +30,7 @@ The script reads the manifest, creates missing labels, skips duplicate issue tit
 
 ## Published Issues
 
-The first decomposition execution was completed for `xlabtg/Teleton-Client`. Manifest entries now record the published `issueNumber` and `issueUrl` for issues `#5` through `#29`, so future automation can reconcile by title and keep links stable.
+The epic decomposition has been completed for `xlabtg/Teleton-Client`. Manifest entries now record the published `issueNumber` and `issueUrl` for the original issues `#5` through `#29` and the follow-up expansion issues `#33` through `#70`, so future automation can reconcile by title and keep links stable.
 
 ## First Execution Target
 

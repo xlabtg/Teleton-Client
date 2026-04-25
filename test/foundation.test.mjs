@@ -34,7 +34,7 @@ test('epic backlog decomposes issue 1 into prioritized phases', async () => {
   const manifest = await readJson('config/epic-subtasks.json');
 
   assert.equal(manifest.parentIssue, 1);
-  assert.ok(manifest.subtasks.length >= 25, 'expected a full epic decomposition');
+  assert.equal(manifest.subtasks.length, 63, 'expected the full 63-task epic decomposition');
 
   const requiredPhases = [
     'Infrastructure and Core',
@@ -53,6 +53,9 @@ test('epic backlog decomposes issue 1 into prioritized phases', async () => {
 
   const titles = manifest.subtasks.map((subtask) => subtask.title);
   assert.equal(new Set(titles).size, titles.length, 'subtask titles must be unique');
+
+  const requiredIds = Array.from({ length: 63 }, (_, index) => String(index + 1).padStart(3, '0'));
+  assert.deepEqual(manifest.subtasks.map((subtask) => subtask.id), requiredIds);
 
   const issueNumbers = manifest.subtasks.map((subtask) => subtask.issueNumber);
   assert.equal(new Set(issueNumbers).size, issueNumbers.length, 'published issue numbers must be unique');
