@@ -5,9 +5,10 @@ import { createProxySettingsView } from '../src/foundation/proxy-settings-view.m
 
 test('proxy settings view supports add, test, enable, disable, and remove workflow', async () => {
   const view = createProxySettingsView({
-    testProxy: async (proxy) => ({
+    testProxy: async (proxy, probe) => ({
       reachable: proxy.host === 'proxy.example',
-      message: proxy.host === 'proxy.example' ? 'Connected' : `Could not connect with env:SECRET_VALUE`
+      message: proxy.host === 'proxy.example' ? 'Connected' : `Could not connect with env:SECRET_VALUE`,
+      probeTarget: probe.target
     })
   });
 
@@ -32,6 +33,8 @@ test('proxy settings view supports add, test, enable, disable, and remove workfl
   state = await view.testProxy('primary');
   assert.equal(state.tests.primary.status, 'success');
   assert.equal(state.tests.primary.message, 'Connected');
+  assert.equal(state.tests.primary.reason, null);
+  assert.equal(state.tests.primary.probeTarget, 'telegram');
 
   state = view.enableProxy('primary');
   assert.equal(state.route.type, 'mtproto');
@@ -49,6 +52,82 @@ test('proxy settings view supports add, test, enable, disable, and remove workfl
   state = view.removeProxy('primary');
   assert.deepEqual(state.list.items, []);
   assert.equal(state.route.type, 'direct');
+});
+
+test('proxy settings view records per-proxy speed checks with timeout and failure categories', async () => {
+  let now = 1_000;
+  const seen = [];
+  const view = createProxySettingsView({
+    speedTest: {
+      target: 'telegram',
+      timeoutMs: 5000,
+      now: () => now
+    },
+    testProxy: async (proxy, probe) => {
+      seen.push({ proxy, probe });
+      if (proxy.id === 'slow') {
+        now += 5100;
+        return {
+          reachable: true,
+          latencyMs: 80,
+          message: 'Eventually connected'
+        };
+      }
+
+      if (proxy.id === 'blocked') {
+        now += 40;
+        return {
+          reachable: false,
+          reason: 'tls_error',
+          message: 'TLS handshake failed'
+        };
+      }
+
+      now += 123;
+      return {
+        reachable: true,
+        message: 'Connected'
+      };
+    }
+  });
+
+  for (const draft of [
+    { id: 'fast', protocol: 'socks5', host: 'fast.proxy', port: '1080' },
+    { id: 'slow', protocol: 'socks5', host: 'slow.proxy', port: '1080' },
+    { id: 'blocked', protocol: 'socks5', host: 'blocked.proxy', port: '1080' }
+  ]) {
+    view.updateDraft(draft);
+    view.saveDraft();
+  }
+
+  let state = await view.testProxy('fast');
+  assert.equal(state.tests.fast.status, 'success');
+  assert.equal(state.tests.fast.reachable, true);
+  assert.equal(state.tests.fast.latencyMs, 123);
+  assert.equal(state.tests.fast.reason, null);
+  assert.equal(state.tests.fast.probeTarget, 'telegram');
+
+  state = await view.testProxy('slow');
+  assert.equal(state.tests.slow.status, 'failure');
+  assert.equal(state.tests.slow.reachable, false);
+  assert.equal(state.tests.slow.reason, 'timeout');
+  assert.equal(state.tests.slow.latencyMs, 5100);
+  assert.equal(state.tests.slow.message, 'Proxy test timed out.');
+
+  state = await view.testProxy('blocked');
+  assert.equal(state.tests.blocked.status, 'failure');
+  assert.equal(state.tests.blocked.reachable, false);
+  assert.equal(state.tests.blocked.reason, 'tls_error');
+  assert.equal(state.tests.blocked.latencyMs, 40);
+
+  assert.deepEqual(
+    seen.map(({ probe }) => probe),
+    [
+      { target: 'telegram', timeoutMs: 5000 },
+      { target: 'telegram', timeoutMs: 5000 },
+      { target: 'telegram', timeoutMs: 5000 }
+    ]
+  );
 });
 
 test('proxy settings view reports validation and test failures without exposing secrets', async () => {
