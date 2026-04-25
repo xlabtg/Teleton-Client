@@ -15,6 +15,7 @@ export const DEFAULT_TELETON_SETTINGS = deepFreeze({
   theme: 'system',
   proxy: {
     enabled: false,
+    autoSwitchEnabled: true,
     activeProxyId: null,
     entries: []
   },
@@ -266,9 +267,11 @@ function normalizeProxy(value, errors) {
   }
 
   const enabled = proxyInput.enabled ?? DEFAULT_TELETON_SETTINGS.proxy.enabled;
+  const autoSwitchEnabled = proxyInput.autoSwitchEnabled ?? DEFAULT_TELETON_SETTINGS.proxy.autoSwitchEnabled;
   const activeProxyId = proxyInput.activeProxyId ?? DEFAULT_TELETON_SETTINGS.proxy.activeProxyId;
 
   booleanError(enabled, 'Proxy enabled', errors);
+  booleanError(autoSwitchEnabled, 'Proxy autoSwitchEnabled', errors);
 
   if (activeProxyId !== null && (typeof activeProxyId !== 'string' || activeProxyId.trim().length === 0)) {
     errors.push('Active proxy id must be null or a non-empty string.');
@@ -284,6 +287,7 @@ function normalizeProxy(value, errors) {
 
   return {
     enabled,
+    autoSwitchEnabled,
     activeProxyId,
     entries
   };

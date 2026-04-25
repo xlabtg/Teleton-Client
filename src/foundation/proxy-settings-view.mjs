@@ -125,6 +125,14 @@ function routeFromSettings(settings) {
   return Object.freeze(route);
 }
 
+function preferencesFromSettings(settings) {
+  return Object.freeze({
+    enabled: settings.proxy.enabled,
+    autoSwitchEnabled: settings.proxy.autoSwitchEnabled,
+    activeProxyId: settings.proxy.activeProxyId
+  });
+}
+
 function defaultProxyTest() {
   return {
     reachable: false,
@@ -259,6 +267,7 @@ export function createProxySettingsView(options = {}) {
       },
       connectionQuality: createConnectionQuality(settings, connectionHealth),
       tests: clone(tests),
+      preferences: preferencesFromSettings(settings),
       route: routeFromSettings(settings)
     };
   }
@@ -366,6 +375,15 @@ export function createProxySettingsView(options = {}) {
         ...settings.proxy,
         enabled: true,
         activeProxyId: proxyId
+      });
+
+      return state();
+    },
+    setAutoSwitchEnabled(enabled) {
+      const settings = manager.getSettings();
+      manager.saveProxyPreferences({
+        ...settings.proxy,
+        autoSwitchEnabled: enabled === true
       });
 
       return state();

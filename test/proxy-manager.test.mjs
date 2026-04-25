@@ -5,6 +5,7 @@ import { createProxyManager, validateProxyPreferences } from '../src/foundation/
 
 const proxySettings = {
   enabled: true,
+  autoSwitchEnabled: true,
   activeProxyId: 'mtproto-primary',
   entries: [
     {
@@ -67,6 +68,79 @@ test('proxy manager falls back through active MTProto and SOCKS5 proxy health', 
   });
 
   assert.equal(manager.chooseRoute({ direct: false, proxies: {} }), null);
+});
+
+test('proxy manager auto-selects the lowest-latency healthy proxy with deterministic ties', () => {
+  const manager = createProxyManager({ proxy: proxySettings });
+
+  assert.equal(manager.chooseRoute({
+    direct: { reachable: false },
+    proxies: {
+      'mtproto-primary': { healthy: true, latencyMs: 320 },
+      'socks-office': { healthy: true, latencyMs: 120 }
+    }
+  }).proxyId, 'socks-office');
+
+  assert.equal(manager.chooseRoute({
+    direct: { reachable: false },
+    proxies: {
+      'mtproto-primary': { healthy: true, latencyMs: 100 },
+      'socks-office': { healthy: true, latencyMs: 100 }
+    }
+  }).proxyId, 'mtproto-primary');
+});
+
+test('proxy manager excludes proxies during failure cooldown and falls back to direct', () => {
+  const manager = createProxyManager({ proxy: proxySettings });
+
+  manager.recordProxyFailure('mtproto-primary', { now: 1_000, cooldownMs: 10_000 });
+  assert.equal(manager.chooseRoute({
+    direct: { reachable: false },
+    now: 5_000,
+    proxies: {
+      'mtproto-primary': { healthy: true, latencyMs: 40 },
+      'socks-office': { healthy: true, latencyMs: 90 }
+    }
+  }).proxyId, 'socks-office');
+
+  manager.recordProxyFailure('socks-office', { now: 2_000, cooldownMs: 10_000 });
+  assert.deepEqual(manager.chooseRoute({
+    direct: { reachable: true, latencyMs: 250 },
+    now: 5_000,
+    proxies: {
+      'mtproto-primary': { healthy: true, latencyMs: 40 },
+      'socks-office': { healthy: true, latencyMs: 90 }
+    }
+  }), {
+    type: 'direct',
+    proxyId: null
+  });
+
+  assert.equal(manager.chooseRoute({
+    direct: { reachable: false },
+    now: 13_000,
+    proxies: {
+      'mtproto-primary': { healthy: true, latencyMs: 40 },
+      'socks-office': { healthy: true, latencyMs: 90 }
+    }
+  }).proxyId, 'mtproto-primary');
+});
+
+test('proxy manager keeps manual active proxy selection when automatic switching is disabled', () => {
+  const manager = createProxyManager({
+    proxy: {
+      ...proxySettings,
+      autoSwitchEnabled: false
+    }
+  });
+
+  assert.equal(manager.chooseRoute({
+    direct: { reachable: false },
+    proxies: {
+      'mtproto-primary': { healthy: true, latencyMs: 400 },
+      'socks-office': { healthy: true, latencyMs: 40 }
+    }
+  }).proxyId, 'mtproto-primary');
 });
 
 test('proxy manager persists validated user proxy preferences without raw secrets', () => {

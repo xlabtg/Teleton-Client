@@ -18,7 +18,7 @@ Teleton Client is planned as a layered client where protocol, automation, wallet
 - TDLib callers use the shared `authenticate`, `getChatList`, `sendMessage`, and `subscribeUpdates` adapter contract so Android, iOS, desktop, and web-compatible bridges expose the same boundary.
 - Agent mode defaults to `off`; cloud and hybrid modes require explicit activation.
 - Proxy secrets are represented as secure references such as `env:NAME`, `keychain:name`, or `keystore:name`.
-- Proxy settings UI shells use shared view state for list items, edit forms, test status, and active route metadata. Display snapshots expose only configured flags for secrets, while settings persistence keeps secure references for platform storage resolution.
+- Proxy settings UI shells use shared view state for list items, edit forms, test status, auto-switch preferences, and active route metadata. Display snapshots expose only configured flags for secrets, while settings persistence keeps secure references for platform storage resolution.
 - TON signing requires user confirmation and platform secure storage or wallet-provider approval.
 
 ## Foundation Status

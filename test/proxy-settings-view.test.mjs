@@ -36,6 +36,11 @@ test('proxy settings view supports add, test, enable, disable, and remove workfl
   state = view.enableProxy('primary');
   assert.equal(state.route.type, 'mtproto');
   assert.equal(state.route.proxyId, 'primary');
+  assert.equal(state.preferences.autoSwitchEnabled, true);
+
+  state = view.setAutoSwitchEnabled(false);
+  assert.equal(state.preferences.autoSwitchEnabled, false);
+  assert.equal(state.route.proxyId, 'primary');
 
   state = view.disableProxy();
   assert.equal(state.route.type, 'direct');
