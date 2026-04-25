@@ -15,6 +15,7 @@ const requiredFiles = [
   '.github/ISSUE_TEMPLATE/bug_report.yml',
   '.github/ISSUE_TEMPLATE/feature_task.yml',
   '.github/ISSUE_TEMPLATE/subtask.yml',
+  '.github/CODEOWNERS',
   '.github/pull_request_template.md',
   'config/epic-subtasks.json',
   'docs/contributing-templates.md',
@@ -26,6 +27,34 @@ const requiredFiles = [
 for (const requiredFile of requiredFiles) {
   assert.equal(existsSync(new URL(requiredFile, root)), true, `${requiredFile} is required`);
 }
+
+const codeowners = await readFile(new URL('.github/CODEOWNERS', root), 'utf8');
+const requiredOwnershipPatterns = [
+  '*',
+  '.github/',
+  '.github/workflows/',
+  '.github/CODEOWNERS',
+  'src/',
+  'src/tdlib/',
+  'src/foundation/',
+  'scripts/',
+  'config/',
+  'docs/',
+  'PRIVACY.md',
+  'BUILD-GUIDE.md',
+  'package.json'
+];
+
+for (const pattern of requiredOwnershipPatterns) {
+  assert.match(
+    codeowners,
+    new RegExp(`^${pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s+@`, 'm'),
+    `${pattern} must have CODEOWNERS coverage`
+  );
+}
+
+assert.match(codeowners, /# Ownership changes/i, 'CODEOWNERS must document ownership review rules');
+assert.match(codeowners, /human maintainer/i, 'CODEOWNERS must require human review for high-risk changes');
 
 const manifest = JSON.parse(await readFile(new URL('config/epic-subtasks.json', root), 'utf8'));
 const requiredPhases = [

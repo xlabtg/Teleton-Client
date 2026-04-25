@@ -24,6 +24,7 @@ test('foundation artifacts required by issue 1 are present', () => {
     '.github/ISSUE_TEMPLATE/bug_report.yml',
     '.github/ISSUE_TEMPLATE/feature_task.yml',
     '.github/ISSUE_TEMPLATE/subtask.yml',
+    '.github/CODEOWNERS',
     '.github/pull_request_template.md',
     'config/epic-subtasks.json',
     'docs/contributing-templates.md',
@@ -33,6 +34,33 @@ test('foundation artifacts required by issue 1 are present', () => {
   for (const requiredFile of requiredFiles) {
     assert.equal(existsSync(pathFor(requiredFile)), true, `${requiredFile} should exist`);
   }
+});
+
+test('CODEOWNERS routes high-risk repository areas to human maintainers', async () => {
+  const codeowners = await readFile(pathFor('.github/CODEOWNERS'), 'utf8');
+
+  const requiredPatterns = [
+    '*',
+    '.github/',
+    '.github/workflows/',
+    '.github/CODEOWNERS',
+    'src/',
+    'src/tdlib/',
+    'src/foundation/',
+    'scripts/',
+    'config/',
+    'docs/',
+    'PRIVACY.md',
+    'BUILD-GUIDE.md',
+    'package.json'
+  ];
+
+  for (const pattern of requiredPatterns) {
+    assert.match(codeowners, new RegExp(`^${pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s+@`, 'm'), `${pattern} should have an owner`);
+  }
+
+  assert.match(codeowners, /# Ownership changes/i, 'CODEOWNERS should document ownership review rules');
+  assert.match(codeowners, /human maintainer/i, 'CODEOWNERS should require human review for ownership changes');
 });
 
 test('GitHub templates collect reproducible, secret-free contribution details', async () => {

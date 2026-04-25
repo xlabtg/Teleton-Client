@@ -1,0 +1,32 @@
+# Teleton Client ownership rules.
+#
+# GitHub applies the last matching pattern, so broad defaults stay at the top and
+# higher-risk or more specific areas stay below them.
+
+* @xlabtg/teleton-maintainers
+
+# Documentation and generated planning artifacts.
+docs/ @xlabtg/teleton-maintainers
+README.md @xlabtg/teleton-maintainers
+BUILD-GUIDE.md @xlabtg/teleton-maintainers
+config/ @xlabtg/teleton-maintainers
+
+# Shared foundation code and platform-facing integration boundaries.
+src/ @xlabtg/teleton-maintainers
+src/foundation/ @xlabtg/teleton-maintainers
+src/tdlib/ @xlabtg/teleton-maintainers
+scripts/ @xlabtg/teleton-maintainers
+test/ @xlabtg/teleton-maintainers
+package.json @xlabtg/teleton-maintainers
+
+# Security, privacy, release, and repository automation require human review.
+PRIVACY.md @xlabtg/teleton-maintainers
+LICENSE @xlabtg/teleton-maintainers
+.github/ @xlabtg/teleton-maintainers
+.github/workflows/ @xlabtg/teleton-maintainers
+.github/CODEOWNERS @xlabtg/teleton-maintainers
+
+# Ownership changes
+# Changes to this file, security or privacy documentation, release automation,
+# CI workflows, package metadata, and shared client code must be reviewed by a
+# human maintainer before merge.
