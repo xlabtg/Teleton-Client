@@ -13,6 +13,7 @@ This repository is in the foundation phase. The current implementation establish
 - Dry-run and idempotent GitHub issue creation script for decomposing issue `#1`.
 - Shared cross-platform settings model for language, theme, notifications, agent mode, proxy, and secure references.
 - ProxyManager route selection for direct, MTProto, and SOCKS5 connectivity using saved preferences and health inputs.
+- Shared proxy settings view state for add, test, enable, disable, edit, and remove workflows without exposing secure references.
 - Baseline TDLib client adapter contract with mock-backed tests.
 - CI workflow for foundation checks.
 - Documented semantic version source of truth and release metadata validation.
