@@ -22,15 +22,46 @@ test('foundation artifacts required by issue 1 are present', () => {
     '.githooks/pre-commit',
     '.github/workflows/ci.yml',
     '.github/workflows/release-validation.yml',
+    '.github/ISSUE_TEMPLATE/bug_report.yml',
+    '.github/ISSUE_TEMPLATE/feature_task.yml',
     '.github/ISSUE_TEMPLATE/subtask.yml',
+    '.github/pull_request_template.md',
     'config/epic-subtasks.json',
     'docs/release-strategy.md',
+    'docs/contributing-templates.md',
     'docs/tdlib-adapter.md'
   ];
 
   for (const requiredFile of requiredFiles) {
     assert.equal(existsSync(pathFor(requiredFile)), true, `${requiredFile} should exist`);
   }
+});
+
+test('GitHub templates collect reproducible, secret-free contribution details', async () => {
+  const templateFiles = [
+    '.github/ISSUE_TEMPLATE/bug_report.yml',
+    '.github/ISSUE_TEMPLATE/feature_task.yml',
+    '.github/ISSUE_TEMPLATE/subtask.yml',
+    '.github/pull_request_template.md'
+  ];
+
+  for (const templateFile of templateFiles) {
+    const content = await readFile(pathFor(templateFile), 'utf8');
+    assert.match(content, /test|reproduc/i, `${templateFile} should prompt for validation details`);
+    assert.match(content, /secret|credential|token/i, `${templateFile} should warn against secrets`);
+  }
+
+  const bugTemplate = await readFile(pathFor('.github/ISSUE_TEMPLATE/bug_report.yml'), 'utf8');
+  assert.match(bugTemplate, /Expected behavior/i);
+  assert.match(bugTemplate, /Actual behavior/i);
+
+  const featureTemplate = await readFile(pathFor('.github/ISSUE_TEMPLATE/feature_task.yml'), 'utf8');
+  assert.match(featureTemplate, /Acceptance criteria/i);
+
+  const guide = await readFile(pathFor('docs/contributing-templates.md'), 'utf8');
+  assert.match(guide, /feature task/i);
+  assert.match(guide, /bug report/i);
+  assert.match(guide, /pull request/i);
 });
 
 test('pre-commit hook is installable and runs deterministic local checks', async () => {

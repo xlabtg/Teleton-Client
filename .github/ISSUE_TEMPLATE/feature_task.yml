@@ -1,0 +1,66 @@
+name: Feature task
+description: Propose bounded product, platform, or infrastructure work.
+title: "[Task] "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for planned Teleton Client work that is not a defect. Do not include secrets, production credentials, access tokens, Telegram API hashes, private keys, or user-private message content.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or goal
+      description: Describe the user, product, or engineering need.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: Describe the bounded implementation work and any explicit non-goals.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: List measurable checks that prove the task is complete.
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Project area
+      options:
+        - Infrastructure and Core
+        - Connectivity Layer
+        - Teleton Agent Integration
+        - TON Blockchain Module
+        - Platform Wrappers
+        - Security and Licenses
+        - Testing and Release
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: testing
+    attributes:
+      label: Testing plan
+      description: Describe the automated or manual validation expected for this work.
+      placeholder: |
+        - npm test
+        - npm run validate:foundation
+    validations:
+      required: true
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks and dependencies
+      description: Note compatibility, security, privacy, release, or upstream dependency risks.
+    validations:
+      required: false
