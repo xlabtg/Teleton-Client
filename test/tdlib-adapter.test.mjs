@@ -6,7 +6,8 @@ import {
   TDLIB_PLATFORMS,
   createMockTdlibClientAdapter,
   createTdlibClientAdapter,
-  validateTdlibAuthenticationRequest
+  validateTdlibAuthenticationRequest,
+  validateTdlibProxyConfig
 } from '../src/tdlib/client-adapter.mjs';
 
 const root = new URL('../', import.meta.url);
@@ -133,6 +134,121 @@ test('TDLib client adapter validates bridge inputs before native calls', async (
     { method: 'subscribeUpdates' },
     { method: 'unsubscribe' }
   ]);
+});
+
+test('TDLib proxy commands map MTProto and SOCKS5 settings without plaintext secrets', async () => {
+  const adapter = createMockTdlibClientAdapter();
+
+  const mtproto = await adapter.enableProxy({
+    protocol: 'mtproto',
+    host: 'mtproto.example',
+    port: 443,
+    secretRef: 'env:TELETON_MTPROTO_SECRET'
+  });
+  const socks5 = await adapter.updateProxy(mtproto.proxyId, {
+    protocol: 'socks5',
+    host: '127.0.0.1',
+    port: 1080,
+    usernameRef: 'keychain:proxy-user',
+    passwordRef: 'keychain:proxy-password'
+  });
+
+  await adapter.disableProxy();
+  await adapter.removeProxy(socks5.proxyId);
+
+  assert.deepEqual(adapter.getCommands().slice(-4), [
+    {
+      method: 'enableProxy',
+      command: {
+        '@type': 'addProxy',
+        server: 'mtproto.example',
+        port: 443,
+        enable: true,
+        type: {
+          '@type': 'proxyTypeMtproto',
+          secretRef: 'env:TELETON_MTPROTO_SECRET'
+        }
+      }
+    },
+    {
+      method: 'updateProxy',
+      proxyId: mtproto.proxyId,
+      command: {
+        '@type': 'editProxy',
+        proxy_id: mtproto.proxyId,
+        server: '127.0.0.1',
+        port: 1080,
+        enable: true,
+        type: {
+          '@type': 'proxyTypeSocks5',
+          usernameRef: 'keychain:proxy-user',
+          passwordRef: 'keychain:proxy-password'
+        }
+      }
+    },
+    {
+      method: 'disableProxy',
+      command: {
+        '@type': 'disableProxy'
+      }
+    },
+    {
+      method: 'removeProxy',
+      proxyId: socks5.proxyId,
+      command: {
+        '@type': 'removeProxy',
+        proxy_id: socks5.proxyId
+      }
+    }
+  ]);
+
+  assert.doesNotMatch(JSON.stringify(adapter.getCommands()), /hardcoded-secret|proxy-password-value/);
+});
+
+test('TDLib proxy validation rejects invalid settings before native calls', async () => {
+  const validation = validateTdlibProxyConfig({
+    protocol: 'mtproto',
+    host: 'proxy.example',
+    port: 443,
+    secret: 'hardcoded-secret'
+  });
+
+  assert.equal(validation.valid, false);
+  assert.match(validation.errors.join('\n'), /secure reference/);
+
+  const calls = [];
+  const adapter = createTdlibClientAdapter(
+    {
+      async authenticate() {
+        return { authorizationState: 'ready' };
+      },
+      async getChatList() {
+        return { chats: [], nextCursor: null };
+      },
+      async sendMessage() {
+        return { id: 'message-1', status: 'sent' };
+      },
+      subscribeUpdates() {
+        return () => {};
+      },
+      async enableProxy(command) {
+        calls.push(command);
+        return { proxyId: 1 };
+      }
+    }
+  );
+
+  await assert.rejects(
+    () => adapter.enableProxy({
+      protocol: 'socks5',
+      host: '',
+      port: 70000,
+      password: 'raw-password'
+    }),
+    /Proxy host/
+  );
+
+  assert.deepEqual(calls, []);
 });
 
 test('TDLib build targets, licensing, and adapter boundary are documented', async () => {
