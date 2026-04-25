@@ -251,6 +251,54 @@ test('TDLib proxy validation rejects invalid settings before native calls', asyn
   assert.deepEqual(calls, []);
 });
 
+test('TDLib adapter logs structured network failures with redacted user content', async () => {
+  const logs = [];
+  const adapter = createTdlibClientAdapter(
+    {
+      async authenticate() {
+        return { authorizationState: 'ready' };
+      },
+      async getChatList() {
+        return { chats: [], nextCursor: null };
+      },
+      async sendMessage() {
+        throw new Error('network timeout for +1 555 123 4567 token 123456:abcdefghijklmnopqrstuvwxyzABCDEF');
+      },
+      subscribeUpdates() {
+        return () => {};
+      },
+      async enableProxy() {
+        throw new Error('connect ECONNREFUSED env:TELETON_MTPROTO_SECRET');
+      }
+    },
+    { logger: (entry) => logs.push(entry) }
+  );
+
+  await assert.rejects(
+    () => adapter.sendMessage({ chatId: 'chat-1', text: 'private message body' }),
+    /network timeout/
+  );
+  await assert.rejects(
+    () => adapter.enableProxy({
+      protocol: 'mtproto',
+      host: 'mtproto.example',
+      port: 443,
+      secretRef: 'env:TELETON_MTPROTO_SECRET'
+    }),
+    /ECONNREFUSED/
+  );
+
+  assert.equal(logs.length, 2);
+  assert.equal(logs[0].event, 'network.error');
+  assert.equal(logs[0].category, 'network_operation_failed');
+  assert.equal(logs[1].category, 'mtproto_proxy_failed');
+  assert.equal(logs[1].host, 'mtproto.example');
+  assert.doesNotMatch(
+    JSON.stringify(logs),
+    /private message body|\+1 555 123 4567|123456:abcdefghijklmnopqrstuvwxyzABCDEF|TELETON_MTPROTO_SECRET/
+  );
+});
+
 test('TDLib build targets, licensing, and adapter boundary are documented', async () => {
   const buildGuide = await readFile(pathFor('BUILD-GUIDE.md'), 'utf8');
   const adapterGuide = await readFile(pathFor('docs/tdlib-adapter.md'), 'utf8');

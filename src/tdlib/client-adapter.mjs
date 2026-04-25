@@ -1,4 +1,5 @@
 import { isSecureReference } from '../foundation/proxy-settings.mjs';
+import { logNetworkError } from '../foundation/network-error-logger.mjs';
 
 export const TDLIB_PLATFORMS = Object.freeze(['android', 'ios', 'desktop', 'web']);
 export const TDLIB_UPDATE_TYPES = Object.freeze(['authorizationState', 'connectionState', 'chatList', 'message']);
@@ -312,6 +313,16 @@ export function createTdlibClientAdapter(implementation, options = {}) {
   assertBridgeImplementation(implementation);
 
   const platform = normalizePlatform(options.platform ?? implementation.platform ?? 'desktop');
+  const logger = options.logger ?? implementation.logger;
+
+  async function runNetworkOperation(operation, context, callback) {
+    try {
+      return await callback();
+    } catch (error) {
+      logNetworkError(logger, error, { operation, platform, ...context });
+      throw error;
+    }
+  }
 
   return Object.freeze({
     platform,
@@ -321,7 +332,7 @@ export function createTdlibClientAdapter(implementation, options = {}) {
         throw adapterError(validation.errors, 'invalid_authentication_request');
       }
 
-      return implementation.authenticate(validation.request);
+      return runNetworkOperation('authenticate', validation.request, () => implementation.authenticate(validation.request));
     },
     async getChatList(input = {}) {
       const validation = validateTdlibChatListQuery(input);
@@ -329,7 +340,7 @@ export function createTdlibClientAdapter(implementation, options = {}) {
         throw adapterError(validation.errors, 'invalid_chat_list_query');
       }
 
-      return implementation.getChatList(validation.query);
+      return runNetworkOperation('getChatList', validation.query, () => implementation.getChatList(validation.query));
     },
     async sendMessage(input = {}) {
       const validation = validateTdlibMessageDraft(input);
@@ -337,7 +348,7 @@ export function createTdlibClientAdapter(implementation, options = {}) {
         throw adapterError(validation.errors, 'invalid_message_draft');
       }
 
-      return implementation.sendMessage(validation.draft);
+      return runNetworkOperation('sendMessage', validation.draft, () => implementation.sendMessage(validation.draft));
     },
     subscribeUpdates(listener, input = {}) {
       const validation = validateUpdateSubscription(listener, input);
@@ -363,7 +374,11 @@ export function createTdlibClientAdapter(implementation, options = {}) {
         return command;
       }
 
-      return implementation.enableProxy(command);
+      return runNetworkOperation(
+        'enableProxy',
+        { route: { type: validation.proxy.protocol, host: validation.proxy.host, port: validation.proxy.port } },
+        () => implementation.enableProxy(command)
+      );
     },
     async updateProxy(proxyId, input = {}) {
       const idValidation = validateProxyId(proxyId);
@@ -378,7 +393,14 @@ export function createTdlibClientAdapter(implementation, options = {}) {
         return command;
       }
 
-      return implementation.updateProxy(idValidation.proxyId, command);
+      return runNetworkOperation(
+        'updateProxy',
+        {
+          proxyId: idValidation.proxyId,
+          route: { type: proxyValidation.proxy.protocol, host: proxyValidation.proxy.host, port: proxyValidation.proxy.port }
+        },
+        () => implementation.updateProxy(idValidation.proxyId, command)
+      );
     },
     async disableProxy() {
       const command = createTdlibDisableProxyCommand();
@@ -386,7 +408,7 @@ export function createTdlibClientAdapter(implementation, options = {}) {
         return command;
       }
 
-      return implementation.disableProxy(command);
+      return runNetworkOperation('disableProxy', {}, () => implementation.disableProxy(command));
     },
     async removeProxy(proxyId) {
       const validation = validateProxyId(proxyId);
@@ -399,7 +421,9 @@ export function createTdlibClientAdapter(implementation, options = {}) {
         return command;
       }
 
-      return implementation.removeProxy(validation.proxyId, command);
+      return runNetworkOperation('removeProxy', { proxyId: validation.proxyId }, () =>
+        implementation.removeProxy(validation.proxyId, command)
+      );
     }
   });
 }
