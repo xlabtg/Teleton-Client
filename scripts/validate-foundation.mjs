@@ -51,6 +51,12 @@ for (const subtask of manifest.subtasks) {
 
   assert.ok(requiredPhases.includes(subtask.phase), `${subtask.id} has unknown phase`);
   assert.ok(Number.isInteger(subtask.priority), `${subtask.id} priority must be an integer`);
+  assert.ok(Number.isInteger(subtask.issueNumber), `${subtask.id} must reference its published GitHub issue`);
+  assert.equal(
+    subtask.issueUrl,
+    `https://github.com/${manifest.repository}/issues/${subtask.issueNumber}`,
+    `${subtask.id} issueUrl must match its published issue number`
+  );
   assert.ok(Array.isArray(subtask.labels) && subtask.labels.length >= 2, `${subtask.id} needs labels`);
   assert.ok(
     subtask.labels.includes('ai-solvable') || subtask.labels.includes('human-review-required'),

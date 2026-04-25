@@ -113,6 +113,9 @@ function printDryRun(repo, manifest, subtasks) {
     console.log(`${String(subtask.priority).padStart(2, '0')} ${subtask.title}`);
     console.log(`   phase: ${subtask.phase}`);
     console.log(`   labels: ${subtask.labels.join(', ')}`);
+    if (subtask.issueNumber && subtask.issueUrl) {
+      console.log(`   published: #${subtask.issueNumber} ${subtask.issueUrl}`);
+    }
   }
 }
 

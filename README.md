@@ -8,7 +8,8 @@ This repository is in the foundation phase. The current implementation establish
 
 - Dependency-free Node.js validation and test suite.
 - Machine-readable backlog for the Teleton Client foundation epic.
-- Dry-run and GitHub issue creation script for decomposing issue `#1`.
+- Published GitHub subissues for the issue `#1` decomposition, tracked in the manifest.
+- Dry-run and idempotent GitHub issue creation script for decomposing issue `#1`.
 - Shared agent mode and proxy settings models with tests.
 - CI workflow for foundation checks.
 - Required project documents: `README.md`, `PRIVACY.md`, `LICENSE`, and `BUILD-GUIDE.md`.
@@ -48,6 +49,8 @@ node scripts/decompose-epic.mjs --create --repo xlabtg/Teleton-Client
 ```
 
 The script skips duplicate issue titles and creates missing labels before opening issues. Creation requires write access to the target repository.
+
+The initial decomposition has been published as issues `#5` through `#29`; each manifest entry records its `issueNumber` and `issueUrl`.
 
 ## License
 

@@ -28,6 +28,10 @@ node scripts/decompose-epic.mjs --create --repo xlabtg/Teleton-Client
 
 The script reads the manifest, creates missing labels, skips duplicate issue titles, and opens issues in priority order.
 
+## Published Issues
+
+The first decomposition execution was completed for `xlabtg/Teleton-Client`. Manifest entries now record the published `issueNumber` and `issueUrl` for issues `#5` through `#29`, so future automation can reconcile by title and keep links stable.
+
 ## First Execution Target
 
 The first generated task is `[001] Configure repository structure, CI, linters, and pre-commit`. This repository foundation PR implements that task's initial version by adding documents, validation, CI, issue templates, and a tested manifest.
