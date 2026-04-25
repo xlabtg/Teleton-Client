@@ -7,6 +7,7 @@ const root = new URL('../', import.meta.url);
 
 const requiredFiles = [
   'README.md',
+  'CONTRIBUTING.md',
   'PRIVACY.md',
   'BUILD-GUIDE.md',
   'LICENSE',
@@ -110,7 +111,33 @@ for (const subtask of manifest.subtasks) {
   assert.ok(Array.isArray(subtask.acceptanceCriteria) && subtask.acceptanceCriteria.length >= 2);
 }
 
-const docsToScan = ['README.md', 'PRIVACY.md', 'BUILD-GUIDE.md', 'docs/architecture.md', 'docs/tdlib-adapter.md'];
+const contributing = await readFile(new URL('CONTRIBUTING.md', root), 'utf8');
+const requiredContributingPatterns = [
+  /npm test/,
+  /npm run validate:foundation/,
+  /npm run validate:release/,
+  /npm run decompose:dry-run/,
+  /docs\/contributing-templates\.md/,
+  /BUILD-GUIDE\.md/,
+  /PRIVACY\.md/,
+  /secrets/i,
+  /credentials/i,
+  /Telegram API IDs or hashes/i,
+  /private message content/i
+];
+
+for (const pattern of requiredContributingPatterns) {
+  assert.match(contributing, pattern, `CONTRIBUTING.md must include ${pattern}`);
+}
+
+const docsToScan = [
+  'README.md',
+  'CONTRIBUTING.md',
+  'PRIVACY.md',
+  'BUILD-GUIDE.md',
+  'docs/architecture.md',
+  'docs/tdlib-adapter.md'
+];
 const forbiddenPatterns = [
   /api_hash\s*[:=]\s*['"][^'"]+['"]/i,
   /api_id\s*[:=]\s*\d{4,}/i,
