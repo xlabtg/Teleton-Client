@@ -130,6 +130,37 @@ test('proxy settings view records per-proxy speed checks with timeout and failur
   );
 });
 
+test('proxy settings view exposes resettable and exportable proxy usage statistics', async () => {
+  let now = 1_000;
+  const view = createProxySettingsView({
+    speedTest: {
+      now: () => now
+    },
+    testProxy: async () => {
+      now += 90;
+      return {
+        reachable: true,
+        message: 'Connected'
+      };
+    }
+  });
+
+  view.updateDraft({ id: 'office', protocol: 'socks5', host: '127.0.0.1', port: '1080' });
+  view.saveDraft();
+
+  let state = await view.testProxy('office');
+  assert.equal(state.statistics.records.office.attempts, 1);
+  assert.equal(state.statistics.records.office.successes, 1);
+  assert.equal(state.statistics.records.office.failures, 0);
+  assert.equal(state.statistics.records.office.lastLatencyMs, 90);
+  assert.equal(state.statistics.records.office.lastUsedAt, 1090);
+  assert.deepEqual(view.exportProxyStatistics(), state.statistics);
+  assert.doesNotMatch(JSON.stringify(state.statistics), /127\.0\.0\.1|keychain|env:|Connected/);
+
+  state = view.clearProxyStatistics('office');
+  assert.deepEqual(state.statistics.records, {});
+});
+
 test('proxy settings view reports validation and test failures without exposing secrets', async () => {
   const view = createProxySettingsView({
     initialSettings: {
