@@ -26,7 +26,9 @@ const requiredFiles = [
   'docs/backlog.md',
   'docs/tdlib-adapter.md',
   'src/foundation/agent-runtime-supervisor.mjs',
-  'test/agent-runtime-supervisor.test.mjs'
+  'test/agent-runtime-supervisor.test.mjs',
+  'src/foundation/agent-plugin-registry.mjs',
+  'test/agent-plugin-registry.test.mjs'
 ];
 
 for (const requiredFile of requiredFiles) {
