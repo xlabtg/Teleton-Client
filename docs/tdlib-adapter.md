@@ -18,6 +18,8 @@ The adapter exposes core client operations:
 - `sendMessage(draft)` validates chat and text inputs before the platform bridge sends a message.
 - `subscribeUpdates(listener, options)` registers a typed update listener and returns an unsubscribe function.
 
+Two-factor authentication flows use `src/tdlib/two-factor-auth.mjs` as the shared state controller when TDLib reports a password-required authorization state. The controller normalizes password prompts, recovery-code prompts, failure feedback, cancellation, and ready states for UI shells. It keeps password and recovery-code drafts in memory only long enough to call platform bridge hooks, and returned state/log events expose only safe metadata such as field lengths, attempt counts, prompt hints when enabled, and recovery email patterns.
+
 The adapter also exposes proxy lifecycle operations that build TDLib-compatible commands before the native bridge sends them:
 
 - `enableProxy(config)` validates MTProto, SOCKS5, or HTTP CONNECT settings and maps them to `addProxy`.
@@ -36,6 +38,8 @@ Authentication accepts secure references only:
 ```
 
 The shared adapter rejects raw `apiId`, `api_id`, `apiHash`, `api_hash`, `phoneNumber`, and `botToken` values. Platform bridges are responsible for resolving references through environment variables, keychains, keystores, secret managers, or equivalent local secure storage.
+
+Two-factor passwords and recovery codes are user-entered runtime values, not settings. Platform bridges may pass them directly to TDLib password or recovery APIs, but shared state snapshots, settings exports, diagnostics, and log entries must not persist those values. Recovery guidance can show TDLib's redacted recovery email pattern when available.
 
 Proxy settings follow the same rule. MTProto requires `secretRef`, while SOCKS5 and HTTP CONNECT accept optional `usernameRef` and `passwordRef`. Raw proxy secrets and credentials are rejected before native bridge calls. Platform bridges must resolve those references inside platform secure storage and pass the resolved values only to TDLib-native APIs, never back through shared logs or command snapshots.
 

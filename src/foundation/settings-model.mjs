@@ -66,7 +66,12 @@ export const DEFAULT_TELETON_SETTINGS = deepFreeze({
     redactSensitiveNotifications: true,
     encryptAgentMemory: true,
     agentMemoryKeyRef: null,
-    secretRefs: {}
+    secretRefs: {},
+    twoFactor: {
+      passwordHintsEnabled: true,
+      recoveryGuidanceEnabled: true,
+      failureFeedbackEnabled: true
+    }
   }
 });
 
@@ -521,6 +526,25 @@ function normalizeSecurity(value, errors) {
     secretRefs[name] = reference;
   }
 
+  const twoFactorInput = objectField(
+    securityInput.twoFactor,
+    'Two-factor security settings',
+    errors,
+    DEFAULT_TELETON_SETTINGS.security.twoFactor
+  );
+  const twoFactor = {
+    passwordHintsEnabled:
+      twoFactorInput.passwordHintsEnabled ?? DEFAULT_TELETON_SETTINGS.security.twoFactor.passwordHintsEnabled,
+    recoveryGuidanceEnabled:
+      twoFactorInput.recoveryGuidanceEnabled ?? DEFAULT_TELETON_SETTINGS.security.twoFactor.recoveryGuidanceEnabled,
+    failureFeedbackEnabled:
+      twoFactorInput.failureFeedbackEnabled ?? DEFAULT_TELETON_SETTINGS.security.twoFactor.failureFeedbackEnabled
+  };
+
+  booleanError(twoFactor.passwordHintsEnabled, 'Two-factor passwordHintsEnabled', errors);
+  booleanError(twoFactor.recoveryGuidanceEnabled, 'Two-factor recoveryGuidanceEnabled', errors);
+  booleanError(twoFactor.failureFeedbackEnabled, 'Two-factor failureFeedbackEnabled', errors);
+
   const security = {
     requireDeviceLock: securityInput.requireDeviceLock ?? DEFAULT_TELETON_SETTINGS.security.requireDeviceLock,
     biometricUnlock: securityInput.biometricUnlock ?? DEFAULT_TELETON_SETTINGS.security.biometricUnlock,
@@ -529,7 +553,8 @@ function normalizeSecurity(value, errors) {
       securityInput.redactSensitiveNotifications ?? DEFAULT_TELETON_SETTINGS.security.redactSensitiveNotifications,
     encryptAgentMemory: securityInput.encryptAgentMemory ?? DEFAULT_TELETON_SETTINGS.security.encryptAgentMemory,
     agentMemoryKeyRef: securityInput.agentMemoryKeyRef ?? DEFAULT_TELETON_SETTINGS.security.agentMemoryKeyRef,
-    secretRefs
+    secretRefs,
+    twoFactor
   };
 
   booleanError(security.requireDeviceLock, 'Security requireDeviceLock', errors);
