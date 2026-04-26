@@ -24,3 +24,4 @@ Add before and after screenshots for UI changes, or write `Not applicable`.
 
 - [ ] This PR does not include secrets, production credentials, access tokens, Telegram API hashes, private keys, or private message content.
 - [ ] Any logs, screenshots, or fixtures are redacted.
+- [ ] Security-sensitive changes request human maintainer review before release.

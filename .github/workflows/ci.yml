@@ -26,6 +26,9 @@ jobs:
       - name: Run unit tests
         run: npm test
 
+      - name: Scan committed files for secrets
+        run: npm run validate:secrets
+
       - name: Validate foundation artifacts
         run: npm run validate:foundation
 

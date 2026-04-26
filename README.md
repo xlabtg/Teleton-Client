@@ -39,6 +39,7 @@ This repository is in the foundation phase. The current implementation establish
 - Teleton Agent plugin registry contract with manifest permissions, enable/disable/list/health bridge flows, and lifecycle permission gates.
 - Local Teleton Agent memory encryption contract using platform secure storage key providers, AES-256-GCM payloads, migration, missing-key, locked-store, and key-rotation tests.
 - CI workflow for foundation checks.
+- Automated committed-secret scanning with documented credential rotation and secure storage review requirements.
 - Documented semantic version source of truth and release metadata validation.
 - Required project documents: `README.md`, `PRIVACY.md`, `LICENSE`, and `BUILD-GUIDE.md`.
 
@@ -46,6 +47,7 @@ This repository is in the foundation phase. The current implementation establish
 
 ```sh
 npm test
+npm run validate:secrets
 npm run validate:foundation
 npm run validate:release
 npm run decompose:dry-run
@@ -67,7 +69,7 @@ The project is intended to evolve through these layers:
 4. TON blockchain integrations for wallet, transfers, swaps, NFTs, staking, and DNS.
 5. Security and privacy controls for credentials, user consent, and auditability.
 
-See `docs/architecture.md`, `docs/backlog.md`, `docs/tdlib-adapter.md`, `docs/android-wrapper.md`, `docs/ios-wrapper.md`, `docs/desktop-wrapper.md`, `docs/tablet-layout.md`, `docs/web-pwa-wrapper.md`, and `docs/release-strategy.md` for the current foundation plan. The agent settings, local runtime, input action map, Android wrapper, iOS wrapper, desktop wrapper, tablet layout, and PWA sections record the shared settings UI contract, supported runtime directions, platform execution boundaries, shortcut and gesture behavior, responsive tablet behavior, web installability behavior, and remaining packaging gaps for Android, iOS, desktop, and web wrappers.
+See `docs/architecture.md`, `docs/backlog.md`, `docs/tdlib-adapter.md`, `docs/android-wrapper.md`, `docs/ios-wrapper.md`, `docs/desktop-wrapper.md`, `docs/tablet-layout.md`, `docs/web-pwa-wrapper.md`, `docs/security-audit.md`, and `docs/release-strategy.md` for the current foundation plan. The agent settings, local runtime, input action map, Android wrapper, iOS wrapper, desktop wrapper, tablet layout, PWA, and security audit sections record the shared settings UI contract, supported runtime directions, platform execution boundaries, shortcut and gesture behavior, responsive tablet behavior, web installability behavior, credential rotation expectations, secure storage review requirements, and remaining packaging gaps for Android, iOS, desktop, and web wrappers.
 
 ## Contribution Templates
 
