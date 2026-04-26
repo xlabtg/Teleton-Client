@@ -71,3 +71,17 @@ node scripts/decompose-epic.mjs --create --skip-label-create --repo xlabtg/Telet
 ## Environment
 
 Do not hardcode Telegram API credentials, proxy secrets, TON wallet secrets, cloud model tokens, or agent keys in source files. Use environment variables or platform secure storage references such as `env:TELETON_MTPROTO_SECRET`, `keychain:teleton-agent-token`, or `keystore:ton-wallet`.
+
+## TON Testnet Checks
+
+`test/ton-testnet-coverage.test.mjs` runs the TON wallet flow harness in mock mode by default, so local validation never needs wallet secrets or network access. Protected CI can opt into live testnet checks only when all required variables are present:
+
+| Variable | Required for live testnet | Secret | Purpose |
+| --- | --- | --- | --- |
+| `TELETON_TON_TESTNET_ENABLED` | yes | no | Set to `true` to enable live testnet checks. Any other value keeps mock mode. |
+| `TELETON_TON_TESTNET_WALLET_ADDRESS` | yes | no | Public testnet wallet address used for balance and receive-address checks. |
+| `TELETON_TON_TESTNET_PROVIDER_REF` | yes | yes | Secure provider reference resolved by protected CI or a platform wallet bridge. Do not store raw private keys, mnemonics, or seed phrases. |
+| `TELETON_TON_TESTNET_RECIPIENT_ADDRESS` | yes | no | Public testnet recipient address used for unsigned transfer draft checks. |
+| `TELETON_TON_TESTNET_TRANSFER_NANOTON` | no | no | Optional positive integer draft amount. Defaults to `1` nanotON for live checks and a mock fixture amount locally. |
+
+Rotate testnet credentials by creating a fresh testnet wallet/provider outside the repository, funding it only with faucet testnet TON, updating the protected CI secret that backs `TELETON_TON_TESTNET_PROVIDER_REF`, and replacing the public wallet/recipient variables in the protected environment. After rotation, run the protected testnet job once, then revoke or delete the previous provider reference. Never paste wallet provider material into issue comments, pull request descriptions, logs, screenshots, or committed fixtures.
