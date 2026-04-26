@@ -179,6 +179,11 @@ assert.match(
   /actions\/upload-artifact@v4/,
   'release validation must upload the security audit report artifact'
 );
+assert.match(
+  releaseWorkflow,
+  /if:\s*always\(\)/,
+  'release validation must preserve the security audit artifact when audit checks fail'
+);
 
 const securityAudit = await readFile(new URL('docs/security-audit.md', root), 'utf8');
 const requiredSecurityAuditPatterns = [

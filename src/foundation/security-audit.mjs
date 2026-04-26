@@ -315,10 +315,12 @@ export async function createSecurityAudit({
             /npm run validate:release/.test(releaseWorkflow) &&
             /npm run audit:security -- --output security-audit-report\.md/.test(releaseWorkflow) &&
             /actions\/upload-artifact@v4/.test(releaseWorkflow) &&
+            /if:\s*always\(\)/.test(releaseWorkflow) &&
             !/npm\s+publish/.test(releaseWorkflow)
               ? 'pass'
               : 'blocked',
-          evidence: '.github/workflows/release-validation.yml validates metadata, generates a security audit report artifact, and does not publish.'
+          evidence:
+            '.github/workflows/release-validation.yml validates metadata, preserves the security audit report artifact, and does not publish.'
         })
       ]
     })

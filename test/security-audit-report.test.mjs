@@ -73,6 +73,7 @@ test('security audit command is wired into local, CI, and release validation doc
   assert.match(ci, /npm run audit:security/);
   assert.match(release, /npm run audit:security -- --output security-audit-report\.md/);
   assert.match(release, /actions\/upload-artifact@v4/);
+  assert.match(release, /if:\s*always\(\)/);
   assert.match(contributing, /npm run audit:security/);
   assert.match(buildGuide, /security-audit-report\.md/);
 });

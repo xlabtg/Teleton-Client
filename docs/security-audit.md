@@ -22,7 +22,7 @@ Generate attachable release-review evidence with:
 npm run audit:security -- --output security-audit-report.md
 ```
 
-The generated Markdown report records the release gate status, automated security checks, redacted secret findings if any are found, and manual release sign-off checkboxes. CI runs the same command, and the release validation workflow uploads `security-audit-report.md` as a review artifact.
+The generated Markdown report records the release gate status, automated security checks, redacted secret findings if any are found, and manual release sign-off checkboxes. CI runs the same command, and the release validation workflow uploads `security-audit-report.md` as a review artifact even when audit checks fail.
 
 | Audit category | Automated evidence | Required human evidence |
 | --- | --- | --- |
