@@ -53,6 +53,18 @@ desktop/out/debug/linux-x64/teleton-client
 
 The contract declares app id `dev.teleton.client`, product name `Teleton Client`, tray menu actions, system notification mapping, focused-window and opt-in global shortcuts, launch-at-login configuration for macOS, Windows, and Linux, protocol routing for Telegram and TON flows, and release packaging targets for DMG, EXE, and AppImage. See `docs/desktop-wrapper.md` for the desktop API mapping and packaging plan.
 
+## Web PWA Wrapper
+
+The web PWA wrapper contract in `src/platform/web-pwa-wrapper.mjs` selects a browser runtime, static asset build boundary, and installable manifest metadata for the future web shell. Reserved deployable asset paths are:
+
+```text
+web/manifest.webmanifest
+web/service-worker.js
+web/offline.html
+```
+
+The contract declares manifest id and start URL `/app/`, root scope `/`, standalone display mode, 192 x 192 and 512 x 512 PNG icon metadata, service worker precache assets, offline navigation fallback, prompt-before-reload update activation, and network-only caching for private API and media requests. It also documents browser fallbacks for TDLib, Teleton Agent IPC, notifications, background sync, and secure storage. See `docs/web-pwa-wrapper.md` for the installability and browser support constraints.
+
 ## Tablet Layout
 
 The tablet layout contract in `src/platform/tablet-layout.mjs` defines dependency-free responsive rules that Android, iOS, desktop, and web shells can consume while rendering native controls. It classifies tablet viewports from a 600 px short edge through a 1366 px long edge, uses bottom navigation in portrait, uses a navigation rail in landscape, and returns non-overlapping pane frames for chats, settings, agent, and wallet views.
