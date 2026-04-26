@@ -18,6 +18,7 @@ This repository is in the foundation phase. The current implementation establish
 - Local proxy usage statistics for attempts, successes, failures, latency, and last-used time, stored separately from proxy secrets.
 - Optional public MTProto proxy catalog metadata model that stays disabled by default and requires source freshness plus human review metadata before release.
 - Baseline TDLib client adapter contract with mock-backed tests.
+- TON wallet adapter contract for balance lookup, receive address display, transfer draft preparation, and status checks without plaintext private keys.
 - Local Teleton Agent runtime supervisor contract with mock lifecycle tests for start, stop, health, resource monitoring, and logs.
 - Teleton Agent action notification contract for proposals, starts, completions, approval-required states, and failures with settings-aware delivery and redacted lock-screen text.
 - Teleton Agent action history contract for redacted action records, retention filtering, rollback eligibility, and irreversible action markers.
