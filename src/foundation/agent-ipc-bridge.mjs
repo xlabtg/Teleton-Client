@@ -268,6 +268,18 @@ export function createAgentIpcBridge({ localId = 'ui', remoteId = 'agent', trans
         })
       );
     },
+    listPlugins(payload = {}) {
+      return this.request('agent.plugin.list', payload);
+    },
+    enablePlugin(pluginId, payload = {}) {
+      return this.request('agent.plugin.enable', { ...payload, pluginId: normalizeId(pluginId, 'Agent plugin id') });
+    },
+    disablePlugin(pluginId, payload = {}) {
+      return this.request('agent.plugin.disable', { ...payload, pluginId: normalizeId(pluginId, 'Agent plugin id') });
+    },
+    healthCheckPlugin(pluginId, payload = {}) {
+      return this.request('agent.plugin.health', { ...payload, pluginId: normalizeId(pluginId, 'Agent plugin id') });
+    },
     receive,
     close() {
       pending.clear();
