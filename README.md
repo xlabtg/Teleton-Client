@@ -15,6 +15,7 @@ This repository is in the foundation phase. The current implementation establish
 - ProxyManager route selection for direct, MTProto, and SOCKS5 connectivity using saved preferences, health inputs, latency ranking, and failure cooldowns.
 - Shared proxy settings view state for add, test, enable, disable, edit, remove, reset statistics, and export diagnostics workflows without exposing secure references.
 - Local proxy usage statistics for attempts, successes, failures, latency, and last-used time, stored separately from proxy secrets.
+- Optional public MTProto proxy catalog metadata model that stays disabled by default and requires source freshness plus human review metadata before release.
 - Baseline TDLib client adapter contract with mock-backed tests.
 - CI workflow for foundation checks.
 - Documented semantic version source of truth and release metadata validation.

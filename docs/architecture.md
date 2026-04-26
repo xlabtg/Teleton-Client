@@ -20,6 +20,7 @@ Teleton Client is planned as a layered client where protocol, automation, wallet
 - Proxy secrets are represented as secure references such as `env:NAME`, `keychain:name`, or `keystore:name`.
 - Proxy settings UI shells use shared view state for list items, edit forms, test status, auto-switch preferences, and active route metadata. Display snapshots expose only configured flags for secrets, while settings persistence keeps secure references for platform storage resolution.
 - Proxy usage statistics are local diagnostics records keyed by proxy id. They track attempts, successes, failures, latency samples, and last-used time separately from proxy configuration and never include proxy secrets or message contents.
+- Public MTProto proxy catalog use is opt-in and disabled by default. Catalog entries must include source URL/name, source verification notes, freshness timestamps, and per-entry human review metadata before they can be shipped.
 - TON signing requires user confirmation and platform secure storage or wallet-provider approval.
 
 ## Foundation Status
