@@ -21,6 +21,16 @@ Future TDLib build work should produce:
 
 TDLib is distributed under the Boost Software License 1.0 (`BSL-1.0`). Future build scripts must preserve upstream license notices, record the TDLib source revision, and document local patches or packaging changes. See `docs/tdlib-adapter.md` for the adapter boundary and credential-handling rules.
 
+## Android Wrapper
+
+The Android wrapper contract in `src/platform/android-wrapper.mjs` selects Kotlin, Jetpack Compose, and the Gradle Android Plugin for the future native shell. The debug artifact contract is an installable APK at:
+
+```text
+android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+The contract declares package `dev.teleton.client`, entry activity `dev.teleton.client.MainActivity`, Android notification channels, WorkManager jobs for message and TON synchronization, an app-private foreground service for the local Teleton Agent runtime, and deep-link routing for Telegram and TON flows. See `docs/android-wrapper.md` for the platform API mapping.
+
 ## Local Checks
 
 Run the same checks used by CI:

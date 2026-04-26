@@ -24,6 +24,7 @@ This repository is in the foundation phase. The current implementation establish
 - TON staking adapter contract for Tonstakers and Whales previews, explicit risk/fee disclosure, rewards previews, and confirmation-gated unsigned stake/unstake drafts.
 - TON transaction confirmation workflow for review details, biometric or password approval hooks, limit/risk indicators, and status history.
 - TON testnet coverage harness that runs wallet flow checks in mock mode locally and requires explicit protected environment variables before live testnet execution.
+- Android wrapper contract for the Kotlin/Jetpack Compose stack, runnable debug APK artifact metadata, notification channels, WorkManager and foreground service boundaries, and Telegram/TON deep-link routing.
 - Local Teleton Agent runtime supervisor contract with mock lifecycle tests for start, stop, health, resource monitoring, and logs.
 - Teleton Agent action notification contract for proposals, starts, completions, approval-required states, and failures with settings-aware delivery and redacted lock-screen text.
 - Teleton Agent action history contract for redacted action records, retention filtering, rollback eligibility, and irreversible action markers.
@@ -58,7 +59,7 @@ The project is intended to evolve through these layers:
 4. TON blockchain integrations for wallet, transfers, swaps, NFTs, staking, and DNS.
 5. Security and privacy controls for credentials, user consent, and auditability.
 
-See `docs/architecture.md`, `docs/backlog.md`, `docs/tdlib-adapter.md`, and `docs/release-strategy.md` for the current foundation plan. The agent settings and local runtime sections in `docs/architecture.md` record the shared settings UI contract, supported runtime directions, and packaging gaps for Android, iOS, desktop, and web wrappers.
+See `docs/architecture.md`, `docs/backlog.md`, `docs/tdlib-adapter.md`, `docs/android-wrapper.md`, and `docs/release-strategy.md` for the current foundation plan. The agent settings, local runtime, and Android wrapper sections record the shared settings UI contract, supported runtime directions, platform execution boundaries, and remaining packaging gaps for Android, iOS, desktop, and web wrappers.
 
 ## Contribution Templates
 

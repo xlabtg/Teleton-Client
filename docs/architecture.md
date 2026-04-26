@@ -16,6 +16,7 @@ Teleton Client is planned as a layered client where protocol, automation, wallet
 
 - TDLib credentials must be supplied at runtime and never committed.
 - TDLib callers use the shared `authenticate`, `getChatList`, `sendMessage`, and `subscribeUpdates` adapter contract so Android, iOS, desktop, and web-compatible bridges expose the same boundary.
+- The Android wrapper is represented by `src/platform/android-wrapper.mjs`. It selects Kotlin, Jetpack Compose, and the Gradle Android Plugin for the native shell; exposes runnable debug APK artifact metadata; maps notifications and background work to Android channels, WorkManager, and an app-private foreground service; and routes Telegram and TON deep links to shared workflows.
 - Agent mode defaults to `off`; cloud and hybrid modes require explicit activation.
 - Agent settings UI shells use shared view state for mode options, model provider preferences, LLM provider configuration, privacy impact prompts, approval preferences, and autonomous action limits. Cloud and hybrid activation stays pending until the user confirms the privacy impact summary.
 - LLM provider credentials use secure references such as `env:NAME`, `keychain:name`, `keystore:name`, or `secret:name`. Local providers cannot persist shared credentials, while cloud and custom HTTPS endpoint providers require explicit cloud processing opt-in before use.
@@ -45,7 +46,7 @@ The local Teleton Agent lifecycle has four platform targets:
 
 | Platform | Supported local runtime direction | Packaging gaps |
 | --- | --- | --- |
-| Android | Foreground service or bound service wrapping a bundled agent binary. | Service strategy, ABI-specific binary packaging, update policy, and sandbox-safe IPC still need platform implementation. |
+| Android | App-private foreground service wrapping a bundled agent binary, with WorkManager jobs for sync work. | Kotlin/Jetpack Compose wrapper contract is defined; concrete Gradle sources, ABI-specific binary packaging, update policy, and sandbox-safe IPC still need native implementation. |
 | iOS | App extension or in-app process within iOS background execution limits. | App Store background constraints, signed framework packaging, entitlements, and suspension fallback behavior still need review. |
 | Desktop | Child process supervised by the desktop shell with local IPC. | Per-OS binaries, code signing or notarization, crash restart policy, log paths, and IPC endpoint reservation still need implementation. |
 | Web | Browser worker, WebAssembly runtime, or native-host bridge when available. | Browser support matrix, native-host installation permissions, and fallback behavior for unsupported browsers still need implementation. |
@@ -92,4 +93,4 @@ The view also carries model provider/model id preferences, provider configuratio
 
 ## Foundation Status
 
-This PR implements only the foundation layer, epic decomposition workflow, baseline TDLib adapter boundary, local agent runtime lifecycle contract, agent IPC bridge contract, local agent memory encryption contract, mock-backed TON wallet adapter boundary, and mock-backed TON swap adapter boundary. Platform UI shells, live TDLib integration, concrete agent process packaging, concrete IPC transports, concrete secure storage bindings, and live TON operations remain tracked by the generated subtasks in `config/epic-subtasks.json`.
+This PR implements only the foundation layer, epic decomposition workflow, baseline TDLib adapter boundary, Android wrapper contract, local agent runtime lifecycle contract, agent IPC bridge contract, local agent memory encryption contract, mock-backed TON wallet adapter boundary, and mock-backed TON swap adapter boundary. Native Gradle sources, non-Android platform UI shells, live TDLib integration, concrete agent process packaging, concrete IPC transports, concrete secure storage bindings, and live TON operations remain tracked by the generated subtasks in `config/epic-subtasks.json`.
