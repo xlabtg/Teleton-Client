@@ -29,6 +29,12 @@ The helper `classifyVersionBump(previousVersion, nextVersion)` records these rul
 - Publishing is intentionally absent from pull request workflows, so unreviewed pull request code cannot publish packages.
 - Future publishing automation should run only from reviewed `main` changes or protected release tags.
 
+## Security Policy Review
+
+Before release readiness is claimed, a human maintainer must review `SECURITY.md` and confirm that supported versions, GitHub private security advisory intake, private report expectations, coordinated disclosure timing, and credential rotation guidance match the release being prepared.
+
+Security fixes and release notes must be checked against the security policy before publication. Advisory identifiers, reproduction details, reporter information, logs, screenshots, and exploit details should stay private until coordinated disclosure is approved.
+
 ## Changelog Workflow
 
 Run `npm run changelog` to print release notes for the current `package.json` version from merged pull requests on `main`. The generated notes group entries by pull request labels and include links to merged pull requests plus issue references found in pull request text such as `Fixes #38`.

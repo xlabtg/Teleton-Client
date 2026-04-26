@@ -8,6 +8,7 @@ const root = new URL('../', import.meta.url);
 const requiredFiles = [
   'README.md',
   'CONTRIBUTING.md',
+  'SECURITY.md',
   'PRIVACY.md',
   'BUILD-GUIDE.md',
   'LICENSE',
@@ -57,6 +58,7 @@ const requiredOwnershipPatterns = [
   'scripts/',
   'config/',
   'docs/',
+  'SECURITY.md',
   'PRIVACY.md',
   'BUILD-GUIDE.md',
   'package.json'
@@ -135,6 +137,7 @@ const requiredContributingPatterns = [
   /npm run decompose:dry-run/,
   /docs\/contributing-templates\.md/,
   /BUILD-GUIDE\.md/,
+  /SECURITY\.md/,
   /PRIVACY\.md/,
   /docs\/license-matrix\.md/,
   /secrets/i,
@@ -246,6 +249,7 @@ for (const pattern of requiredLicenseMatrixPatterns) {
 const docsToScan = [
   'README.md',
   'CONTRIBUTING.md',
+  'SECURITY.md',
   'PRIVACY.md',
   'BUILD-GUIDE.md',
   'docs/architecture.md',

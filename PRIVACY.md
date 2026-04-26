@@ -91,4 +91,4 @@ Before release, reviewers must compare this policy against implemented behavior,
 
 ## Security Reporting
 
-Please report vulnerabilities through GitHub private security advisories rather than public issues.
+Please report vulnerabilities through GitHub private security advisories rather than public issues. See `SECURITY.md` for supported versions, private report expectations, disclosure timelines, and human maintainer review before release.

@@ -136,6 +136,8 @@ Use `docs/security-audit.md` as the credential inventory and rotation source of 
 
 Run `npm run audit:security -- --output security-audit-report.md` during release preparation. The generated `security-audit-report.md` records automated evidence for secrets, dependency risk, permission boundaries, and release readiness, then lists manual sign-off checkboxes that can be attached to the release review.
 
+Use `SECURITY.md` as the security policy source of truth for supported versions, private vulnerability reporting, coordinated disclosure, and the human maintainer review required before release.
+
 ## TON Testnet Checks
 
 `test/ton-testnet-coverage.test.mjs` runs the TON wallet flow harness in mock mode by default, so local validation never needs wallet secrets or network access. Protected CI can opt into live testnet checks only when all required variables are present:
