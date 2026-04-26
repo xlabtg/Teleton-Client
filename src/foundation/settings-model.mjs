@@ -45,6 +45,8 @@ export const DEFAULT_TELETON_SETTINGS = deepFreeze({
     biometricUnlock: false,
     lockAfterMinutes: 0,
     redactSensitiveNotifications: true,
+    encryptAgentMemory: true,
+    agentMemoryKeyRef: null,
     secretRefs: {}
   }
 });
@@ -387,12 +389,15 @@ function normalizeSecurity(value, errors) {
     lockAfterMinutes: securityInput.lockAfterMinutes ?? DEFAULT_TELETON_SETTINGS.security.lockAfterMinutes,
     redactSensitiveNotifications:
       securityInput.redactSensitiveNotifications ?? DEFAULT_TELETON_SETTINGS.security.redactSensitiveNotifications,
+    encryptAgentMemory: securityInput.encryptAgentMemory ?? DEFAULT_TELETON_SETTINGS.security.encryptAgentMemory,
+    agentMemoryKeyRef: securityInput.agentMemoryKeyRef ?? DEFAULT_TELETON_SETTINGS.security.agentMemoryKeyRef,
     secretRefs
   };
 
   booleanError(security.requireDeviceLock, 'Security requireDeviceLock', errors);
   booleanError(security.biometricUnlock, 'Security biometricUnlock', errors);
   booleanError(security.redactSensitiveNotifications, 'Security redactSensitiveNotifications', errors);
+  booleanError(security.encryptAgentMemory, 'Security encryptAgentMemory', errors);
 
   if (!Number.isInteger(security.lockAfterMinutes) || security.lockAfterMinutes < 0 || security.lockAfterMinutes > 1440) {
     errors.push('Security lockAfterMinutes must be an integer between 0 and 1440.');
@@ -400,6 +405,14 @@ function normalizeSecurity(value, errors) {
 
   if (security.biometricUnlock === true && security.requireDeviceLock !== true) {
     errors.push('Biometric unlock requires device lock to be enabled.');
+  }
+
+  if (security.encryptAgentMemory !== true) {
+    errors.push('Agent memory encryption must remain enabled.');
+  }
+
+  if (security.agentMemoryKeyRef !== null && !isSecureReference(security.agentMemoryKeyRef)) {
+    errors.push('Security agentMemoryKeyRef must be null or a secure reference such as keychain:name or keystore:name.');
   }
 
   return security;

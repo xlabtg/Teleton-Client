@@ -25,6 +25,8 @@ test('settings defaults are serializable and keep agent and proxy disabled', () 
   assert.deepEqual(settings.proxy.entries, []);
   assert.equal(settings.notifications.enabled, true);
   assert.equal(settings.security.redactSensitiveNotifications, true);
+  assert.equal(settings.security.encryptAgentMemory, true);
+  assert.equal(settings.security.agentMemoryKeyRef, null);
   assert.deepEqual(JSON.parse(JSON.stringify(settings)), settings);
 });
 
@@ -52,6 +54,8 @@ test('settings validation rejects invalid proxy, notification, agent, and secret
       }
     },
     security: {
+      encryptAgentMemory: false,
+      agentMemoryKeyRef: 'plain-memory-key',
       secretRefs: {
         cloudAgentToken: 'raw-token'
       }
@@ -63,6 +67,8 @@ test('settings validation rejects invalid proxy, notification, agent, and secret
   assert.match(result.errors.join('\n'), /Proxy entry primary/);
   assert.match(result.errors.join('\n'), /Proxy port must be an integer/);
   assert.match(result.errors.join('\n'), /secure reference/);
+  assert.match(result.errors.join('\n'), /Agent memory encryption must remain enabled/);
+  assert.match(result.errors.join('\n'), /agentMemoryKeyRef/);
   assert.match(result.errors.join('\n'), /Quiet hours start/);
 });
 

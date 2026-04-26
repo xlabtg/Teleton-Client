@@ -24,6 +24,7 @@ Teleton Client is planned as a layered client where protocol, automation, wallet
 - Public MTProto proxy catalog use is opt-in and disabled by default. Catalog entries must include source URL/name, source verification notes, freshness timestamps, and per-entry human review metadata before they can be shipped.
 - Local Teleton Agent startup is represented by the `src/foundation/agent-runtime-supervisor.mjs` lifecycle boundary. Platform wrappers supply start, stop, health, and log hooks; the shared supervisor keeps the default runtime local and never requires cloud credentials for startup.
 - Teleton Agent UI communication is represented by the `src/foundation/agent-ipc-bridge.mjs` contract. It uses versioned IPC envelopes for request, event, response, error, and cancellation flows; UI layers receive incoming message hooks and can distinguish informational events from confirmation-required action proposals.
+- Local Teleton Agent memory is represented by the `src/foundation/agent-memory-store.mjs` contract. It encrypts memory snapshots, vector index payloads, and local credential references with AES-256-GCM while platform wrappers keep the raw data key in OS secure storage providers such as Keychain or Keystore.
 - TON signing requires user confirmation and platform secure storage or wallet-provider approval.
 
 ## Local Agent Runtime
@@ -45,6 +46,12 @@ The shared agent IPC bridge is transport-agnostic so desktop pipes, mobile servi
 
 UI-facing agent events are classified by confirmation behavior. Informational updates such as `agent.info`, incoming message hooks such as `agent.message.received`, and task progress events are delivered without confirmation. Action proposals such as `agent.action.proposed` are marked `requiresConfirmation: true` before dispatch so UI shells can route them to consent flows.
 
+## Agent Memory Encryption
+
+Agent memory encryption is enabled by default in the shared settings model through `security.encryptAgentMemory`. The foundation layer refuses settings that disable it and accepts only secure references for custom `security.agentMemoryKeyRef` values.
+
+Platform wrappers supply a secure storage provider with `get` and `set` hooks. The shared memory store creates or reads the platform data key, encrypts JSON-serializable memory payloads with AES-256-GCM, stores only ciphertext plus nonce/authentication metadata in local files, and resolves the key only during unlock, migration, or rotation flows. Missing keys and locked secure storage states fail closed so plaintext memory is not returned.
+
 ## Agent Settings UI
 
 The shared agent settings view state is implemented in `src/foundation/agent-settings-view.mjs`. It exposes the canonical `off`, `local`, `cloud`, and `hybrid` mode controls from the settings model, keeps the default mode off, and blocks cloud-capable mode changes behind an explicit privacy impact confirmation step before enabling cloud processing consent.
@@ -53,4 +60,4 @@ The view also carries model provider/model id preferences, confirmation requirem
 
 ## Foundation Status
 
-This PR implements only the foundation layer, epic decomposition workflow, baseline TDLib adapter boundary, local agent runtime lifecycle contract, and agent IPC bridge contract. Platform UI shells, live TDLib integration, concrete agent process packaging, concrete IPC transports, and live TON operations remain tracked by the generated subtasks in `config/epic-subtasks.json`.
+This PR implements only the foundation layer, epic decomposition workflow, baseline TDLib adapter boundary, local agent runtime lifecycle contract, agent IPC bridge contract, and local agent memory encryption contract. Platform UI shells, live TDLib integration, concrete agent process packaging, concrete IPC transports, concrete secure storage bindings, and live TON operations remain tracked by the generated subtasks in `config/epic-subtasks.json`.
