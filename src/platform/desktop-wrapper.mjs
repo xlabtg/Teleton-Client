@@ -1,3 +1,5 @@
+import { createPushNotificationDeliveryPlan, describePushNotificationPlatform } from '../foundation/push-notifications.mjs';
+
 export const DESKTOP_APP_ID = 'dev.teleton.client';
 export const DESKTOP_PRODUCT_NAME = 'Teleton Client';
 export const DESKTOP_DEEP_LINK_SCHEMES = Object.freeze(['teleton', 'tg', 'ton', 'https']);
@@ -609,6 +611,22 @@ export function createDesktopNotificationRequest(notification, options = {}) {
   };
 }
 
+export function createDesktopPushNotificationPlan(notification, options = {}) {
+  const delivery = createPushNotificationDeliveryPlan(notification, {
+    ...options,
+    platform: 'desktop'
+  });
+
+  if (!delivery.deliver) {
+    return delivery;
+  }
+
+  return {
+    ...delivery,
+    request: createDesktopNotificationRequest(delivery.notification)
+  };
+}
+
 export function describeDesktopShortcuts() {
   return clone(DESKTOP_SHORTCUTS);
 }
@@ -718,6 +736,7 @@ export function describeDesktopWrapper() {
     shortcuts: describeDesktopShortcuts(),
     autostart: describeDesktopAutostart(),
     notifications: clone(DESKTOP_NOTIFICATION_CATEGORIES),
+    pushNotifications: describePushNotificationPlatform('desktop'),
     deepLinks: {
       schemes: [...DESKTOP_DEEP_LINK_SCHEMES],
       protocolApi: 'app.setAsDefaultProtocolClient',

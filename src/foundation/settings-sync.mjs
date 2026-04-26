@@ -18,6 +18,7 @@ export const SETTINGS_SYNC_SYNCABLE_PATHS = Object.freeze([
   'notifications.messagePreviews',
   'notifications.sounds',
   'notifications.mentionsOnly',
+  'notifications.categories',
   'notifications.quietHours',
   'agent.model',
   'agent.requireConfirmation',

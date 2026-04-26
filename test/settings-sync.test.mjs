@@ -143,6 +143,7 @@ test('settings sync payload serializes only syncable settings and excludes local
   assert.equal(payload.deviceId, 'desktop-a');
   assert.equal(payload.revision, 7);
   assert.deepEqual(payload.syncablePaths, SETTINGS_SYNC_SYNCABLE_PATHS);
+  assert.ok(SETTINGS_SYNC_SYNCABLE_PATHS.includes('notifications.categories'));
   assert.ok(SETTINGS_SYNC_SYNCABLE_PATHS.includes('notifications.quietHours'));
   assert.ok(SETTINGS_SYNC_DEVICE_LOCAL_PATHS.includes('proxy.entries[]'));
   assert.ok(SETTINGS_SYNC_SECRET_PATHS.includes('agent.providerConfig.tokenRef'));
@@ -154,6 +155,11 @@ test('settings sync payload serializes only syncable settings and excludes local
       messagePreviews: false,
       sounds: false,
       mentionsOnly: false,
+      categories: {
+        messages: true,
+        agentApprovals: true,
+        wallet: true
+      },
       quietHours: {
         enabled: false,
         start: '22:00',

@@ -12,6 +12,7 @@ This repository is in the foundation phase. The current implementation establish
 - GitHub issue and pull request templates for reproducible, secret-free contributions.
 - Dry-run and idempotent GitHub issue creation script for decomposing issue `#1`.
 - Shared cross-platform settings model for language, theme, notifications, agent mode, proxy, and secure references.
+- Shared push notification model for messages, Teleton Agent approvals, and TON wallet events with redacted payloads, category preferences, and platform permission failure plans.
 - Shared agent settings view state for off, local, cloud, and hybrid modes, model preferences, privacy prompts, approval preferences, and autonomous action limits.
 - ProxyManager route selection for direct, MTProto, and SOCKS5 connectivity using saved preferences, health inputs, latency ranking, and failure cooldowns.
 - Shared proxy settings view state for add, test, enable, disable, edit, remove, reset statistics, and export diagnostics workflows without exposing secure references.

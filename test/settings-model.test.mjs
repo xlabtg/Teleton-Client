@@ -27,6 +27,11 @@ test('settings defaults are serializable and keep agent and proxy disabled', () 
   assert.equal(settings.proxy.activeProxyId, null);
   assert.deepEqual(settings.proxy.entries, []);
   assert.equal(settings.notifications.enabled, true);
+  assert.deepEqual(settings.notifications.categories, {
+    messages: true,
+    agentApprovals: true,
+    wallet: true
+  });
   assert.equal(settings.security.redactSensitiveNotifications, true);
   assert.equal(settings.security.encryptAgentMemory, true);
   assert.equal(settings.security.agentMemoryKeyRef, null);
@@ -50,6 +55,9 @@ test('settings validation rejects invalid proxy, notification, agent, and secret
       ]
     },
     notifications: {
+      categories: {
+        wallet: 'disabled'
+      },
       quietHours: {
         enabled: true,
         start: '25:00',
@@ -72,6 +80,7 @@ test('settings validation rejects invalid proxy, notification, agent, and secret
   assert.match(result.errors.join('\n'), /secure reference/);
   assert.match(result.errors.join('\n'), /Agent memory encryption must remain enabled/);
   assert.match(result.errors.join('\n'), /agentMemoryKeyRef/);
+  assert.match(result.errors.join('\n'), /Notification category wallet/);
   assert.match(result.errors.join('\n'), /Quiet hours start/);
 });
 
