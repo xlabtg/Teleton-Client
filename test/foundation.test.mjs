@@ -289,6 +289,37 @@ test('agent action notifications redact private content and respect settings', a
   assert.match(architecture, /lock-screen/i);
 });
 
+test('agent action history records redacted rollback-aware action records', async () => {
+  const { AGENT_ACTION_HISTORY_RETENTION_DAYS, createAgentActionHistoryStore } = await import(
+    '../src/foundation/agent-action-history.mjs'
+  );
+  const architecture = await readFile(pathFor('docs/architecture.md'), 'utf8');
+
+  const store = createAgentActionHistoryStore({ now: () => '2026-04-26T12:00:00.000Z' });
+  const record = store.recordAction({
+    id: 'history-1',
+    action: 'sendMessage',
+    actionLabel: 'Send message',
+    actor: { id: 'agent.local', type: 'agent' },
+    status: 'completed',
+    timestamp: '2026-04-26T11:00:00.000Z',
+    payload: { messageText: 'private body', chatId: 42 },
+    rollback: {
+      type: 'compensating-action',
+      action: 'deleteMessage',
+      expiresAt: '2026-04-27T11:00:00.000Z'
+    }
+  });
+
+  assert.equal(AGENT_ACTION_HISTORY_RETENTION_DAYS, 30);
+  assert.equal(record.status, 'completed');
+  assert.equal(record.actor.id, 'agent.local');
+  assert.equal(record.rollback.eligible, true);
+  assert.doesNotMatch(JSON.stringify(record), /private body/);
+  assert.match(architecture, /Agent Action History/i);
+  assert.match(architecture, /irreversible proposals/i);
+});
+
 test('agent plugin registry requires permissions and blocks disabled plugins', async () => {
   const { createAgentPluginRegistry, createMockAgentPluginBridge } = await import(
     '../src/foundation/agent-plugin-registry.mjs'

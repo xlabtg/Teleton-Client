@@ -20,6 +20,7 @@ This repository is in the foundation phase. The current implementation establish
 - Baseline TDLib client adapter contract with mock-backed tests.
 - Local Teleton Agent runtime supervisor contract with mock lifecycle tests for start, stop, health, resource monitoring, and logs.
 - Teleton Agent action notification contract for proposals, starts, completions, approval-required states, and failures with settings-aware delivery and redacted lock-screen text.
+- Teleton Agent action history contract for redacted action records, retention filtering, rollback eligibility, and irreversible action markers.
 - Teleton Agent plugin registry contract with manifest permissions, enable/disable/list/health bridge flows, and lifecycle permission gates.
 - Local Teleton Agent memory encryption contract using platform secure storage key providers, AES-256-GCM payloads, migration, missing-key, locked-store, and key-rotation tests.
 - CI workflow for foundation checks.

@@ -26,6 +26,7 @@ Teleton Client is planned as a layered client where protocol, automation, wallet
 - Local Teleton Agent startup is represented by the `src/foundation/agent-runtime-supervisor.mjs` lifecycle boundary. Platform wrappers supply start, stop, health, resource, and log hooks; the shared supervisor keeps the default runtime local and never requires cloud credentials for startup.
 - Teleton Agent UI communication is represented by the `src/foundation/agent-ipc-bridge.mjs` contract. It uses versioned IPC envelopes for request, event, response, error, and cancellation flows; UI layers receive incoming message hooks and can distinguish informational events from confirmation-required action proposals.
 - Teleton Agent action notifications are represented by the `src/foundation/agent-action-notifications.mjs` contract. It converts action lifecycle IPC events into UI and platform notification payloads, always surfaces approval-required actions, filters informational updates through notification settings, and uses redacted lock-screen copy that does not include private message content.
+- Teleton Agent action history is represented by the `src/foundation/agent-action-history.mjs` contract. It stores redacted action records with status, actor, and timestamp fields, filters records by a local retention window, exposes rollback requests only while rollback metadata remains eligible, and marks irreversible proposals before execution.
 - Teleton Agent plugins are represented by the `src/foundation/agent-plugin-registry.mjs` contract. Plugins declare permissions, lifecycle defaults, and IPC compatibility before they can be enabled. Disabled plugins cannot receive events or perform actions, and enable, disable, list, and health-check flows are routed through the agent bridge.
 - Local Teleton Agent memory is represented by the `src/foundation/agent-memory-store.mjs` contract. It encrypts memory snapshots, vector index payloads, and local credential references with AES-256-GCM while platform wrappers keep the raw data key in OS secure storage providers such as Keychain or Keystore.
 - TON signing requires user confirmation and platform secure storage or wallet-provider approval.
@@ -56,6 +57,12 @@ UI-facing agent events are classified by confirmation behavior. Informational up
 The shared agent action notification boundary maps `agent.action.proposed`, `agent.action.started`, `agent.action.completed`, and task update events into normalized notification payloads for UI surfaces and platform notification adapters. Approval-required actions use critical priority and remain visible even when informational notifications are disabled, because they block agent progress until the user responds.
 
 Informational start, completion, and failure notifications respect the shared notification settings, including disabled notifications and mentions-only filtering. Notification bodies use action labels only, while lock-screen text and serialized payloads remove private message text, chat names, sender names, prompts, and context fields before dispatch.
+
+## Agent Action History
+
+The shared action history boundary records proposed, started, completed, failed, cancelled, and rolled-back agent actions with normalized status, actor, timestamp, action label, and redacted payload metadata. The default retention window is 30 days, and platform storage adapters can prune older records before presenting history views.
+
+Rollback metadata is explicit. Reversible actions declare a direct or compensating rollback action, sanitized rollback payload, and optional expiry timestamp. Rollback requests are exposed only while that metadata remains eligible. Irreversible proposals carry an ineligible rollback marker, a human-readable reason, and a confirmation warning before execution so UI shells can distinguish actions that cannot be compensated later.
 
 ## Agent Plugin System
 
