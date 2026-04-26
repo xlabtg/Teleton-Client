@@ -4,6 +4,8 @@ import { test } from 'node:test';
 import {
   createMockTonWalletAdapter,
   createTonWalletAdapter,
+  normalizeJettonMetadata,
+  validateJettonTransferRequest,
   validateTonTransferRequest,
   validateTonWalletConfig
 } from '../src/ton/wallet-adapter.mjs';
@@ -148,6 +150,188 @@ test('TON transfer validation rejects secret material in transfer requests', () 
       amountNanoTon: 1n,
       confirmed: true,
       privateKey: 'plaintext-key'
+    },
+    { address: 'EQDsenderAddress' }
+  );
+
+  assert.equal(validation.valid, false);
+  assert.match(validation.errors.join('\n'), /private keys are not accepted/i);
+});
+
+test('Jetton metadata normalizes unknown and malformed token details safely', () => {
+  assert.deepEqual(normalizeJettonMetadata(), {
+    address: '',
+    symbol: 'UNKNOWN',
+    name: 'Unknown Jetton',
+    decimals: 0,
+    imageUrl: null,
+    verified: false,
+    unknown: true,
+    warnings: ['Jetton metadata address is missing.', 'Jetton metadata is unavailable.']
+  });
+
+  assert.deepEqual(
+    normalizeJettonMetadata({
+      address: ' EQDjettonMaster ',
+      symbol: '   ',
+      name: 123,
+      decimals: 'not-a-number',
+      imageUrl: 'javascript:alert(1)',
+      verified: true
+    }),
+    {
+      address: 'EQDjettonMaster',
+      symbol: 'UNKNOWN',
+      name: '123',
+      decimals: 0,
+      imageUrl: null,
+      verified: false,
+      unknown: true,
+      warnings: [
+        'Jetton metadata symbol is missing.',
+        'Jetton metadata decimals must be an integer between 0 and 255.',
+        'Jetton metadata imageUrl must be an http(s) URL.'
+      ]
+    }
+  );
+});
+
+test('mock TON adapter returns Jetton balances with safe metadata fallbacks', async () => {
+  const adapter = createMockTonWalletAdapter({
+    address: 'EQDownerAddress',
+    walletProviderRef: 'wallet:tonkeeper:test-wallet',
+    jettonBalances: [
+      {
+        walletAddress: 'EQDjettonWallet',
+        masterAddress: 'EQDjettonMaster',
+        balanceAtomic: 2500000n,
+        metadata: {
+          address: 'EQDjettonMaster',
+          symbol: 'USDT',
+          name: 'Tether USD',
+          decimals: 6,
+          imageUrl: 'https://static.example/usdt.png',
+          verified: true
+        }
+      },
+      {
+        masterAddress: 'EQDunknownMaster',
+        balanceAtomic: 5n,
+        metadata: {
+          address: 'EQDunknownMaster',
+          symbol: '',
+          decimals: -1
+        }
+      }
+    ]
+  });
+
+  assert.deepEqual(await adapter.getJettonBalances(), {
+    address: 'EQDownerAddress',
+    network: 'testnet',
+    jettons: [
+      {
+        walletAddress: 'EQDjettonWallet',
+        masterAddress: 'EQDjettonMaster',
+        balanceAtomic: 2500000n,
+        metadata: {
+          address: 'EQDjettonMaster',
+          symbol: 'USDT',
+          name: 'Tether USD',
+          decimals: 6,
+          imageUrl: 'https://static.example/usdt.png',
+          verified: true,
+          unknown: false,
+          warnings: []
+        }
+      },
+      {
+        walletAddress: null,
+        masterAddress: 'EQDunknownMaster',
+        balanceAtomic: 5n,
+        metadata: {
+          address: 'EQDunknownMaster',
+          symbol: 'UNKNOWN',
+          name: 'Unknown Jetton',
+          decimals: 0,
+          imageUrl: null,
+          verified: false,
+          unknown: true,
+          warnings: [
+            'Jetton metadata symbol is missing.',
+            'Jetton metadata decimals must be an integer between 0 and 255.'
+          ]
+        }
+      }
+    ]
+  });
+});
+
+test('Jetton transfer preparation requires explicit confirmation and validates token inputs', async () => {
+  const adapter = createMockTonWalletAdapter({
+    address: 'EQDsenderAddress',
+    walletProviderRef: 'wallet:tonkeeper:test-wallet'
+  });
+
+  await assert.rejects(
+    () =>
+      adapter.prepareJettonTransfer({
+        jettonMasterAddress: 'EQDjettonMaster',
+        to: 'EQDreceiverAddress',
+        amountAtomic: 100n
+      }),
+    /explicit confirmation/
+  );
+
+  await assert.rejects(
+    () =>
+      adapter.prepareJettonTransfer({
+        jettonMasterAddress: '',
+        to: 'EQDreceiverAddress',
+        amountAtomic: 100n,
+        confirmed: true
+      }),
+    /Jetton master/
+  );
+
+  const draft = await adapter.prepareJettonTransfer({
+    jettonMasterAddress: 'EQDjettonMaster',
+    jettonWalletAddress: 'EQDjettonWallet',
+    to: 'EQDreceiverAddress',
+    amountAtomic: 100n,
+    memo: 'token payout',
+    confirmed: true
+  });
+
+  assert.equal(draft.status, 'draft');
+  assert.equal(draft.requiresSigningConfirmation, true);
+  assert.equal(draft.signed, false);
+  assert.equal(draft.assetType, 'jetton');
+  assert.equal(draft.from, 'EQDsenderAddress');
+  assert.equal(draft.to, 'EQDreceiverAddress');
+  assert.equal(draft.amountAtomic, 100n);
+  assert.deepEqual(adapter.getCommands().at(-1), {
+    method: 'prepareJettonTransfer',
+    request: {
+      from: 'EQDsenderAddress',
+      to: 'EQDreceiverAddress',
+      jettonMasterAddress: 'EQDjettonMaster',
+      jettonWalletAddress: 'EQDjettonWallet',
+      amountAtomic: 100n,
+      memo: 'token payout',
+      confirmed: true
+    }
+  });
+});
+
+test('Jetton transfer validation rejects secret material', () => {
+  const validation = validateJettonTransferRequest(
+    {
+      to: 'EQDreceiverAddress',
+      jettonMasterAddress: 'EQDjettonMaster',
+      amountAtomic: 1n,
+      confirmed: true,
+      mnemonic: 'secret words'
     },
     { address: 'EQDsenderAddress' }
   );
