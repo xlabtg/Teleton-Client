@@ -53,6 +53,12 @@ desktop/out/debug/linux-x64/teleton-client
 
 The contract declares app id `dev.teleton.client`, product name `Teleton Client`, tray menu actions, system notification mapping, focused-window and opt-in global shortcuts, launch-at-login configuration for macOS, Windows, and Linux, protocol routing for Telegram and TON flows, and release packaging targets for DMG, EXE, and AppImage. See `docs/desktop-wrapper.md` for the desktop API mapping and packaging plan.
 
+## Tablet Layout
+
+The tablet layout contract in `src/platform/tablet-layout.mjs` defines dependency-free responsive rules that Android, iOS, desktop, and web shells can consume while rendering native controls. It classifies tablet viewports from a 600 px short edge through a 1366 px long edge, uses bottom navigation in portrait, uses a navigation rail in landscape, and returns non-overlapping pane frames for chats, settings, agent, and wallet views.
+
+The layout tests cover representative 768 x 1024 portrait, 1180 x 820 landscape, and 600 x 960 narrow-tablet viewports. See `docs/tablet-layout.md` for the breakpoint, navigation, and pane behavior.
+
 ## Local Checks
 
 Run the same checks used by CI:
