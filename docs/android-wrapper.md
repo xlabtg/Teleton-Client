@@ -2,7 +2,7 @@
 
 The Android wrapper contract selects a Kotlin Android runtime with Jetpack Compose UI, the Gradle Android Plugin build system, and package name `dev.teleton.client`. The debug variant is represented by the installable artifact contract `android/app/build/outputs/apk/debug/app-debug.apk`, launched through `dev.teleton.client.MainActivity`.
 
-This repository still keeps the implementation dependency-free, so the wrapper is modeled as a shared contract that future native Gradle sources can consume. The contract records the selected stack, runnable debug artifact metadata, notification channels, background execution boundaries, and deep-link routing into shared messaging, settings, agent, proxy, and TON workflows.
+This repository still keeps the implementation dependency-free, so the wrapper is modeled as a shared contract that future native Gradle sources can consume. The contract records the selected stack, runnable debug artifact metadata, notification channels, background execution boundaries, gesture bindings from the shared input action map, and deep-link routing into shared messaging, settings, agent, proxy, and TON workflows.
 
 ## Notifications
 
@@ -24,6 +24,19 @@ Long-running local agent execution is modeled as an app-private `ForegroundServi
 Message synchronization uses `WorkManager` through `dev.teleton.client.sync.MessageSyncWorker`. Expedited work requires foreground info so Android can display the user-visible notification required for expedited or foreground execution.
 
 TON status refresh uses `WorkManager` through `dev.teleton.client.ton.TonStatusRefreshWorker` with connected-network and battery-not-low constraints. It is not expedited because wallet status polling should not consume foreground service quota.
+
+## Gestures
+
+Android gesture metadata is generated from the shared input action map and is intended for Jetpack Compose `pointerInput` or higher-level gesture handlers. Default gestures cover repeated workflows while keeping visible controls as the primary path:
+
+- Pull down from the top of the chat list to search messages.
+- Horizontal swipes inside chat content to move to the next or previous chat.
+- Long press the agent navigation item to draft an agent quick action for review.
+- Long press the wallet navigation item to draft a TON transfer review.
+
+The gesture plan includes a collision report for duplicate gestures in the same context. It also documents Android system back edge swipes as reserved; Teleton chat navigation gestures must start inside content and must not intercept the system back gesture area.
+
+Gesture accessibility requirements match the desktop shortcut contract: every gesture route must also be reachable through visible controls, keyboard navigation where available, and TalkBack actions. Agent quick action and TON transfer gestures are `review-required`, keep explicit confirmation screens, and can be removed through `input.riskyActionBindings.enabled` or per-action disabled ids.
 
 ## Deep Links
 

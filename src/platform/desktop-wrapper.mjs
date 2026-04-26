@@ -1,4 +1,5 @@
 import { createPushNotificationDeliveryPlan, describePushNotificationPlatform } from '../foundation/push-notifications.mjs';
+import { createDesktopShortcutPlan, createPlatformInputPlan } from './action-map.mjs';
 
 export const DESKTOP_APP_ID = 'dev.teleton.client';
 export const DESKTOP_PRODUCT_NAME = 'Teleton Client';
@@ -88,66 +89,6 @@ const DESKTOP_PACKAGING_TARGETS = deepFreeze({
     signing: 'optional-appimage-signature',
     sandboxNotes: 'Use distro sandboxing or portal integrations where available.'
   }
-});
-
-const DESKTOP_SHORTCUTS = deepFreeze({
-  api: {
-    local: 'BrowserWindow webContents before-input-event',
-    global: 'Electron globalShortcut'
-  },
-  local: [
-    {
-      id: 'messaging.search',
-      accelerator: 'CommandOrControl+K',
-      route: 'messaging.search',
-      scope: 'focused-main-window'
-    },
-    {
-      id: 'chat.new',
-      accelerator: 'CommandOrControl+N',
-      route: 'messaging.composeMessage',
-      scope: 'focused-main-window'
-    },
-    {
-      id: 'chat.next',
-      accelerator: 'Alt+ArrowDown',
-      route: 'messaging.selectNextChat',
-      scope: 'focused-main-window'
-    },
-    {
-      id: 'chat.previous',
-      accelerator: 'Alt+ArrowUp',
-      route: 'messaging.selectPreviousChat',
-      scope: 'focused-main-window'
-    },
-    {
-      id: 'agent.quickAction',
-      accelerator: 'CommandOrControl+Shift+A',
-      route: 'agent.action.compose',
-      scope: 'focused-main-window',
-      requiresUserConfirmation: true
-    },
-    {
-      id: 'wallet.open',
-      accelerator: 'CommandOrControl+Shift+W',
-      route: 'ton.wallet.open',
-      scope: 'focused-main-window'
-    }
-  ],
-  global: [
-    {
-      id: 'window.showHide',
-      accelerator: 'CommandOrControl+Shift+T',
-      route: 'window.toggleVisible',
-      registration: 'opt-in-user-setting'
-    },
-    {
-      id: 'notifications.muteToggle',
-      accelerator: 'CommandOrControl+Shift+M',
-      route: 'settings.notifications.toggleMute',
-      registration: 'opt-in-user-setting'
-    }
-  ]
 });
 
 const PRIVATE_NOTIFICATION_FIELDS = new Set([
@@ -627,8 +568,8 @@ export function createDesktopPushNotificationPlan(notification, options = {}) {
   };
 }
 
-export function describeDesktopShortcuts() {
-  return clone(DESKTOP_SHORTCUTS);
+export function describeDesktopShortcuts(options = {}) {
+  return createDesktopShortcutPlan(options);
 }
 
 export function createDesktopAutostartConfig(options = {}) {
@@ -734,6 +675,7 @@ export function describeDesktopWrapper() {
     },
     tray: createDesktopTrayMenu(),
     shortcuts: describeDesktopShortcuts(),
+    inputActions: createPlatformInputPlan('desktop'),
     autostart: describeDesktopAutostart(),
     notifications: clone(DESKTOP_NOTIFICATION_CATEGORIES),
     pushNotifications: describePushNotificationPlatform('desktop'),

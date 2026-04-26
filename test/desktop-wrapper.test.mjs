@@ -120,8 +120,11 @@ test('desktop shortcuts cover expected local and global messenger actions', () =
   assert.equal(shortcuts.local.find((shortcut) => shortcut.id === 'messaging.search').accelerator, 'CommandOrControl+K');
   assert.equal(shortcuts.local.find((shortcut) => shortcut.id === 'chat.new').route, 'messaging.composeMessage');
   assert.equal(shortcuts.local.find((shortcut) => shortcut.id === 'agent.quickAction').requiresUserConfirmation, true);
+  assert.equal(shortcuts.local.find((shortcut) => shortcut.id === 'wallet.transferReview').route, 'ton.transfer.review');
   assert.equal(shortcuts.global.find((shortcut) => shortcut.id === 'window.showHide').accelerator, 'CommandOrControl+Shift+T');
   assert.equal(shortcuts.global.find((shortcut) => shortcut.id === 'notifications.muteToggle').route, 'settings.notifications.toggleMute');
+  assert.equal(shortcuts.collisionReport.conflictCount, 0);
+  assert.equal(shortcuts.settings.disableRiskyActionBindingsKey, 'input.riskyActionBindings.enabled');
 });
 
 test('desktop autostart maps to per-OS startup APIs without enabling by default', () => {
@@ -209,6 +212,8 @@ test('desktop wrapper docs cover the selected stack, capabilities, and packaging
   assert.match(desktopGuide, /Electron/i);
   assert.match(desktopGuide, /Electron Tray/i);
   assert.match(desktopGuide, /globalShortcut/i);
+  assert.match(desktopGuide, /collision report/i);
+  assert.match(desktopGuide, /input\.riskyActionBindings\.enabled/i);
   assert.match(desktopGuide, /autostart/i);
   assert.match(desktopGuide, /DMG/i);
   assert.match(desktopGuide, /EXE/i);

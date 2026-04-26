@@ -9,6 +9,7 @@ import {
   createAndroidDebugBuildArtifact,
   createAndroidNotificationRequest,
   describeAndroidBackgroundWork,
+  describeAndroidGestures,
   describeAndroidWrapper,
   routeAndroidDeepLink
 } from '../src/platform/android-wrapper.mjs';
@@ -92,6 +93,20 @@ test('Android background work uses WorkManager and an app-private foreground ser
 
   assert.equal(work.tonStatusRefresh.api, 'WorkManager');
   assert.equal(work.tonStatusRefresh.constraints.networkType, 'connected');
+});
+
+test('Android gestures map shared actions to Jetpack Compose gesture metadata', () => {
+  const gestures = describeAndroidGestures();
+  const disabled = describeAndroidGestures({ disabledActionIds: ['wallet.transferReview'] });
+
+  assert.equal(gestures.api, 'Jetpack Compose pointerInput');
+  assert.equal(gestures.gestures.find((gesture) => gesture.actionId === 'messaging.search').gesture, 'pull-down');
+  assert.equal(gestures.gestures.find((gesture) => gesture.actionId === 'chat.next').direction, 'left');
+  assert.equal(gestures.gestures.find((gesture) => gesture.actionId === 'agent.quickAction').requiresUserConfirmation, true);
+  assert.equal(gestures.collisionReport.conflictCount, 0);
+  assert.equal(gestures.reservedGestureWarnings.some((warning) => /system back/i.test(warning.description)), true);
+  assert.equal(disabled.gestures.some((gesture) => gesture.actionId === 'wallet.transferReview'), false);
+  assert.equal(disabled.disabled.find((gesture) => gesture.actionId === 'wallet.transferReview').reason, 'action-disabled-by-user');
 });
 
 test('Android deep links route Telegram and TON URIs to shared workflows', () => {
@@ -192,6 +207,8 @@ test('Android wrapper docs cover the selected stack, approved APIs, and deep lin
   assert.match(androidGuide, /WorkManager/i);
   assert.match(androidGuide, /ForegroundService/i);
   assert.match(androidGuide, /POST_NOTIFICATIONS/i);
+  assert.match(androidGuide, /Gestures/i);
+  assert.match(androidGuide, /system back/i);
   assert.match(androidGuide, /tg:\/\/resolve/i);
   assert.match(androidGuide, /ton:\/\/transfer/i);
 });

@@ -2,7 +2,7 @@
 
 The desktop wrapper contract selects an Electron runtime with a web renderer, isolated preload bridge, and `electron-builder` packaging for Linux, macOS, and Windows. The app id is `dev.teleton.client`, the product name is `Teleton Client`, and the shared integration boundary matches the mobile wrappers: TDLib, settings, Teleton Agent, proxy, and TON.
 
-This repository still keeps the implementation dependency-free, so the wrapper is modeled as a shared contract that future Electron sources can consume. The contract records runnable debug artifact metadata, tray menu behavior, desktop notification requests, local and global shortcuts, autostart settings, protocol routing, and packaging targets.
+This repository still keeps the implementation dependency-free, so the wrapper is modeled as a shared contract that future Electron sources can consume. The contract records runnable debug artifact metadata, tray menu behavior, desktop notification requests, local and global shortcuts from the shared input action map, autostart settings, protocol routing, and packaging targets.
 
 ## Debug Artifacts
 
@@ -43,7 +43,7 @@ The shared push notification plan applies category preferences before creating a
 
 ## Shortcuts
 
-Focused-window shortcuts use `BrowserWindow webContents before-input-event`. Opt-in global shortcuts use `Electron globalShortcut`.
+Focused-window shortcuts use `BrowserWindow webContents before-input-event`. Opt-in global shortcuts use `Electron globalShortcut`. Both lists are generated from the shared input action map in `src/platform/action-map.mjs` so desktop bindings use the same route ids as mobile gestures.
 
 Default focused-window shortcuts:
 
@@ -52,6 +52,7 @@ Default focused-window shortcuts:
 - `Alt+ArrowDown` and `Alt+ArrowUp` to move between chats.
 - `CommandOrControl+Shift+A` to open an agent quick action draft with explicit user confirmation.
 - `CommandOrControl+Shift+W` to open the TON wallet.
+- `CommandOrControl+Shift+X` to open a TON transfer review draft with explicit user confirmation.
 
 Default global shortcuts:
 
@@ -59,6 +60,17 @@ Default global shortcuts:
 - `CommandOrControl+Shift+M` to toggle notification mute state.
 
 Global shortcuts must be user-controlled because they reserve operating system key combinations outside the app window.
+
+The desktop shortcut plan includes a collision report before native registration. Duplicate accelerators in the same focused-window scope or the same global registration scope are blocking conflicts; the default map reports no conflicts. Native Electron sources must treat global shortcut registration failures as platform conflicts and leave the visible menu or button path available.
+
+Risky shortcuts for agent and wallet transaction actions are marked `review-required`, carry `requiresUserConfirmation: true`, and can be filtered out through `input.riskyActionBindings.enabled` or per-action disabled ids. Disabling those shortcuts does not disable the underlying review workflows, so users can still reach them through visible controls.
+
+Shortcut accessibility requirements:
+
+- Every shortcut action must have a visible control or menu item with the same route.
+- Focused-window shortcuts must not trap text input fields.
+- Global shortcuts must be opt-in and discoverable in settings.
+- Risky agent and TON transfer shortcuts must keep the same confirmation screen as visible controls.
 
 ## Autostart
 

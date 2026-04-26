@@ -29,7 +29,7 @@ The Android wrapper contract in `src/platform/android-wrapper.mjs` selects Kotli
 android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
-The contract declares package `dev.teleton.client`, entry activity `dev.teleton.client.MainActivity`, Android notification channels, WorkManager jobs for message and TON synchronization, an app-private foreground service for the local Teleton Agent runtime, and deep-link routing for Telegram and TON flows. See `docs/android-wrapper.md` for the platform API mapping.
+The contract declares package `dev.teleton.client`, entry activity `dev.teleton.client.MainActivity`, Android notification channels, WorkManager jobs for message and TON synchronization, an app-private foreground service for the local Teleton Agent runtime, shared gesture bindings for messaging, agent, and wallet workflows, and deep-link routing for Telegram and TON flows. See `docs/android-wrapper.md` for the platform API mapping.
 
 ## iOS Wrapper
 
@@ -39,7 +39,7 @@ The iOS wrapper contract in `src/platform/ios-wrapper.mjs` selects Swift, SwiftU
 ios/build/Build/Products/Debug-iphonesimulator/TeletonClient.app
 ```
 
-The contract declares bundle identifier `dev.teleton.client`, app target and scheme `TeletonClient`, Keychain Services references for TDLib credentials, agent memory keys, proxy credentials, and TON wallet references, APNs notification request mapping, BGTaskScheduler jobs for agent runtime, message sync, and TON status refresh, and URL scheme or Universal Link routing for Telegram and TON flows. See `docs/ios-wrapper.md` for the platform API mapping and App Store review constraints.
+The contract declares bundle identifier `dev.teleton.client`, app target and scheme `TeletonClient`, Keychain Services references for TDLib credentials, agent memory keys, proxy credentials, and TON wallet references, APNs notification request mapping, BGTaskScheduler jobs for agent runtime, message sync, and TON status refresh, shared gesture bindings for messaging, agent, and wallet workflows, and URL scheme or Universal Link routing for Telegram and TON flows. See `docs/ios-wrapper.md` for the platform API mapping and App Store review constraints.
 
 ## Desktop Wrapper
 
@@ -51,7 +51,11 @@ desktop/out/debug/windows-x64/Teleton Client.exe
 desktop/out/debug/linux-x64/teleton-client
 ```
 
-The contract declares app id `dev.teleton.client`, product name `Teleton Client`, tray menu actions, system notification mapping, focused-window and opt-in global shortcuts, launch-at-login configuration for macOS, Windows, and Linux, protocol routing for Telegram and TON flows, and release packaging targets for DMG, EXE, and AppImage. See `docs/desktop-wrapper.md` for the desktop API mapping and packaging plan.
+The contract declares app id `dev.teleton.client`, product name `Teleton Client`, tray menu actions, system notification mapping, focused-window and opt-in global shortcuts from the shared input action map, launch-at-login configuration for macOS, Windows, and Linux, protocol routing for Telegram and TON flows, and release packaging targets for DMG, EXE, and AppImage. See `docs/desktop-wrapper.md` for the desktop API mapping and packaging plan.
+
+## Input Action Map
+
+The shared input action map in `src/platform/action-map.mjs` defines common messaging, Teleton Agent, and TON wallet routes once, then adapts them to desktop shortcuts and mobile gestures. The generated plans include collision reports, reserved mobile system gesture notes, accessibility requirements, and `input.riskyActionBindings.enabled` so risky agent or transaction bindings can be disabled without removing visible workflow controls.
 
 ## Web PWA Wrapper
 
