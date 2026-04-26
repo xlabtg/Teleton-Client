@@ -248,6 +248,30 @@ test('agent IPC bridge exposes versioned envelopes and confirmation-aware UI eve
   assert.equal(proposal.requiresConfirmation, true);
 });
 
+test('agent plugin registry requires permissions and blocks disabled plugins', async () => {
+  const { createAgentPluginRegistry, createMockAgentPluginBridge } = await import(
+    '../src/foundation/agent-plugin-registry.mjs'
+  );
+  const architecture = await readFile(pathFor('docs/architecture.md'), 'utf8');
+
+  const registry = createAgentPluginRegistry({ bridge: createMockAgentPluginBridge() });
+  await registry.register({
+    id: 'summarizer',
+    name: 'Summarizer',
+    version: '1.0.0',
+    permissions: [{ scope: 'agent.events.receive', reason: 'Receive selected agent events' }],
+    compatibility: { ipcVersion: 1 }
+  });
+
+  assert.equal(registry.canReceiveEvent('summarizer', 'agent.message.received'), false);
+  await registry.enable('summarizer');
+  assert.equal(registry.canReceiveEvent('summarizer', 'agent.message.received'), true);
+  await registry.disable('summarizer');
+  assert.equal(registry.canReceiveEvent('summarizer', 'agent.message.received'), false);
+  assert.match(architecture, /Plugins declare permissions/i);
+  assert.match(architecture, /Disabled plugins cannot receive events/i);
+});
+
 test('proxy settings model covers supported proxy types without hardcoded secrets', async () => {
   const { PROXY_PROTOCOLS, validateProxyConfig } = await import('../src/foundation/proxy-settings.mjs');
   const { PROXY_ROUTE_TYPES, createProxyManager } = await import('../src/foundation/proxy-manager.mjs');

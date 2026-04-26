@@ -3,6 +3,15 @@ import { createPublicProxyCatalog, validatePublicProxyCatalog } from './public-p
 import { isSecureReference, validateProxyConfig } from './proxy-settings.mjs';
 
 export const SETTINGS_SCHEMA_VERSION = 1;
+export const PORTABLE_SETTINGS_EXPORT_KIND = 'teleton.settings.export';
+export const PORTABLE_SETTINGS_EXCLUDED_FIELDS = Object.freeze([
+  'proxy.entries[].secretRef',
+  'proxy.entries[].usernameRef',
+  'proxy.entries[].passwordRef',
+  'security.agentMemoryKeyRef',
+  'security.secretRefs',
+  'agent.memory'
+]);
 export const SETTINGS_PLATFORM_WRAPPERS = Object.freeze(['android', 'ios', 'desktop', 'web']);
 export const SETTINGS_THEMES = Object.freeze(['system', 'light', 'dark']);
 
@@ -79,6 +88,100 @@ function clone(value) {
 
 function isPlainObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function mergePlainObject(base, overlay) {
+  const merged = { ...base };
+
+  for (const [key, value] of Object.entries(overlay)) {
+    if (isPlainObject(value) && isPlainObject(base[key])) {
+      merged[key] = mergePlainObject(base[key], value);
+    } else {
+      merged[key] = value;
+    }
+  }
+
+  return merged;
+}
+
+function redactPortableSettings(settings) {
+  const portable = clone(settings);
+  delete portable.platform;
+
+  if (portable.proxy?.entries) {
+    portable.proxy.entries = portable.proxy.entries.map((entry) => {
+      const safeEntry = { ...entry };
+      delete safeEntry.secretRef;
+      delete safeEntry.usernameRef;
+      delete safeEntry.passwordRef;
+      return safeEntry;
+    });
+  }
+
+  if (portable.security) {
+    delete portable.security.agentMemoryKeyRef;
+    delete portable.security.secretRefs;
+  }
+
+  if (portable.agent) {
+    delete portable.agent.memory;
+  }
+
+  return portable;
+}
+
+function normalizePortableEnvelope(payload) {
+  if (!isPlainObject(payload)) {
+    throw new Error('Portable settings import payload must be an object.');
+  }
+
+  if (payload.kind !== undefined && payload.kind !== PORTABLE_SETTINGS_EXPORT_KIND) {
+    throw new Error(`Unsupported portable settings export kind: ${payload.kind}.`);
+  }
+
+  const schemaVersion = payload.schemaVersion;
+  if (!Number.isInteger(schemaVersion)) {
+    throw new Error('Portable settings import schemaVersion must be an integer.');
+  }
+
+  if (schemaVersion > SETTINGS_SCHEMA_VERSION) {
+    throw new Error(
+      `Portable settings schema version ${schemaVersion} is newer than this client supports (${SETTINGS_SCHEMA_VERSION}).`
+    );
+  }
+
+  if (schemaVersion < 0) {
+    throw new Error(`Unsupported portable settings schema version: ${schemaVersion}.`);
+  }
+
+  if (!isPlainObject(payload.settings)) {
+    throw new Error('Portable settings import settings must be an object.');
+  }
+
+  return payload;
+}
+
+function collectChanges(before, after, prefix = '') {
+  const changes = [];
+  const keys = new Set([...Object.keys(before ?? {}), ...Object.keys(after ?? {})]);
+
+  for (const key of keys) {
+    const path = prefix ? `${prefix}.${key}` : key;
+    const previous = before?.[key];
+    const next = after?.[key];
+
+    if (isPlainObject(previous) && isPlainObject(next)) {
+      changes.push(...collectChanges(previous, next, path));
+    } else if (JSON.stringify(previous) !== JSON.stringify(next)) {
+      changes.push({
+        path,
+        before: previous === undefined ? undefined : clone(previous),
+        after: next === undefined ? undefined : clone(next)
+      });
+    }
+  }
+
+  return changes;
 }
 
 function normalizePlatform(value) {
@@ -482,6 +585,57 @@ export function createPlatformSettings(platform, input = {}) {
     ...input,
     platform: normalizePlatform(platform)
   });
+}
+
+export function exportPortableTeletonSettings(input = {}) {
+  const settings = createTeletonSettings(input);
+
+  return {
+    kind: PORTABLE_SETTINGS_EXPORT_KIND,
+    schemaVersion: SETTINGS_SCHEMA_VERSION,
+    excludedFields: [...PORTABLE_SETTINGS_EXCLUDED_FIELDS],
+    settings: redactPortableSettings(settings)
+  };
+}
+
+export function previewPortableTeletonSettingsImport(payload, options = {}) {
+  let envelope;
+
+  try {
+    envelope = normalizePortableEnvelope(payload);
+  } catch (error) {
+    return {
+      valid: false,
+      errors: [error.message],
+      schemaVersion: isPlainObject(payload) ? payload.schemaVersion : undefined,
+      excludedFields: [...PORTABLE_SETTINGS_EXCLUDED_FIELDS],
+      changes: [],
+      settings: undefined
+    };
+  }
+
+  const currentSettings = createTeletonSettings(options.currentSettings);
+  const mergedSettings = mergePlainObject(currentSettings, redactPortableSettings(envelope.settings));
+  const validation = validateTeletonSettings(mergedSettings);
+
+  return {
+    valid: validation.valid,
+    errors: validation.errors,
+    schemaVersion: envelope.schemaVersion,
+    excludedFields: [...PORTABLE_SETTINGS_EXCLUDED_FIELDS],
+    changes: validation.settings ? collectChanges(currentSettings, validation.settings) : [],
+    settings: validation.settings
+  };
+}
+
+export function importPortableTeletonSettings(payload, options = {}) {
+  const preview = previewPortableTeletonSettingsImport(payload, options);
+
+  if (!preview.valid) {
+    throw new Error(preview.errors.join(' '));
+  }
+
+  return preview.settings;
 }
 
 export function serializeTeletonSettings(input = {}) {

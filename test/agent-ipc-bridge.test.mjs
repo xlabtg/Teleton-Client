@@ -93,6 +93,62 @@ test('agent IPC bridge supports request, response, event, and cancellation flows
   bridge.close();
 });
 
+test('agent IPC bridge exposes plugin management request helpers', async () => {
+  const transport = createMockAgentIpcTransport();
+  const bridge = createAgentIpcBridge({ transport });
+
+  const listPromise = bridge.listPlugins();
+  assert.equal(transport.sent.at(-1).action, 'agent.plugin.list');
+  transport.deliver({
+    id: 'agent.response.plugins',
+    kind: 'response',
+    source: 'agent',
+    target: 'ui',
+    replyTo: 'ui.request.1',
+    payload: { plugins: [] }
+  });
+  await listPromise;
+
+  const enablePromise = bridge.enablePlugin('summarizer');
+  assert.equal(transport.sent.at(-1).action, 'agent.plugin.enable');
+  assert.equal(transport.sent.at(-1).payload.pluginId, 'summarizer');
+  transport.deliver({
+    id: 'agent.response.enable',
+    kind: 'response',
+    source: 'agent',
+    target: 'ui',
+    replyTo: 'ui.request.2',
+    payload: { ok: true }
+  });
+  await enablePromise;
+
+  const disablePromise = bridge.disablePlugin('summarizer');
+  assert.equal(transport.sent.at(-1).action, 'agent.plugin.disable');
+  transport.deliver({
+    id: 'agent.response.disable',
+    kind: 'response',
+    source: 'agent',
+    target: 'ui',
+    replyTo: 'ui.request.3',
+    payload: { ok: true }
+  });
+  await disablePromise;
+
+  const healthPromise = bridge.healthCheckPlugin('summarizer');
+  assert.equal(transport.sent.at(-1).action, 'agent.plugin.health');
+  transport.deliver({
+    id: 'agent.response.health',
+    kind: 'response',
+    source: 'agent',
+    target: 'ui',
+    replyTo: 'ui.request.4',
+    payload: { health: { ok: true } }
+  });
+  await healthPromise;
+
+  bridge.close();
+});
+
 test('agent IPC bridge rejects malformed messages before dispatch', () => {
   assert.throws(() => parseAgentIpcEnvelope('{'), /Malformed IPC message JSON/);
   assert.throws(
