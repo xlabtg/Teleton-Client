@@ -17,6 +17,7 @@ This repository currently contains foundation automation, configuration models, 
 - Refreshable credentials must renew through platform secure storage references only; failed or revoked refresh attempts must expose reauthentication states without logging token values.
 - Settings synchronization is opt-in and disabled by default. Sync payloads exclude secure references, proxy credentials, cloud provider credential references, local security controls, and private agent memory.
 - TON private keys and wallet credentials must use platform secure storage or user-approved wallet providers.
+- Users must be able to delete local account data, cached media, agent memory, and wallet local state from a device after explicit irreversible confirmation. Local deletion must not be presented as deletion of remote Telegram accounts, remote messages, external wallet-provider accounts, or public blockchain history.
 
 ## Data Flow Coverage
 
@@ -64,6 +65,12 @@ Planned behavior: TON operations use wallet-provider integrations, TON SDKs, or 
 
 TON wallet-provider refresh is limited to provider references and secure storage references. Shared refresh state can indicate retry, expiry, revocation, or required wallet reauthentication, but it must not expose signing material or wallet provider secrets.
 
+### Local Data Deletion
+
+Current repository behavior: `src/foundation/secure-data-deletion.mjs` defines deletion plans and execution hooks for local account, cache, agent, and wallet scopes. The shared contract records platform storage locations, irreversible confirmation text, progress states, cache recovery-window behavior, and human security review status for filesystem limitations. It does not delete live service data because the repository foundation does not connect to Telegram, agent providers, sync transports, or TON services.
+
+Planned behavior: users can request deletion for local account data, cached media, Teleton Agent memory, and wallet local state from the current device. Account deletion clears local TDLib session state, message database snapshots, device-only authentication caches, and secure references. Cache deletion clears cached media, previews, temporary uploads, and offline shell cache entries, optionally using a recovery window before purge. Agent deletion destroys the local memory key reference and removes encrypted memory snapshots, vector indexes, and runtime scratch state. Wallet deletion removes local wallet metadata, transaction caches, pending drafts, WalletConnect sessions, and wallet provider secure references. Platform wrappers must explain that deletion is local-only and that filesystem journals, flash wear-leveling, browser storage internals, and backups can retain remnants outside app control.
+
 ## User Controls
 
 The planned agent modes are `off`, `local`, `cloud`, and `hybrid`. The default is `off`. Users must be able to switch modes, set action limits, review sensitive actions, and disable automation without losing access to standard messaging features.
@@ -73,6 +80,8 @@ Cloud-capable provider use requires explicit cloud processing opt-in before acti
 Users can leave cross-device settings synchronization disabled. Enabling sync on one device does not enable cloud-capable agent modes or copy sync credentials to another device; each device must opt in and provide local secure storage access independently.
 
 TON transaction workflows must preserve a review screen, show the wallet action being prepared, and require explicit confirmation before signing or broadcasting.
+
+Local deletion controls must require exact irreversible confirmation before users delete local account data, cached media, agent memory, or wallet local state. Cache deletion may offer a recovery window, but account, agent, and wallet deletion must treat destroyed secure references as unrecoverable.
 
 ## Policy Maintenance
 

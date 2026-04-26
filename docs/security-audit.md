@@ -44,6 +44,7 @@ Manual review items must be completed before public release even when automated 
 | Hardware security key credential ids, attestation, and assertion payloads | `src/foundation/hardware-security-key.mjs` stores only safe ceremony summaries. Platform and verification bridges own WebAuthn/FIDO public-key credential creation, challenge handling, attestation, assertion signatures, and verification. | Credential ids may be local metadata; attestation objects, client data JSON, authenticator data, signatures, and server challenges stay in platform or server-side verification bridges and must not be written to shared settings or logs. | Authenticator loss, account recovery, relying-party id or origin change, suspicious assertion failure, platform bridge replacement, or release security review finding. |
 | Message database encryption keys | `src/tdlib/message-database-storage.mjs` creates or reads AES-256-GCM data keys for cached messages, indexes, and attachments metadata from platform secure storage. Restore failures keep encrypted snapshots intact until the user explicitly consents to reset or deletion. | iOS Keychain, Android Keystore, desktop OS credential vault, or reviewed browser non-extractable WebCrypto-backed storage where available. | Device reenrollment, locked or missing key recovery, plaintext database migration, failed-decryption recovery, or release security review. |
 | Agent memory encryption keys | `src/foundation/agent-memory-store.mjs` creates or reads AES-256-GCM data keys from platform secure storage. | iOS Keychain, Android Keystore, desktop OS credential vault, or browser non-extractable WebCrypto-backed storage where available. | Device reenrollment, locked or missing key recovery, storage migration, or release security review. |
+| Secure deletion key and provider references | `src/foundation/secure-data-deletion.mjs` plans local account, cache, agent, and wallet deletion by destroying secure references before app-private files, databases, cache entries, and browser stores are removed. | Same platform secure storage used by the deleted scope: Keychain, Keystore, desktop credential vault, WebCrypto-backed references, wallet providers, or reviewed platform equivalents. | User-requested local data deletion, device disposal, account logout on shared devices, wallet provider removal, agent memory reset, or suspected local compromise. |
 | Settings sync encryption keys | Settings sync stores only local key references and excludes sync key material from payloads. | Device-local secure storage; each device resolves its own key. | Device removal, sync transport replacement, missing-key recovery, or suspected remote snapshot exposure. |
 | GitHub and CI tokens | GitHub Actions uses platform-provided tokens for validation and changelog preview. | GitHub protected repository or environment secrets; never committed files. | Maintainer offboarding, repository permission changes, failed CI audit, or GitHub security alert. |
 
@@ -84,6 +85,14 @@ When a provider rotates a refreshable credential automatically, the platform wra
 
 Release enablement is blocked until a human security review confirms that each platform implementation resolves references locally, redacts diagnostics, supports rotation or reenrollment, and keeps exported settings free of raw credential material.
 
+## Secure Data Deletion Review
+
+`src/foundation/secure-data-deletion.mjs` defines the foundation contract for user-requested local deletion of account, cache, agent, and wallet scopes. Deletion plans must show exact irreversible confirmation text, list the storage locations that a platform wrapper will clear, destroy local secure references before removing encrypted stores, and report progress through adapter hooks without exposing private messages, prompts, wallet signing material, or credential values.
+
+Cache deletion can use a recovery window where platform wrappers hide cache entries immediately and purge them after the deadline. Account, agent, and wallet scopes do not use a recovery window because their deletion depends on destroying local key or provider references. This is intentional: encrypted data that loses its device-local key must be treated as unrecoverable.
+
+The secure deletion workflow must describe filesystem limitations before release. Android and iOS flash storage, APFS snapshots, journaling filesystems, desktop SSD wear-leveling, search indexes, browser IndexedDB and CacheStorage internals, operating system backups, cloud backups, and external backup tools can retain remnants outside app control. A human security review must confirm the platform storage inventory, backup exclusions or disclosure, diagnostics redaction, and release notes before `humanReview.releaseBlocker` can be cleared for a platform wrapper.
+
 ## Human Security Review
 
 Security and privacy changes require CODEOWNERS review by a human maintainer. Before release, request a human security review that covers:
@@ -92,5 +101,6 @@ Security and privacy changes require CODEOWNERS review by a human maintainer. Be
 - Any changes to secret patterns or allowlisted fixtures.
 - Platform secure storage bindings and diagnostic redaction behavior.
 - Hardware security key platform capability detection, relying-party id and origin binding, registration and assertion verification boundaries, explicit fallback behavior, and release enablement flags.
+- Secure data deletion storage inventories, filesystem limitations, backup behavior, irreversible confirmation copy, cache recovery-window behavior, and deletion diagnostics redaction.
 - Credential rotation notes for Telegram, proxy, LLM provider, message database, TON, agent memory, sync, and CI credentials.
 - Confirmation that release notes, screenshots, fixtures, logs, and pull request text do not include secrets or private message content.
