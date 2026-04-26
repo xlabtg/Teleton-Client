@@ -230,6 +230,23 @@ test('portable settings export excludes local secrets and private agent memory f
   assert.doesNotMatch(serialized, /cloudAgentToken|telegramApiHash|keychain:|env:TELEGRAM_API_HASH/);
   assert.equal(exported.settings.agent.memory, undefined);
   assert.equal(exported.settings.security.agentMemoryKeyRef, undefined);
+
+  const cloudExported = exportPortableTeletonSettings({
+    agent: {
+      mode: 'cloud',
+      allowCloudProcessing: true,
+      providerConfig: {
+        id: 'teleton-cloud',
+        type: 'cloud',
+        modelId: 'teleton-cloud-default',
+        endpointUrl: 'https://agent.teleton.example/v1',
+        tokenRef: 'secret:teleton-agent-token'
+      }
+    }
+  });
+
+  assert.equal(cloudExported.settings.agent.providerConfig.tokenRef, undefined);
+  assert.doesNotMatch(JSON.stringify(cloudExported), /secret:teleton-agent-token/);
 });
 
 test('portable settings import validates version and previews changes before apply', () => {
@@ -260,6 +277,8 @@ test('portable settings import validates version and previews changes before app
     'proxy.entries[].secretRef',
     'proxy.entries[].usernameRef',
     'proxy.entries[].passwordRef',
+    'agent.providerConfig.apiKeyRef',
+    'agent.providerConfig.tokenRef',
     'security.agentMemoryKeyRef',
     'security.secretRefs',
     'agent.memory'
