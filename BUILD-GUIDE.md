@@ -31,6 +31,16 @@ android/app/build/outputs/apk/debug/app-debug.apk
 
 The contract declares package `dev.teleton.client`, entry activity `dev.teleton.client.MainActivity`, Android notification channels, WorkManager jobs for message and TON synchronization, an app-private foreground service for the local Teleton Agent runtime, and deep-link routing for Telegram and TON flows. See `docs/android-wrapper.md` for the platform API mapping.
 
+## iOS Wrapper
+
+The iOS wrapper contract in `src/platform/ios-wrapper.mjs` selects Swift, SwiftUI, and Xcode for the future native shell. The debug simulator artifact contract is a runnable app bundle at:
+
+```text
+ios/build/Build/Products/Debug-iphonesimulator/TeletonClient.app
+```
+
+The contract declares bundle identifier `dev.teleton.client`, app target and scheme `TeletonClient`, Keychain Services references for TDLib credentials, agent memory keys, proxy credentials, and TON wallet references, APNs notification request mapping, BGTaskScheduler jobs for agent runtime, message sync, and TON status refresh, and URL scheme or Universal Link routing for Telegram and TON flows. See `docs/ios-wrapper.md` for the platform API mapping and App Store review constraints.
+
 ## Local Checks
 
 Run the same checks used by CI:
