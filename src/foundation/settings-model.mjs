@@ -17,6 +17,7 @@ export const PORTABLE_SETTINGS_EXCLUDED_FIELDS = Object.freeze([
   'agent.providerConfig.apiKeyRef',
   'agent.providerConfig.tokenRef',
   'security.agentMemoryKeyRef',
+  'security.messageDatabaseKeyRef',
   'security.secretRefs',
   'agent.memory'
 ]);
@@ -70,6 +71,8 @@ export const DEFAULT_TELETON_SETTINGS = deepFreeze({
     redactSensitiveNotifications: true,
     encryptAgentMemory: true,
     agentMemoryKeyRef: null,
+    encryptMessageDatabase: true,
+    messageDatabaseKeyRef: null,
     secretRefs: {},
     hardwareKeys: DEFAULT_HARDWARE_SECURITY_KEY_SETTINGS,
     twoFactor: {
@@ -139,6 +142,7 @@ function redactPortableSettings(settings) {
 
   if (portable.security) {
     delete portable.security.agentMemoryKeyRef;
+    delete portable.security.messageDatabaseKeyRef;
     delete portable.security.secretRefs;
   }
 
@@ -565,6 +569,10 @@ function normalizeSecurity(value, errors) {
       securityInput.redactSensitiveNotifications ?? DEFAULT_TELETON_SETTINGS.security.redactSensitiveNotifications,
     encryptAgentMemory: securityInput.encryptAgentMemory ?? DEFAULT_TELETON_SETTINGS.security.encryptAgentMemory,
     agentMemoryKeyRef: securityInput.agentMemoryKeyRef ?? DEFAULT_TELETON_SETTINGS.security.agentMemoryKeyRef,
+    encryptMessageDatabase:
+      securityInput.encryptMessageDatabase ?? DEFAULT_TELETON_SETTINGS.security.encryptMessageDatabase,
+    messageDatabaseKeyRef:
+      securityInput.messageDatabaseKeyRef ?? DEFAULT_TELETON_SETTINGS.security.messageDatabaseKeyRef,
     secretRefs,
     hardwareKeys: hardwareKeysResult.settings,
     twoFactor
@@ -574,6 +582,7 @@ function normalizeSecurity(value, errors) {
   booleanError(security.biometricUnlock, 'Security biometricUnlock', errors);
   booleanError(security.redactSensitiveNotifications, 'Security redactSensitiveNotifications', errors);
   booleanError(security.encryptAgentMemory, 'Security encryptAgentMemory', errors);
+  booleanError(security.encryptMessageDatabase, 'Security encryptMessageDatabase', errors);
 
   if (!Number.isInteger(security.lockAfterMinutes) || security.lockAfterMinutes < 0 || security.lockAfterMinutes > 1440) {
     errors.push('Security lockAfterMinutes must be an integer between 0 and 1440.');
@@ -589,6 +598,16 @@ function normalizeSecurity(value, errors) {
 
   if (security.agentMemoryKeyRef !== null && !isSecureReference(security.agentMemoryKeyRef)) {
     errors.push('Security agentMemoryKeyRef must be null or a secure reference such as keychain:name or keystore:name.');
+  }
+
+  if (security.encryptMessageDatabase !== true) {
+    errors.push('Message database encryption must remain enabled.');
+  }
+
+  if (security.messageDatabaseKeyRef !== null && !isSecureReference(security.messageDatabaseKeyRef)) {
+    errors.push(
+      'Security messageDatabaseKeyRef must be null or a secure reference such as keychain:name or keystore:name.'
+    );
   }
 
   return security;

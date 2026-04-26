@@ -35,6 +35,8 @@ test('settings defaults are serializable and keep agent and proxy disabled', () 
   assert.equal(settings.security.redactSensitiveNotifications, true);
   assert.equal(settings.security.encryptAgentMemory, true);
   assert.equal(settings.security.agentMemoryKeyRef, null);
+  assert.equal(settings.security.encryptMessageDatabase, true);
+  assert.equal(settings.security.messageDatabaseKeyRef, null);
   assert.deepEqual(JSON.parse(JSON.stringify(settings)), settings);
 });
 
@@ -67,6 +69,8 @@ test('settings validation rejects invalid proxy, notification, agent, and secret
     security: {
       encryptAgentMemory: false,
       agentMemoryKeyRef: 'plain-memory-key',
+      encryptMessageDatabase: false,
+      messageDatabaseKeyRef: 'plain-database-key',
       secretRefs: {
         cloudAgentToken: 'raw-token'
       }
@@ -80,6 +84,8 @@ test('settings validation rejects invalid proxy, notification, agent, and secret
   assert.match(result.errors.join('\n'), /secure reference/);
   assert.match(result.errors.join('\n'), /Agent memory encryption must remain enabled/);
   assert.match(result.errors.join('\n'), /agentMemoryKeyRef/);
+  assert.match(result.errors.join('\n'), /Message database encryption must remain enabled/);
+  assert.match(result.errors.join('\n'), /messageDatabaseKeyRef/);
   assert.match(result.errors.join('\n'), /Notification category wallet/);
   assert.match(result.errors.join('\n'), /Quiet hours start/);
 });
@@ -220,6 +226,7 @@ test('portable settings export excludes local secrets and private agent memory f
       requireDeviceLock: true,
       lockAfterMinutes: 10,
       agentMemoryKeyRef: 'keychain:teleton.agentMemory.desktop.v1',
+      messageDatabaseKeyRef: 'keychain:teleton.messageDatabase.desktop.v1',
       secretRefs: {
         cloudAgentToken: 'keychain:teleton.agent.cloud',
         telegramApiHash: 'env:TELEGRAM_API_HASH'
@@ -235,6 +242,7 @@ test('portable settings export excludes local secrets and private agent memory f
   assert.equal(exported.settings.agent.mode, 'local');
   assert.equal(exported.settings.proxy.entries[0].secretRef, undefined);
   assert.equal(exported.settings.security.agentMemoryKeyRef, undefined);
+  assert.equal(exported.settings.security.messageDatabaseKeyRef, undefined);
   assert.deepEqual(exported.settings.security.secretRefs, undefined);
   assert.doesNotMatch(serialized, /cloudAgentToken|telegramApiHash|keychain:|env:TELEGRAM_API_HASH/);
   assert.equal(exported.settings.agent.memory, undefined);
@@ -267,6 +275,7 @@ test('portable settings import validates version and previews changes before app
       requireDeviceLock: true,
       lockAfterMinutes: 15,
       agentMemoryKeyRef: 'keychain:teleton.agentMemory.desktop.v1',
+      messageDatabaseKeyRef: 'keychain:teleton.messageDatabase.desktop.v1',
       secretRefs: { cloudAgentToken: 'keychain:teleton.agent.cloud' }
     }
   });
@@ -289,6 +298,7 @@ test('portable settings import validates version and previews changes before app
     'agent.providerConfig.apiKeyRef',
     'agent.providerConfig.tokenRef',
     'security.agentMemoryKeyRef',
+    'security.messageDatabaseKeyRef',
     'security.secretRefs',
     'agent.memory'
   ]);
@@ -299,11 +309,13 @@ test('portable settings import validates version and previews changes before app
     'security.lockAfterMinutes'
   ]);
   assert.equal(preview.settings.security.agentMemoryKeyRef, 'keychain:teleton.agentMemory.desktop.v1');
+  assert.equal(preview.settings.security.messageDatabaseKeyRef, 'keychain:teleton.messageDatabase.desktop.v1');
   assert.deepEqual(preview.settings.security.secretRefs, { cloudAgentToken: 'keychain:teleton.agent.cloud' });
 
   const imported = importPortableTeletonSettings(exported, { currentSettings: current });
   assert.equal(imported.language, 'ru');
   assert.equal(imported.security.agentMemoryKeyRef, 'keychain:teleton.agentMemory.desktop.v1');
+  assert.equal(imported.security.messageDatabaseKeyRef, 'keychain:teleton.messageDatabase.desktop.v1');
 
   const malformed = previewPortableTeletonSettingsImport({ schemaVersion: SETTINGS_SCHEMA_VERSION, settings: 'bad' });
   assert.equal(malformed.valid, false);

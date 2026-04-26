@@ -45,6 +45,12 @@ Proxy settings follow the same rule. MTProto requires `secretRef`, while SOCKS5 
 
 HTTP CONNECT maps to TDLib's HTTP proxy type with `httpOnly: true` where platform networking permits it. The shared adapter enables this path for Android, iOS, and desktop bridge callers. Web-compatible callers receive an `unsupported_proxy_platform` error and should use MTProto, SOCKS5, a local companion service, or a trusted backend bridge instead.
 
+## Message Database Storage
+
+`src/tdlib/message-database-storage.mjs` defines the shared local cache encryption boundary for future TDLib message database adapters. The encrypted snapshot covers cached messages, search indexes, and attachments metadata with AES-256-GCM; platform wrappers resolve the device-local database data key through Keychain, Keystore, desktop credential vaults, or reviewed browser secure storage fallbacks.
+
+Restore states are explicit so wrappers can avoid destructive recovery paths. Locked secure storage, missing keys, failed authentication tags, and legacy plaintext snapshots preserve the original snapshot and require explicit user consent before reset or deletion. Legacy plaintext snapshots can be migrated by validating the snapshot shape, encrypting it, and writing the encrypted snapshot back through the platform persistence hook.
+
 ## Mock Testing
 
 `createMockTdlibClientAdapter` implements the same public contract without TDLib, Telegram network access, phone numbers, bot tokens, proxy secrets, or live user credentials. Tests can seed chat fixtures, send mock messages, subscribe to mock updates, and verify proxy command mapping while preserving the same validation path used by native bridge adapters.
