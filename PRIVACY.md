@@ -13,6 +13,7 @@ This repository currently contains foundation automation, configuration models, 
 - Autonomous agent actions must require clear user consent and configurable limits.
 - LLM provider credentials must be stored as secure references such as `env:NAME`, `keychain:name`, `keystore:name`, or `secret:name`; raw API keys and tokens must not be committed to settings, logs, issues, or pull requests.
 - Proxy credentials and MTProto secrets must be represented by secure references, not hardcoded values.
+- Settings synchronization is opt-in and disabled by default. Sync payloads exclude secure references, proxy credentials, cloud provider credential references, local security controls, and private agent memory.
 - TON private keys and wallet credentials must use platform secure storage or user-approved wallet providers.
 
 ## Planned Data Flows
@@ -21,11 +22,15 @@ Telegram traffic will be handled through TDLib and optional user-configured prox
 
 Agent provider configuration supports local runtimes, approved cloud providers, and approved custom HTTPS endpoints. Local providers keep prompts, message context, and model execution on the device or local bridge and do not store shared provider credentials. Cloud and custom endpoint providers may receive selected prompts, message context, action metadata, and provider telemetry after explicit cloud processing opt-in. Their API keys and bearer tokens are represented only through secure references resolved by platform secure storage at runtime.
 
+Settings synchronization can move safe appearance, notification, and non-activating agent preference fields between devices only after explicit user enablement. Platform adapters must encrypt sync envelopes before storage or transport, and each device must resolve its own local encryption key reference. Sync does not copy provider tokens, proxy secrets, secure storage keys, local device lock settings, or agent memory.
+
 ## User Controls
 
 The planned agent modes are `off`, `local`, `cloud`, and `hybrid`. The default is `off`. Users must be able to switch modes, set action limits, review sensitive actions, and disable automation without losing access to standard messaging features.
 
 Cloud-capable provider use requires explicit cloud processing opt-in before activation. Users can clear or replace provider references without exposing the underlying credential value through shared settings snapshots.
+
+Users can leave cross-device settings synchronization disabled. Enabling sync on one device does not enable cloud-capable agent modes or copy sync credentials to another device; each device must opt in and provide local secure storage access independently.
 
 ## Security Reporting
 

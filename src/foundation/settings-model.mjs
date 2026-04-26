@@ -1,4 +1,5 @@
 import { createAgentSettings, validateAgentSettings } from './agent-settings.mjs';
+import { AGENT_PROVIDER_SECRET_FIELDS } from './agent-provider-config.mjs';
 import { createPublicProxyCatalog, validatePublicProxyCatalog } from './public-proxy-catalog.mjs';
 import { isSecureReference, validateProxyConfig } from './proxy-settings.mjs';
 
@@ -8,6 +9,8 @@ export const PORTABLE_SETTINGS_EXCLUDED_FIELDS = Object.freeze([
   'proxy.entries[].secretRef',
   'proxy.entries[].usernameRef',
   'proxy.entries[].passwordRef',
+  'agent.providerConfig.apiKeyRef',
+  'agent.providerConfig.tokenRef',
   'security.agentMemoryKeyRef',
   'security.secretRefs',
   'agent.memory'
@@ -124,6 +127,12 @@ function redactPortableSettings(settings) {
   }
 
   if (portable.agent) {
+    if (portable.agent.providerConfig) {
+      for (const field of AGENT_PROVIDER_SECRET_FIELDS) {
+        delete portable.agent.providerConfig[field];
+      }
+    }
+
     delete portable.agent.memory;
   }
 
