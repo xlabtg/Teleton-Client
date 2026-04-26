@@ -38,6 +38,10 @@ The gesture plan includes a collision report for duplicate gestures in the same 
 
 Gesture accessibility requirements match the desktop shortcut contract: every gesture route must also be reachable through visible controls, keyboard navigation where available, and TalkBack actions. Agent quick action and TON transfer gestures are `review-required`, keep explicit confirmation screens, and can be removed through `input.riskyActionBindings.enabled` or per-action disabled ids.
 
+## Hardware Security Keys
+
+Android hardware key support must use the shared capability plan before registration, account protection, or high-risk action prompts are shown. Native sources should expose Credential Manager public-key credential support for passkeys and hardware-backed FIDO authenticators through a platform bridge. If Credential Manager or public-key credentials are unavailable, the wrapper returns the configured fallback behavior rather than attempting a partial authenticator flow.
+
 ## Deep Links
 
 `MainActivity` is the single Android deep-link entry point. It uses `android.intent.action.VIEW` with `DEFAULT` and `BROWSABLE` categories for the supported schemes `teleton`, `tg`, `ton`, and verified `https` app links.

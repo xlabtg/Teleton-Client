@@ -1,5 +1,9 @@
 import { createAgentSettings, validateAgentSettings } from './agent-settings.mjs';
 import { AGENT_PROVIDER_SECRET_FIELDS } from './agent-provider-config.mjs';
+import {
+  DEFAULT_HARDWARE_SECURITY_KEY_SETTINGS,
+  normalizeHardwareSecurityKeySettings
+} from './hardware-security-key.mjs';
 import { createPublicProxyCatalog, validatePublicProxyCatalog } from './public-proxy-catalog.mjs';
 import { PUSH_NOTIFICATION_CATEGORIES } from './push-notifications.mjs';
 import { isSecureReference, validateProxyConfig } from './proxy-settings.mjs';
@@ -67,6 +71,7 @@ export const DEFAULT_TELETON_SETTINGS = deepFreeze({
     encryptAgentMemory: true,
     agentMemoryKeyRef: null,
     secretRefs: {},
+    hardwareKeys: DEFAULT_HARDWARE_SECURITY_KEY_SETTINGS,
     twoFactor: {
       passwordHintsEnabled: true,
       recoveryGuidanceEnabled: true,
@@ -545,6 +550,13 @@ function normalizeSecurity(value, errors) {
   booleanError(twoFactor.recoveryGuidanceEnabled, 'Two-factor recoveryGuidanceEnabled', errors);
   booleanError(twoFactor.failureFeedbackEnabled, 'Two-factor failureFeedbackEnabled', errors);
 
+  const hardwareKeysResult = normalizeHardwareSecurityKeySettings(
+    securityInput.hardwareKeys ?? DEFAULT_TELETON_SETTINGS.security.hardwareKeys
+  );
+  for (const error of hardwareKeysResult.errors) {
+    errors.push(error);
+  }
+
   const security = {
     requireDeviceLock: securityInput.requireDeviceLock ?? DEFAULT_TELETON_SETTINGS.security.requireDeviceLock,
     biometricUnlock: securityInput.biometricUnlock ?? DEFAULT_TELETON_SETTINGS.security.biometricUnlock,
@@ -554,6 +566,7 @@ function normalizeSecurity(value, errors) {
     encryptAgentMemory: securityInput.encryptAgentMemory ?? DEFAULT_TELETON_SETTINGS.security.encryptAgentMemory,
     agentMemoryKeyRef: securityInput.agentMemoryKeyRef ?? DEFAULT_TELETON_SETTINGS.security.agentMemoryKeyRef,
     secretRefs,
+    hardwareKeys: hardwareKeysResult.settings,
     twoFactor
   };
 

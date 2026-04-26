@@ -23,6 +23,7 @@ This repository is in the foundation phase. The current implementation establish
 - Shared offline synchronization contract that marks cached offline state, lists unsupported live-only actions, stores queued writes encrypted at rest, and supports retry, conflict, and cancellation states before replay.
 - Baseline TDLib client adapter contract with mock-backed tests.
 - TDLib two-factor authentication state controller for password-required, recovery-required, failed, cancelled, and completed flows without storing passwords or recovery codes in shared state.
+- Hardware security key foundation contract for WebAuthn/FIDO registration and assertion flows, platform capability checks, explicit fallback authentication, and release review gates.
 - TON wallet adapter contract for balance lookup, receive address display, transfer draft preparation, and status checks without plaintext private keys.
 - TON swap adapter contract for STON.fi and DeDust quote lookup plus confirmation-gated swap transaction draft preparation.
 - TON NFT gallery adapter contract for owned item lookup, collection/item metadata loading, sanitized media metadata, and loading/empty/failed/ready gallery states.
@@ -71,7 +72,7 @@ The project is intended to evolve through these layers:
 4. TON blockchain integrations for wallet, transfers, swaps, NFTs, staking, and DNS.
 5. Security and privacy controls for credentials, user consent, and auditability.
 
-See `docs/architecture.md`, `docs/backlog.md`, `docs/tdlib-adapter.md`, `docs/android-wrapper.md`, `docs/ios-wrapper.md`, `docs/desktop-wrapper.md`, `docs/tablet-layout.md`, `docs/web-pwa-wrapper.md`, `docs/security-audit.md`, `docs/license-matrix.md`, and `docs/release-strategy.md` for the current foundation plan. The agent settings, local runtime, input action map, Android wrapper, iOS wrapper, desktop wrapper, tablet layout, PWA, security audit, and license matrix sections record the shared settings UI contract, supported runtime directions, platform execution boundaries, shortcut and gesture behavior, responsive tablet behavior, web installability behavior, credential rotation expectations, secure storage review requirements, upstream license obligations, and remaining packaging gaps for Android, iOS, desktop, and web wrappers.
+See `docs/architecture.md`, `docs/backlog.md`, `docs/tdlib-adapter.md`, `docs/android-wrapper.md`, `docs/ios-wrapper.md`, `docs/desktop-wrapper.md`, `docs/tablet-layout.md`, `docs/web-pwa-wrapper.md`, `docs/security-audit.md`, `docs/license-matrix.md`, and `docs/release-strategy.md` for the current foundation plan. The agent settings, local runtime, input action map, Android wrapper, iOS wrapper, desktop wrapper, tablet layout, PWA, security audit, and license matrix sections record the shared settings UI contract, supported runtime directions, platform execution boundaries, shortcut and gesture behavior, hardware security key capability checks, responsive tablet behavior, web installability behavior, credential rotation expectations, secure storage review requirements, upstream license obligations, and remaining packaging gaps for Android, iOS, desktop, and web wrappers.
 
 ## Contribution Templates
 
