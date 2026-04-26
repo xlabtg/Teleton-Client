@@ -7,6 +7,7 @@
   "scripts": {
     "test": "node --test test/*.test.mjs",
     "prepare:hooks": "git config core.hooksPath .githooks",
+    "audit:security": "node scripts/audit-security.mjs",
     "validate:secrets": "node scripts/validate-secrets.mjs",
     "validate:foundation": "node scripts/validate-foundation.mjs",
     "validate:release": "node scripts/validate-release.mjs",

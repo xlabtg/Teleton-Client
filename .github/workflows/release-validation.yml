@@ -26,6 +26,15 @@ jobs:
       - name: Validate release metadata
         run: npm run validate:release
 
+      - name: Generate security audit report
+        run: npm run audit:security -- --output security-audit-report.md
+
+      - name: Upload security audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-audit-report
+          path: security-audit-report.md
+
       - name: Preview generated changelog
         run: npm run changelog
         env:

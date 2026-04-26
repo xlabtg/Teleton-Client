@@ -14,6 +14,25 @@ The scan reads git-tracked text files and rejects high-confidence committed secr
 
 The only allowlisted matches are synthetic fixtures in redaction tests. New allowlist entries require a narrow file path, pattern id, line marker, and human maintainer review.
 
+## Release Audit Report
+
+Generate attachable release-review evidence with:
+
+```sh
+npm run audit:security -- --output security-audit-report.md
+```
+
+The generated Markdown report records the release gate status, automated security checks, redacted secret findings if any are found, and manual release sign-off checkboxes. CI runs the same command, and the release validation workflow uploads `security-audit-report.md` as a review artifact.
+
+| Audit category | Automated evidence | Required human evidence |
+| --- | --- | --- |
+| Secrets | `npm run validate:secrets` scans git-tracked text files and fails on common secret patterns. | Security reviewer confirms credential rotation, secure storage, logs, screenshots, fixtures, pull request text, and release notes are redacted. |
+| Dependency risk | `package.json` dependency metadata and lockfile coverage are checked, and `docs/license-matrix.md` must track upstream license and source publication obligations. | Legal or release reviewer confirms selected dependencies match the license matrix and approves TDLib, Telegram reference, Teleton Agent, TON SDK, copyleft, notice, and app-store obligations. |
+| Permission boundaries | CODEOWNERS coverage, workflow `contents: read` permissions, secure storage review language, and non-publishing release validation are checked. | Security reviewer confirms platform bridges resolve secrets locally, redact diagnostics, and keep elevated permissions out of unreviewed pull request workflows. |
+| Release readiness | `npm run validate:release`, package private state, the audit command, and release workflow artifact generation are checked. | Release manager attaches the report, records validation results, confirms changelog redaction, and keeps publication disabled until public release approval. |
+
+Manual review items must be completed before public release even when automated checks pass.
+
 ## Credential Inventory
 
 | Credential source | Current owner boundary | Required storage | Rotation trigger |

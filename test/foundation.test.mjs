@@ -33,7 +33,10 @@ test('foundation artifacts required by issue 1 are present', () => {
     'docs/security-audit.md',
     'docs/license-matrix.md',
     'docs/contributing-templates.md',
-    'docs/tdlib-adapter.md'
+    'docs/tdlib-adapter.md',
+    'src/foundation/security-audit.mjs',
+    'scripts/audit-security.mjs',
+    'test/security-audit-report.test.mjs'
   ];
 
   for (const requiredFile of requiredFiles) {
@@ -103,6 +106,7 @@ test('pre-commit hook is installable and runs deterministic local checks', async
   assert.match(hook, /^#!\/usr\/bin\/env sh\n/, 'pre-commit hook should be directly executable');
   assert.match(hook, /npm test/, 'pre-commit hook should run the test suite');
   assert.match(hook, /npm run validate:secrets/, 'pre-commit hook should run the secret scan');
+  assert.match(hook, /npm run audit:security/, 'pre-commit hook should generate security audit evidence');
   assert.match(hook, /npm run validate:foundation/, 'pre-commit hook should run foundation validation');
   assert.match(hook, /npm run validate:release/, 'pre-commit hook should run release metadata validation');
   assert.match(hook, /npm run decompose:dry-run/, 'pre-commit hook should run the deterministic dry run');
@@ -115,6 +119,10 @@ test('security audit documents scanning, rotation, secure storage, and human rev
   const ci = await readFile(pathFor('.github/workflows/ci.yml'), 'utf8');
 
   assert.match(audit, /npm run validate:secrets/);
+  assert.match(audit, /npm run audit:security -- --output security-audit-report\.md/);
+  assert.match(audit, /Dependency risk/i);
+  assert.match(audit, /Permission boundaries/i);
+  assert.match(audit, /Release readiness/i);
   assert.match(audit, /Credential Inventory/i);
   assert.match(audit, /Credential Rotation/i);
   assert.match(audit, /Secure Storage Review/i);
@@ -129,8 +137,10 @@ test('security audit documents scanning, rotation, secure storage, and human rev
   assert.match(contributing, /docs\/security-audit\.md/);
   assert.match(contributing, /docs\/license-matrix\.md/);
   assert.match(buildGuide, /Credential Inventory/i);
+  assert.match(buildGuide, /security-audit-report\.md/);
   assert.match(buildGuide, /docs\/license-matrix\.md/);
   assert.match(ci, /npm run validate:secrets/);
+  assert.match(ci, /npm run audit:security/);
 });
 
 test('epic backlog decomposes issue 1 into prioritized phases', async () => {
