@@ -159,6 +159,7 @@ test('agent autonomy modes match the epic acceptance criteria', async () => {
 test('proxy settings model covers supported proxy types without hardcoded secrets', async () => {
   const { PROXY_PROTOCOLS, validateProxyConfig } = await import('../src/foundation/proxy-settings.mjs');
   const { PROXY_ROUTE_TYPES, createProxyManager } = await import('../src/foundation/proxy-manager.mjs');
+  const { createPublicProxyCatalog } = await import('../src/foundation/public-proxy-catalog.mjs');
 
   assert.deepEqual(PROXY_PROTOCOLS, ['mtproto', 'socks5', 'http-connect']);
   assert.deepEqual(PROXY_ROUTE_TYPES, ['direct', 'mtproto', 'socks5', 'http-connect']);
@@ -167,4 +168,5 @@ test('proxy settings model covers supported proxy types without hardcoded secret
   assert.equal(validateProxyConfig({ protocol: 'http-connect', host: 'proxy.example', port: 8080 }).valid, true);
   assert.equal(validateProxyConfig({ protocol: 'mtproto', host: 'proxy.example', port: 443, secret: 'hardcoded-secret' }).valid, false);
   assert.equal(createProxyManager().chooseRoute({ direct: true }).type, 'direct');
+  assert.equal(createPublicProxyCatalog().enabled, false);
 });

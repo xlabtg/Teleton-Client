@@ -1,4 +1,5 @@
 import { createAgentSettings, validateAgentSettings } from './agent-settings.mjs';
+import { createPublicProxyCatalog, validatePublicProxyCatalog } from './public-proxy-catalog.mjs';
 import { isSecureReference, validateProxyConfig } from './proxy-settings.mjs';
 
 export const SETTINGS_SCHEMA_VERSION = 1;
@@ -17,7 +18,8 @@ export const DEFAULT_TELETON_SETTINGS = deepFreeze({
     enabled: false,
     autoSwitchEnabled: true,
     activeProxyId: null,
-    entries: []
+    entries: [],
+    publicCatalog: createPublicProxyCatalog()
   },
   notifications: {
     enabled: true,
@@ -289,8 +291,17 @@ function normalizeProxy(value, errors) {
     enabled,
     autoSwitchEnabled,
     activeProxyId,
-    entries
+    entries,
+    publicCatalog: normalizePublicProxyCatalog(proxyInput.publicCatalog, errors)
   };
+}
+
+function normalizePublicProxyCatalog(value, errors) {
+  const validation = validatePublicProxyCatalog(value);
+
+  errors.push(...validation.errors);
+
+  return validation.catalog ?? createPublicProxyCatalog();
 }
 
 function normalizeQuietHours(value, errors) {

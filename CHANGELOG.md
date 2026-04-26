@@ -19,3 +19,4 @@ Release notes are generated from merged pull requests, then reviewed before publ
 - [006] Configure automated semantic versioning ([#76](https://github.com/xlabtg/Teleton-Client/pull/76); refs #35)
 - Add CODEOWNERS for reviewer assignment ([#77](https://github.com/xlabtg/Teleton-Client/pull/77); refs #36)
 - Add CONTRIBUTING.md contributor guidelines ([#78](https://github.com/xlabtg/Teleton-Client/pull/78); refs #37)
+- [019] Curate optional public MTProto proxy catalog ([#90](https://github.com/xlabtg/Teleton-Client/pull/90); refs #45)
