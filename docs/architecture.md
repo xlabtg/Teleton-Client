@@ -22,7 +22,7 @@ Teleton Client is planned as a layered client where protocol, automation, wallet
 - Proxy settings UI shells use shared view state for list items, edit forms, test status, auto-switch preferences, and active route metadata. Display snapshots expose only configured flags for secrets, while settings persistence keeps secure references for platform storage resolution.
 - Proxy usage statistics are local diagnostics records keyed by proxy id. They track attempts, successes, failures, latency samples, and last-used time separately from proxy configuration and never include proxy secrets or message contents.
 - Public MTProto proxy catalog use is opt-in and disabled by default. Catalog entries must include source URL/name, source verification notes, freshness timestamps, and per-entry human review metadata before they can be shipped.
-- Local Teleton Agent startup is represented by the `src/foundation/agent-runtime-supervisor.mjs` lifecycle boundary. Platform wrappers supply start, stop, health, and log hooks; the shared supervisor keeps the default runtime local and never requires cloud credentials for startup.
+- Local Teleton Agent startup is represented by the `src/foundation/agent-runtime-supervisor.mjs` lifecycle boundary. Platform wrappers supply start, stop, health, resource, and log hooks; the shared supervisor keeps the default runtime local and never requires cloud credentials for startup.
 - Teleton Agent UI communication is represented by the `src/foundation/agent-ipc-bridge.mjs` contract. It uses versioned IPC envelopes for request, event, response, error, and cancellation flows; UI layers receive incoming message hooks and can distinguish informational events from confirmation-required action proposals.
 - Teleton Agent plugins are represented by the `src/foundation/agent-plugin-registry.mjs` contract. Plugins declare permissions, lifecycle defaults, and IPC compatibility before they can be enabled. Disabled plugins cannot receive events or perform actions, and enable, disable, list, and health-check flows are routed through the agent bridge.
 - Local Teleton Agent memory is represented by the `src/foundation/agent-memory-store.mjs` contract. It encrypts memory snapshots, vector index payloads, and local credential references with AES-256-GCM while platform wrappers keep the raw data key in OS secure storage providers such as Keychain or Keystore.
@@ -39,7 +39,9 @@ The local Teleton Agent lifecycle has four platform targets:
 | Desktop | Child process supervised by the desktop shell with local IPC. | Per-OS binaries, code signing or notarization, crash restart policy, log paths, and IPC endpoint reservation still need implementation. |
 | Web | Browser worker, WebAssembly runtime, or native-host bridge when available. | Browser support matrix, native-host installation permissions, and fallback behavior for unsupported browsers still need implementation. |
 
-The shared supervisor exposes `start`, `stop`, `status`, `health`, and `logs` operations. It accepts a platform adapter so each wrapper can own process management while foundation tests verify idempotent lifecycle behavior and failure state handling.
+The shared supervisor exposes `start`, `stop`, `status`, `health`, `resources`, and `logs` operations. It accepts a platform adapter so each wrapper can own process management while foundation tests verify idempotent lifecycle behavior and failure state handling.
+
+Resource monitoring samples process id, uptime, CPU usage percent, and resident memory bytes when a platform adapter can provide them. The shared thresholds produce `healthy`, `degraded`, or `unavailable` states so UI shells can display agent resource status and diagnostics logs can record high CPU, high memory, or missing metric conditions. Runtime health and resource diagnostics are sanitized before they are stored or emitted, and resource monitoring never includes message content.
 
 ## Agent IPC Bridge
 

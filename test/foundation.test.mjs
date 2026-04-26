@@ -182,7 +182,9 @@ test('local agent runtime lifecycle boundary is documented and credential-free b
   const architecture = await readFile(pathFor('docs/architecture.md'), 'utf8');
 
   assert.deepEqual(AGENT_RUNTIME_PLATFORMS, ['android', 'ios', 'desktop', 'web']);
-  assert.match(architecture, /`start`, `stop`, `status`, `health`, and `logs`/i);
+  assert.match(architecture, /`start`, `stop`, `status`, `health`, `resources`, and `logs`/i);
+  assert.match(architecture, /Resource monitoring samples process id, uptime, CPU usage percent, and resident memory bytes/i);
+  assert.match(architecture, /resource monitoring never includes message content/i);
   assert.match(architecture, /never requires cloud credentials/i);
 
   for (const platform of AGENT_RUNTIME_PLATFORMS) {
