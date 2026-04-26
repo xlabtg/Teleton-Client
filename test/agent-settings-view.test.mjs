@@ -74,3 +74,46 @@ test('agent settings view activates local mode without cloud privacy consent', (
   assert.equal(state.activation.pending, false);
   assert.deepEqual(AGENT_PRIVACY_IMPACT_MODES, ['cloud', 'hybrid']);
 });
+
+test('agent settings view previews portable imports before applying agent changes', () => {
+  const view = createAgentSettingsView({
+    initialSettings: {
+      mode: 'local',
+      model: { provider: 'local', modelId: 'teleton-local-small' },
+      maxAutonomousActionsPerHour: 2
+    }
+  });
+  const exported = view.exportPortableSettings();
+
+  assert.equal(exported.kind, 'teleton.agent.settings.export');
+  assert.equal(exported.settings.mode, 'local');
+
+  const preview = view.previewImport({
+    ...exported,
+    settings: {
+      ...exported.settings,
+      model: { provider: 'openai', modelId: 'gpt-4.1-mini' },
+      maxAutonomousActionsPerHour: 9,
+      memory: { facts: ['private local memory must not import'] },
+      token: 'raw-token'
+    }
+  });
+
+  assert.equal(preview.valid, true);
+  assert.deepEqual(preview.excludedFields, ['memory', 'token', 'apiKey', 'secret']);
+  assert.deepEqual(preview.changes.map((change) => change.path), [
+    'model.provider',
+    'model.modelId',
+    'maxAutonomousActionsPerHour'
+  ]);
+  assert.equal(view.getState().settings.maxAutonomousActionsPerHour, 2);
+
+  const state = view.applyImport(preview);
+  assert.equal(state.settings.model.provider, 'openai');
+  assert.equal(state.settings.maxAutonomousActionsPerHour, 9);
+
+  assert.throws(
+    () => view.previewImport({ kind: 'teleton.agent.settings.export', schemaVersion: 999, settings: {} }),
+    /newer than this client supports/
+  );
+});

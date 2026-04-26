@@ -7,7 +7,10 @@ import {
   TELETON_SETTINGS_SCHEMA,
   createPlatformSettings,
   createTeletonSettings,
+  exportPortableTeletonSettings,
+  importPortableTeletonSettings,
   migrateTeletonSettings,
+  previewPortableTeletonSettingsImport,
   validateTeletonSettings
 } from '../src/foundation/settings-model.mjs';
 
@@ -123,6 +126,112 @@ test('settings migration upgrades legacy payloads and rejects unsupported future
   assert.equal(validateTeletonSettings(migrated).valid, true);
 
   const future = validateTeletonSettings({ schemaVersion: SETTINGS_SCHEMA_VERSION + 1 });
+  assert.equal(future.valid, false);
+  assert.match(future.errors.join('\n'), /newer than this client supports/);
+});
+
+test('portable settings export excludes local secrets and private agent memory fields', () => {
+  const settings = createTeletonSettings({
+    language: 'en-US',
+    theme: 'dark',
+    agent: {
+      mode: 'local',
+      model: { provider: 'local', modelId: 'teleton-local-small' },
+      requireConfirmation: false,
+      maxAutonomousActionsPerHour: 6
+    },
+    proxy: {
+      enabled: true,
+      activeProxyId: 'office',
+      entries: [
+        {
+          id: 'office',
+          protocol: 'mtproto',
+          host: 'proxy.example',
+          port: 443,
+          secretRef: 'keychain:teleton.proxy.office'
+        }
+      ]
+    },
+    security: {
+      requireDeviceLock: true,
+      lockAfterMinutes: 10,
+      agentMemoryKeyRef: 'keychain:teleton.agentMemory.desktop.v1',
+      secretRefs: {
+        cloudAgentToken: 'keychain:teleton.agent.cloud',
+        telegramApiHash: 'env:TELEGRAM_API_HASH'
+      }
+    }
+  });
+
+  const exported = exportPortableTeletonSettings(settings);
+  const serialized = JSON.stringify(exported);
+
+  assert.equal(exported.kind, 'teleton.settings.export');
+  assert.equal(exported.schemaVersion, SETTINGS_SCHEMA_VERSION);
+  assert.equal(exported.settings.agent.mode, 'local');
+  assert.equal(exported.settings.proxy.entries[0].secretRef, undefined);
+  assert.equal(exported.settings.security.agentMemoryKeyRef, undefined);
+  assert.deepEqual(exported.settings.security.secretRefs, undefined);
+  assert.doesNotMatch(serialized, /cloudAgentToken|telegramApiHash|keychain:|env:TELEGRAM_API_HASH/);
+  assert.equal(exported.settings.agent.memory, undefined);
+  assert.equal(exported.settings.security.agentMemoryKeyRef, undefined);
+});
+
+test('portable settings import validates version and previews changes before apply', () => {
+  const current = createTeletonSettings({
+    language: 'en-US',
+    theme: 'light',
+    agent: { mode: 'local', maxAutonomousActionsPerHour: 2 },
+    security: {
+      requireDeviceLock: true,
+      lockAfterMinutes: 15,
+      agentMemoryKeyRef: 'keychain:teleton.agentMemory.desktop.v1',
+      secretRefs: { cloudAgentToken: 'keychain:teleton.agent.cloud' }
+    }
+  });
+  const exported = exportPortableTeletonSettings({
+    ...current,
+    language: 'ru',
+    theme: 'dark',
+    agent: { mode: 'local', maxAutonomousActionsPerHour: 8 },
+    security: { ...current.security, lockAfterMinutes: 30 }
+  });
+
+  const preview = previewPortableTeletonSettingsImport(exported, { currentSettings: current });
+
+  assert.equal(preview.valid, true);
+  assert.equal(preview.schemaVersion, SETTINGS_SCHEMA_VERSION);
+  assert.deepEqual(preview.excludedFields, [
+    'proxy.entries[].secretRef',
+    'proxy.entries[].usernameRef',
+    'proxy.entries[].passwordRef',
+    'security.agentMemoryKeyRef',
+    'security.secretRefs',
+    'agent.memory'
+  ]);
+  assert.deepEqual(preview.changes.map((change) => change.path), [
+    'language',
+    'theme',
+    'agent.maxAutonomousActionsPerHour',
+    'security.lockAfterMinutes'
+  ]);
+  assert.equal(preview.settings.security.agentMemoryKeyRef, 'keychain:teleton.agentMemory.desktop.v1');
+  assert.deepEqual(preview.settings.security.secretRefs, { cloudAgentToken: 'keychain:teleton.agent.cloud' });
+
+  const imported = importPortableTeletonSettings(exported, { currentSettings: current });
+  assert.equal(imported.language, 'ru');
+  assert.equal(imported.security.agentMemoryKeyRef, 'keychain:teleton.agentMemory.desktop.v1');
+
+  const malformed = previewPortableTeletonSettingsImport({ schemaVersion: SETTINGS_SCHEMA_VERSION, settings: 'bad' });
+  assert.equal(malformed.valid, false);
+  assert.match(malformed.errors.join('\n'), /settings must be an object/);
+
+  const future = previewPortableTeletonSettingsImport({
+    kind: 'teleton.settings.export',
+    schemaVersion: SETTINGS_SCHEMA_VERSION + 1,
+    settings: {}
+  });
   assert.equal(future.valid, false);
   assert.match(future.errors.join('\n'), /newer than this client supports/);
 });
