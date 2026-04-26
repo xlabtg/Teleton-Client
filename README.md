@@ -45,9 +45,10 @@ This repository is in the foundation phase. The current implementation establish
 - CI workflow for foundation checks.
 - Automated committed-secret scanning with documented credential rotation and secure storage review requirements.
 - Attachable security audit report for release review evidence across secrets, dependency risk, permission boundaries, and release readiness.
+- Published security policy for supported versions, private vulnerability reporting, coordinated disclosure, and human maintainer review before release.
 - Upstream license matrix for TDLib, Telegram reference clients, Teleton Agent, and TON SDK release review.
 - Documented semantic version source of truth and release metadata validation.
-- Required project documents: `README.md`, `PRIVACY.md`, `LICENSE`, and `BUILD-GUIDE.md`.
+- Required project documents: `README.md`, `SECURITY.md`, `PRIVACY.md`, `LICENSE`, and `BUILD-GUIDE.md`.
 
 ## Quick Start
 
@@ -76,7 +77,7 @@ The project is intended to evolve through these layers:
 4. TON blockchain integrations for wallet, transfers, swaps, NFTs, staking, and DNS.
 5. Security and privacy controls for credentials, user consent, and auditability.
 
-See `docs/architecture.md`, `docs/backlog.md`, `docs/tdlib-adapter.md`, `docs/android-wrapper.md`, `docs/ios-wrapper.md`, `docs/desktop-wrapper.md`, `docs/tablet-layout.md`, `docs/web-pwa-wrapper.md`, `docs/security-audit.md`, `docs/license-matrix.md`, and `docs/release-strategy.md` for the current foundation plan. The agent settings, local runtime, input action map, Android wrapper, iOS wrapper, desktop wrapper, tablet layout, PWA, message database encryption, secure data deletion, security audit, and license matrix sections record the shared settings UI contract, supported runtime directions, platform execution boundaries, shortcut and gesture behavior, hardware security key capability checks, responsive tablet behavior, web installability behavior, credential rotation expectations, secure storage review requirements, upstream license obligations, and remaining packaging gaps for Android, iOS, desktop, and web wrappers.
+See `SECURITY.md`, `docs/architecture.md`, `docs/backlog.md`, `docs/tdlib-adapter.md`, `docs/android-wrapper.md`, `docs/ios-wrapper.md`, `docs/desktop-wrapper.md`, `docs/tablet-layout.md`, `docs/web-pwa-wrapper.md`, `docs/security-audit.md`, `docs/license-matrix.md`, and `docs/release-strategy.md` for the current foundation plan. The agent settings, local runtime, input action map, Android wrapper, iOS wrapper, desktop wrapper, tablet layout, PWA, message database encryption, secure data deletion, security policy, security audit, and license matrix sections record the shared settings UI contract, supported runtime directions, platform execution boundaries, shortcut and gesture behavior, hardware security key capability checks, responsive tablet behavior, web installability behavior, vulnerability reporting expectations, credential rotation expectations, secure storage review requirements, upstream license obligations, and remaining packaging gaps for Android, iOS, desktop, and web wrappers.
 
 ## Contribution Templates
 

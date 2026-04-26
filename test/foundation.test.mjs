@@ -16,6 +16,7 @@ async function readJson(relativePath) {
 test('foundation artifacts required by issue 1 are present', () => {
   const requiredFiles = [
     'README.md',
+    'SECURITY.md',
     'PRIVACY.md',
     'BUILD-GUIDE.md',
     'LICENSE',
@@ -58,6 +59,7 @@ test('CODEOWNERS routes high-risk repository areas to human maintainers', async 
     'scripts/',
     'config/',
     'docs/',
+    'SECURITY.md',
     'PRIVACY.md',
     'BUILD-GUIDE.md',
     'package.json'

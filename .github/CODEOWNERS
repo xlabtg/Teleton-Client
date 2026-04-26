@@ -20,6 +20,7 @@ test/ @xlabtg/teleton-maintainers
 package.json @xlabtg/teleton-maintainers
 
 # Security, privacy, release, and repository automation require human review.
+SECURITY.md @xlabtg/teleton-maintainers
 PRIVACY.md @xlabtg/teleton-maintainers
 LICENSE @xlabtg/teleton-maintainers
 .github/ @xlabtg/teleton-maintainers

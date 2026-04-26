@@ -73,6 +73,8 @@ Run `npm run validate:secrets` before publishing a branch. The scan rejects high
 
 Run `npm run audit:security -- --output security-audit-report.md` during release preparation to generate attachable Markdown evidence for secrets, dependency risk, permission boundaries, release readiness, and required manual sign-offs.
 
+See `SECURITY.md` for supported versions, private vulnerability reporting through GitHub private security advisories, private report expectations, coordinated disclosure timelines, and the human maintainer review required before release.
+
 Security, privacy, CI, release automation, package metadata, shared client code, and CODEOWNERS changes require human maintainer review according to `.github/CODEOWNERS`.
 
 ## Project Documentation
@@ -80,6 +82,7 @@ Security, privacy, CI, release automation, package metadata, shared client code,
 Use these documents as the source of truth for foundation work:
 
 - `README.md` for the current repository status and quick start.
+- `SECURITY.md` for supported versions, private vulnerability reporting, coordinated disclosure, and security policy review.
 - `BUILD-GUIDE.md` for local checks, release metadata, and build expectations.
 - `PRIVACY.md` for data handling principles and security reporting.
 - `docs/security-audit.md` for secret scanning, credential rotation, and secure storage review requirements.
