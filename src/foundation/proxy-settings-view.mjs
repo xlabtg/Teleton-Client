@@ -1,5 +1,6 @@
 import { createDirectRoute, createProxyManager } from './proxy-manager.mjs';
 import { validateProxyConfig } from './proxy-settings.mjs';
+import { createProxyUsageStatisticsStore } from './proxy-usage-statistics.mjs';
 
 const DEFAULT_DRAFT = Object.freeze({
   id: '',
@@ -310,6 +311,7 @@ function createConnectionQuality(settings, healthInput = {}) {
 
 export function createProxySettingsView(options = {}) {
   const manager = createProxyManager(options.initialSettings);
+  const statistics = createProxyUsageStatisticsStore(options.initialStatistics);
   const testProxyAdapter = options.testProxy ?? defaultProxyTest;
   const probe = normalizeProbeOptions(options);
   let draft = entryToDraft(options.draft);
@@ -331,6 +333,7 @@ export function createProxySettingsView(options = {}) {
       },
       connectionQuality: createConnectionQuality(settings, connectionHealth),
       tests: clone(tests),
+      statistics: statistics.getStatistics(),
       preferences: preferencesFromSettings(settings),
       route: routeFromSettings(settings)
     };
@@ -423,6 +426,11 @@ export function createProxySettingsView(options = {}) {
           ...tests,
           [proxyId]: createProxyTestResult(result, elapsedMs, probe)
         };
+        statistics.recordAttempt(proxyId, {
+          reachable: tests[proxyId].reachable,
+          latencyMs: tests[proxyId].latencyMs,
+          usedAt: startedAt + elapsedMs
+        });
       } catch (error) {
         const reason = normalizeFailureReason(error.reason ?? error.code ?? 'adapter_error');
         tests = {
@@ -436,6 +444,10 @@ export function createProxySettingsView(options = {}) {
             probeTarget: probe.target
           }
         };
+        statistics.recordAttempt(proxyId, {
+          reachable: false,
+          usedAt: probe.now()
+        });
       }
 
       return state();
@@ -481,6 +493,13 @@ export function createProxySettingsView(options = {}) {
       );
 
       return state();
+    },
+    clearProxyStatistics(proxyId) {
+      statistics.clearStatistics(proxyId);
+      return state();
+    },
+    exportProxyStatistics() {
+      return statistics.exportStatistics();
     }
   });
 }
