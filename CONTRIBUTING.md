@@ -10,6 +10,7 @@ Start with:
 
 ```sh
 npm test
+npm run validate:secrets
 npm run validate:foundation
 npm run validate:release
 npm run decompose:dry-run
@@ -50,6 +51,7 @@ Run the same checks used by CI before opening a pull request and again before as
 
 ```sh
 npm test
+npm run validate:secrets
 npm run validate:foundation
 npm run validate:release
 npm run decompose:dry-run
@@ -65,6 +67,8 @@ Represent sensitive runtime values through environment variables or secure stora
 
 Public issues, pull requests, screenshots, fixtures, and logs must be redacted before sharing. Report vulnerabilities through GitHub private security advisories instead of public issues.
 
+Run `npm run validate:secrets` before publishing a branch. The scan rejects high-confidence secret patterns in committed files and redacts findings in command output. Credential inventory, rotation, secure storage review requirements, and release review steps are documented in `docs/security-audit.md`.
+
 Security, privacy, CI, release automation, package metadata, shared client code, and CODEOWNERS changes require human maintainer review according to `.github/CODEOWNERS`.
 
 ## Project Documentation
@@ -74,6 +78,7 @@ Use these documents as the source of truth for foundation work:
 - `README.md` for the current repository status and quick start.
 - `BUILD-GUIDE.md` for local checks, release metadata, and build expectations.
 - `PRIVACY.md` for data handling principles and security reporting.
+- `docs/security-audit.md` for secret scanning, credential rotation, and secure storage review requirements.
 - `docs/architecture.md` for planned layers and integration boundaries.
 - `docs/tdlib-adapter.md` for TDLib adapter and credential handling rules.
 - `docs/release-strategy.md` for release metadata policy.

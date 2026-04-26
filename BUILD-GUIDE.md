@@ -81,6 +81,7 @@ Run the same checks used by CI:
 
 ```sh
 npm test
+npm run validate:secrets
 npm run validate:foundation
 npm run validate:release
 npm run decompose:dry-run
@@ -125,6 +126,10 @@ node scripts/decompose-epic.mjs --create --skip-label-create --repo xlabtg/Telet
 ## Environment
 
 Do not hardcode Telegram API credentials, proxy secrets, TON wallet secrets, cloud model tokens, or agent keys in source files. Use environment variables or platform secure storage references such as `env:TELETON_MTPROTO_SECRET`, `keychain:teleton-agent-token`, or `keystore:ton-wallet`.
+
+Run `npm run validate:secrets` to scan git-tracked files for high-confidence secret patterns before committing or opening a pull request. The command redacts suspected values in output and allows only narrow synthetic fixtures used by redaction tests.
+
+Use `docs/security-audit.md` as the credential inventory and rotation source of truth. It records Telegram, proxy, LLM provider, TON, agent memory, settings sync, and CI credential handling; platform secure storage review requirements; and the human security review required before release.
 
 ## TON Testnet Checks
 

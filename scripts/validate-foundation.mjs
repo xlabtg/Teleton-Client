@@ -23,10 +23,14 @@ const requiredFiles = [
   'docs/contributing-templates.md',
   'docs/architecture.md',
   'docs/release-strategy.md',
+  'docs/security-audit.md',
   'docs/backlog.md',
   'docs/tdlib-adapter.md',
+  'src/foundation/secret-audit.mjs',
   'src/foundation/agent-runtime-supervisor.mjs',
   'test/agent-runtime-supervisor.test.mjs',
+  'scripts/validate-secrets.mjs',
+  'test/secret-audit.test.mjs',
   'src/foundation/agent-action-history.mjs',
   'test/agent-action-history.test.mjs',
   'src/foundation/agent-plugin-registry.mjs',
@@ -120,6 +124,7 @@ for (const subtask of manifest.subtasks) {
 const contributing = await readFile(new URL('CONTRIBUTING.md', root), 'utf8');
 const requiredContributingPatterns = [
   /npm test/,
+  /npm run validate:secrets/,
   /npm run validate:foundation/,
   /npm run validate:release/,
   /npm run decompose:dry-run/,
@@ -136,12 +141,46 @@ for (const pattern of requiredContributingPatterns) {
   assert.match(contributing, pattern, `CONTRIBUTING.md must include ${pattern}`);
 }
 
+const packageJson = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
+assert.equal(
+  packageJson.scripts['validate:secrets'],
+  'node scripts/validate-secrets.mjs',
+  'package.json must expose the secret validation command'
+);
+
+const preCommitHook = await readFile(new URL('.githooks/pre-commit', root), 'utf8');
+assert.match(preCommitHook, /npm run validate:secrets/, 'pre-commit hook must run the secret scan');
+
+const ciWorkflow = await readFile(new URL('.github/workflows/ci.yml', root), 'utf8');
+assert.match(ciWorkflow, /npm run validate:secrets/, 'CI must run the secret scan');
+
+const securityAudit = await readFile(new URL('docs/security-audit.md', root), 'utf8');
+const requiredSecurityAuditPatterns = [
+  /npm run validate:secrets/,
+  /Credential Inventory/i,
+  /Credential Rotation/i,
+  /Secure Storage Review/i,
+  /Human Security Review/i,
+  /before release/i,
+  /Telegram API credentials/i,
+  /MTProto, SOCKS5, and HTTP CONNECT proxy credentials/i,
+  /LLM provider API keys/i,
+  /TON wallet private keys/i,
+  /Agent memory encryption keys/i,
+  /Settings sync encryption keys/i
+];
+
+for (const pattern of requiredSecurityAuditPatterns) {
+  assert.match(securityAudit, pattern, `docs/security-audit.md must include ${pattern}`);
+}
+
 const docsToScan = [
   'README.md',
   'CONTRIBUTING.md',
   'PRIVACY.md',
   'BUILD-GUIDE.md',
   'docs/architecture.md',
+  'docs/security-audit.md',
   'docs/tdlib-adapter.md'
 ];
 const forbiddenPatterns = [
