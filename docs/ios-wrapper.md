@@ -33,6 +33,8 @@ APNs payloads use the `alert` push type and the app topic `dev.teleton.client`. 
 
 Notification `userInfo` carries sanitized routing metadata only. Message text, chat titles, sender names, prompts, context, proxy credentials, wallet secrets, and raw tokens are removed before dispatch.
 
+The shared push notification delivery plan applies message, agent approval, and wallet category preferences before APNs request creation. `UNUserNotificationCenter` permission states are explicit: prompt states request notification permission, denied states route users to platform notification settings, and unsupported states fall back to in-app notification surfaces.
+
 ## Background Tasks
 
 iOS background work is system-managed and cannot assume indefinite execution.

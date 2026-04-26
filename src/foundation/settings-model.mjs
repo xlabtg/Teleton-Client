@@ -1,6 +1,7 @@
 import { createAgentSettings, validateAgentSettings } from './agent-settings.mjs';
 import { AGENT_PROVIDER_SECRET_FIELDS } from './agent-provider-config.mjs';
 import { createPublicProxyCatalog, validatePublicProxyCatalog } from './public-proxy-catalog.mjs';
+import { PUSH_NOTIFICATION_CATEGORIES } from './push-notifications.mjs';
 import { isSecureReference, validateProxyConfig } from './proxy-settings.mjs';
 
 export const SETTINGS_SCHEMA_VERSION = 1;
@@ -38,6 +39,11 @@ export const DEFAULT_TELETON_SETTINGS = deepFreeze({
     messagePreviews: true,
     sounds: true,
     mentionsOnly: false,
+    categories: {
+      messages: true,
+      agentApprovals: true,
+      wallet: true
+    },
     quietHours: {
       enabled: false,
       start: '22:00',
@@ -451,6 +457,24 @@ function normalizeQuietHours(value, errors) {
   return quietHours;
 }
 
+function normalizeNotificationCategories(value, errors) {
+  const categoriesInput = objectField(
+    value,
+    'Notification categories',
+    errors,
+    DEFAULT_TELETON_SETTINGS.notifications.categories
+  );
+  const categories = {};
+
+  for (const category of PUSH_NOTIFICATION_CATEGORIES) {
+    const enabled = categoriesInput[category] ?? DEFAULT_TELETON_SETTINGS.notifications.categories[category];
+    booleanError(enabled, `Notification category ${category}`, errors);
+    categories[category] = enabled;
+  }
+
+  return categories;
+}
+
 function normalizeNotifications(value, errors) {
   const notificationInput = objectField(
     value,
@@ -463,6 +487,7 @@ function normalizeNotifications(value, errors) {
     messagePreviews: notificationInput.messagePreviews ?? DEFAULT_TELETON_SETTINGS.notifications.messagePreviews,
     sounds: notificationInput.sounds ?? DEFAULT_TELETON_SETTINGS.notifications.sounds,
     mentionsOnly: notificationInput.mentionsOnly ?? DEFAULT_TELETON_SETTINGS.notifications.mentionsOnly,
+    categories: normalizeNotificationCategories(notificationInput.categories, errors),
     quietHours: normalizeQuietHours(notificationInput.quietHours, errors)
   };
 

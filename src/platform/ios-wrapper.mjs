@@ -1,3 +1,5 @@
+import { createPushNotificationDeliveryPlan, describePushNotificationPlatform } from '../foundation/push-notifications.mjs';
+
 export const IOS_BUNDLE_IDENTIFIER = 'dev.teleton.client';
 export const IOS_APP_TARGET = 'TeletonClient';
 export const IOS_SCHEME = 'TeletonClient';
@@ -526,6 +528,22 @@ export function createIosPushNotificationRequest(notification, options = {}) {
   };
 }
 
+export function createIosPushNotificationPlan(notification, options = {}) {
+  const delivery = createPushNotificationDeliveryPlan(notification, {
+    ...options,
+    platform: 'ios'
+  });
+
+  if (!delivery.deliver) {
+    return delivery;
+  }
+
+  return {
+    ...delivery,
+    request: createIosPushNotificationRequest(delivery.notification)
+  };
+}
+
 export function describeIosBackgroundTasks() {
   return clone(IOS_BACKGROUND_TASKS);
 }
@@ -570,6 +588,7 @@ export function describeIosWrapper() {
     debugArtifact: createIosDebugBuildArtifact(),
     keychain: describeIosKeychainStorage(),
     notificationCategories: clone(IOS_NOTIFICATION_CATEGORIES),
+    pushNotifications: describePushNotificationPlatform('ios'),
     backgroundTasks: describeIosBackgroundTasks(),
     deepLinks: {
       schemes: [...IOS_DEEP_LINK_SCHEMES],

@@ -15,6 +15,8 @@ Android notification requests are generated from the shared notification payload
 
 Lock-screen copy stays redacted, and pending intents carry sanitized payload metadata rather than message text, chat titles, prompts, tokens, or wallet secrets.
 
+The shared push notification model applies category preferences before Android request creation, so users can mute message, agent approval, or wallet categories independently. When `POST_NOTIFICATIONS` is denied or still needs a prompt, the delivery plan reports the platform permission state and recovery action instead of silently dropping the notification.
+
 ## Background Work
 
 Long-running local agent execution is modeled as an app-private `ForegroundService` named `dev.teleton.client.agent.TeletonAgentForegroundService`. It is not exported, uses the `agent_runtime` notification channel, declares the `dataSync` foreground service type, and is started only through user-initiated or notification-action flows.

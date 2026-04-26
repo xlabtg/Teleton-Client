@@ -55,6 +55,8 @@ Teleton Agent IPC can use service worker message channels, `BroadcastChannel`, o
 
 Notifications use the Notifications API, Push API, and service worker delivery when the user grants permission. Fallback behavior is in-app badges and foreground polling. Lock-screen and serialized notification payloads must stay redacted.
 
+The shared push notification plan maps message, agent approval, and wallet categories to service worker `showNotification` requests only after category preferences and browser permission state pass. The web permission fallback is in-app badges plus foreground polling when notification permission is denied, still pending, or unsupported by the current browser.
+
 Secure storage uses IndexedDB plus WebCrypto non-extractable keys where available. Browser storage remains weaker than OS Keychain or Keystore, so shared code stores only secure references and non-secret metadata. If durable protected storage is unavailable, the web shell falls back to session-only state and reauthentication.
 
 Background sync is best effort. The web shell may request background synchronization where the browser supports it, but queued message sends, agent actions, and wallet signing must reconcile on the next foreground open instead of depending on background execution.

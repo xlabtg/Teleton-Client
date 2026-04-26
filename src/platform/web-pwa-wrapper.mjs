@@ -1,3 +1,5 @@
+import { createPushNotificationDeliveryPlan, describePushNotificationPlatform } from '../foundation/push-notifications.mjs';
+
 export const WEB_PWA_APP_ID = '/app/';
 export const WEB_PWA_PRODUCT_NAME = 'Teleton Client';
 export const WEB_PWA_SHORT_NAME = 'Teleton';
@@ -440,6 +442,45 @@ export function describeWebBrowserSupport() {
   return clone(WEB_BROWSER_SUPPORT);
 }
 
+export function createWebPushNotificationPlan(notification, options = {}) {
+  const delivery = createPushNotificationDeliveryPlan(notification, {
+    ...options,
+    platform: 'web'
+  });
+
+  if (!delivery.deliver) {
+    return delivery;
+  }
+
+  const category = delivery.categoryCapability;
+  const pushNotification = delivery.notification;
+  const data = {
+    notificationId: pushNotification.id,
+    category: pushNotification.category,
+    route: category.route,
+    payload: clone(pushNotification.payload)
+  };
+
+  return {
+    ...delivery,
+    request: {
+      platform: 'web',
+      api: 'ServiceWorkerRegistration.showNotification',
+      permission: 'Notification.permission',
+      serviceWorkerPath: WEB_PWA_SERVICE_WORKER_PATH,
+      notificationId: pushNotification.id,
+      title: pushNotification.title,
+      options: {
+        body: pushNotification.lockScreenBody,
+        tag: `${category.id}.${pushNotification.id}`,
+        requireInteraction: category.requireInteraction === true,
+        data
+      },
+      data
+    }
+  };
+}
+
 export function describeWebPwaWrapper() {
   const serviceWorker = createWebPwaServiceWorkerPlan();
 
@@ -450,6 +491,7 @@ export function describeWebPwaWrapper() {
     installability: createWebPwaInstallabilityReport({ serviceWorker }),
     offlineShell: createWebOfflineShellValidation(serviceWorker),
     browserSupport: describeWebBrowserSupport(),
+    pushNotifications: describePushNotificationPlatform('web'),
     assets: validateWebPwaAssets({ serviceWorker })
   };
 }

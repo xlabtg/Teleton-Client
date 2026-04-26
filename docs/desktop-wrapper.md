@@ -39,6 +39,8 @@ Desktop notification requests use `Electron Notification` and the operating syst
 
 Approval-required agent actions are critical and always delivered because they block agent progress. Informational notifications respect shared notification settings. Serialized payload metadata is redacted before dispatch, and message or wallet notifications use lock-screen-safe fallback copy unless a shared event supplies explicit redacted text.
 
+The shared push notification plan applies category preferences before creating an Electron system notification request. If the operating system notification center is denied or unavailable, the plan returns an explicit permission failure with an in-app fallback so the desktop shell can explain the disabled state.
+
 ## Shortcuts
 
 Focused-window shortcuts use `BrowserWindow webContents before-input-event`. Opt-in global shortcuts use `Electron globalShortcut`.

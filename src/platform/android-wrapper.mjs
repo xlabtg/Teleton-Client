@@ -1,3 +1,5 @@
+import { createPushNotificationDeliveryPlan, describePushNotificationPlatform } from '../foundation/push-notifications.mjs';
+
 export const ANDROID_PACKAGE_NAME = 'dev.teleton.client';
 export const ANDROID_ENTRY_ACTIVITY = `${ANDROID_PACKAGE_NAME}.MainActivity`;
 export const ANDROID_DEEP_LINK_SCHEMES = Object.freeze(['teleton', 'tg', 'ton', 'https']);
@@ -386,6 +388,22 @@ export function createAndroidNotificationRequest(notification, options = {}) {
   };
 }
 
+export function createAndroidPushNotificationPlan(notification, options = {}) {
+  const delivery = createPushNotificationDeliveryPlan(notification, {
+    ...options,
+    platform: 'android'
+  });
+
+  if (!delivery.deliver) {
+    return delivery;
+  }
+
+  return {
+    ...delivery,
+    request: createAndroidNotificationRequest(delivery.notification)
+  };
+}
+
 export function routeAndroidDeepLink(input) {
   let url;
   try {
@@ -421,6 +439,7 @@ export function describeAndroidWrapper() {
     stack: clone(ANDROID_WRAPPER_STACK),
     debugArtifact: createAndroidDebugBuildArtifact(),
     notificationChannels: clone(ANDROID_NOTIFICATION_CHANNELS),
+    pushNotifications: describePushNotificationPlatform('android'),
     backgroundWork: describeAndroidBackgroundWork(),
     deepLinks: {
       schemes: [...ANDROID_DEEP_LINK_SCHEMES],
