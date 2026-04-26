@@ -1,6 +1,6 @@
 # Security Audit
 
-This audit records the current token, key, rotation, and secure storage requirements for the foundation repository. The current codebase has no production client, native secure storage implementation, or live service credentials; shared code must keep sensitive values behind secure references until platform wrappers resolve them locally.
+This audit records the current token, key, refresh, rotation, and secure storage requirements for the foundation repository. The current codebase has no production client, native secure storage implementation, or live service credentials; shared code must keep sensitive values behind secure references until platform wrappers resolve them locally.
 
 ## Automated Secret Scan
 
@@ -46,6 +46,14 @@ Manual review items must be completed before public release even when automated 
 | Settings sync encryption keys | Settings sync stores only local key references and excludes sync key material from payloads. | Device-local secure storage; each device resolves its own key. | Device removal, sync transport replacement, missing-key recovery, or suspected remote snapshot exposure. |
 | GitHub and CI tokens | GitHub Actions uses platform-provided tokens for validation and changelog preview. | GitHub protected repository or environment secrets; never committed files. | Maintainer offboarding, repository permission changes, failed CI audit, or GitHub security alert. |
 
+## Automatic Token Refresh
+
+`src/foundation/token-refresh.mjs` is the shared refresh contract for credential references used by Telegram, agent providers, settings synchronization, and TON wallet providers. It does not read, return, log, or serialize plaintext access tokens, refresh tokens, API keys, bot tokens, private keys, mnemonics, or secrets. Platform wrappers resolve the secure references locally, call provider-specific refresh APIs, and return only updated secure references plus expiry metadata.
+
+Refresh scheduling starts before `expiresAt` using deterministic `nextRefreshAt` timestamps. Expired or soon-expiring credentials with refresh references become `refresh_due`; credentials that cannot be refreshed and are already expired become `reauthentication_required`. Transient network failures are classified as `refresh_failed`, carry sanitized diagnostics only, and schedule bounded exponential backoff through `nextAttemptAt` so wrappers can retry without exposing credentials.
+
+Invalid-token handling is fail-closed. Provider responses such as revoked, unauthorized, forbidden, invalid token, or invalid grant move the affected integration into `reauthentication_required` with an explicit action for the UI shell: `telegram.reauthenticate`, `agent.provider.reauthenticate`, `settings.sync.reauthenticate`, or `ton.wallet.reauthenticate`. Human security review before release must confirm that native wrappers preserve the same behavior when secure storage is locked, credentials are revoked, refresh providers are unavailable, or token rotation changes the reference name.
+
 ## Credential Rotation
 
 Use this sequence for every credential class:
@@ -59,6 +67,8 @@ Use this sequence for every credential class:
 7. Record the rotation date, credential class, reference name, and reviewer in the private security record. Do not record the secret value.
 
 Telegram app credentials should be replaced through the Telegram developer account or vendor-approved app registration process, then updated behind `apiIdRef` and `apiHashRef`. LLM, proxy, TON, and CI credentials should follow the provider's revocation flow and preserve the same shared reference shape whenever possible so settings snapshots do not need plaintext migration.
+
+When a provider rotates a refreshable credential automatically, the platform wrapper should update the secure storage entry or return a new secure reference through the token refresh controller before revoking the old reference. The shared controller treats successful refresh as a secure-reference update only; plaintext token material must never cross the shared boundary.
 
 ## Secure Storage Review
 
