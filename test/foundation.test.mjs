@@ -174,6 +174,30 @@ test('local agent runtime lifecycle boundary is documented and credential-free b
   }
 });
 
+test('agent IPC bridge exposes versioned envelopes and confirmation-aware UI events', async () => {
+  const { AGENT_IPC_EVENT_TYPES, AGENT_IPC_KINDS, AGENT_IPC_VERSION, createAgentIpcEnvelope } = await import(
+    '../src/foundation/agent-ipc-bridge.mjs'
+  );
+  const architecture = await readFile(pathFor('docs/architecture.md'), 'utf8');
+
+  assert.equal(AGENT_IPC_VERSION, 1);
+  assert.deepEqual(AGENT_IPC_KINDS, ['request', 'event', 'response', 'error', 'cancel']);
+  assert.ok(AGENT_IPC_EVENT_TYPES.includes('agent.message.received'));
+  assert.ok(AGENT_IPC_EVENT_TYPES.includes('agent.action.proposed'));
+  assert.match(architecture, /versioned IPC bridge/i);
+  assert.match(architecture, /confirmation-required/i);
+
+  const proposal = createAgentIpcEnvelope({
+    id: 'proposal-1',
+    kind: 'event',
+    source: 'agent',
+    target: 'ui',
+    eventType: 'agent.action.proposed'
+  });
+
+  assert.equal(proposal.requiresConfirmation, true);
+});
+
 test('proxy settings model covers supported proxy types without hardcoded secrets', async () => {
   const { PROXY_PROTOCOLS, validateProxyConfig } = await import('../src/foundation/proxy-settings.mjs');
   const { PROXY_ROUTE_TYPES, createProxyManager } = await import('../src/foundation/proxy-manager.mjs');
