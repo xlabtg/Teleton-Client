@@ -29,6 +29,9 @@ jobs:
       - name: Scan committed files for secrets
         run: npm run validate:secrets
 
+      - name: Generate security audit evidence
+        run: npm run audit:security
+
       - name: Validate foundation artifacts
         run: npm run validate:foundation
 

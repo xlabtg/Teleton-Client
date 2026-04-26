@@ -42,6 +42,7 @@ This repository is in the foundation phase. The current implementation establish
 - Local Teleton Agent memory encryption contract using platform secure storage key providers, AES-256-GCM payloads, migration, missing-key, locked-store, and key-rotation tests.
 - CI workflow for foundation checks.
 - Automated committed-secret scanning with documented credential rotation and secure storage review requirements.
+- Attachable security audit report for release review evidence across secrets, dependency risk, permission boundaries, and release readiness.
 - Upstream license matrix for TDLib, Telegram reference clients, Teleton Agent, and TON SDK release review.
 - Documented semantic version source of truth and release metadata validation.
 - Required project documents: `README.md`, `PRIVACY.md`, `LICENSE`, and `BUILD-GUIDE.md`.
@@ -51,6 +52,7 @@ This repository is in the foundation phase. The current implementation establish
 ```sh
 npm test
 npm run validate:secrets
+npm run audit:security
 npm run validate:foundation
 npm run validate:release
 npm run decompose:dry-run

@@ -27,10 +27,13 @@ const requiredFiles = [
   'docs/license-matrix.md',
   'docs/backlog.md',
   'docs/tdlib-adapter.md',
+  'src/foundation/security-audit.mjs',
   'src/foundation/secret-audit.mjs',
   'src/foundation/agent-runtime-supervisor.mjs',
   'test/agent-runtime-supervisor.test.mjs',
+  'scripts/audit-security.mjs',
   'scripts/validate-secrets.mjs',
+  'test/security-audit-report.test.mjs',
   'test/secret-audit.test.mjs',
   'src/foundation/agent-action-history.mjs',
   'test/agent-action-history.test.mjs',
@@ -126,6 +129,7 @@ const contributing = await readFile(new URL('CONTRIBUTING.md', root), 'utf8');
 const requiredContributingPatterns = [
   /npm test/,
   /npm run validate:secrets/,
+  /npm run audit:security/,
   /npm run validate:foundation/,
   /npm run validate:release/,
   /npm run decompose:dry-run/,
@@ -145,6 +149,12 @@ for (const pattern of requiredContributingPatterns) {
 
 const packageJson = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
 assert.equal(
+  packageJson.scripts['audit:security'],
+  'node scripts/audit-security.mjs',
+  'package.json must expose the security audit report command'
+);
+
+assert.equal(
   packageJson.scripts['validate:secrets'],
   'node scripts/validate-secrets.mjs',
   'package.json must expose the secret validation command'
@@ -152,13 +162,37 @@ assert.equal(
 
 const preCommitHook = await readFile(new URL('.githooks/pre-commit', root), 'utf8');
 assert.match(preCommitHook, /npm run validate:secrets/, 'pre-commit hook must run the secret scan');
+assert.match(preCommitHook, /npm run audit:security/, 'pre-commit hook must generate security audit evidence');
 
 const ciWorkflow = await readFile(new URL('.github/workflows/ci.yml', root), 'utf8');
 assert.match(ciWorkflow, /npm run validate:secrets/, 'CI must run the secret scan');
+assert.match(ciWorkflow, /npm run audit:security/, 'CI must generate security audit evidence');
+
+const releaseWorkflow = await readFile(new URL('.github/workflows/release-validation.yml', root), 'utf8');
+assert.match(
+  releaseWorkflow,
+  /npm run audit:security -- --output security-audit-report\.md/,
+  'release validation must generate an attachable security audit report'
+);
+assert.match(
+  releaseWorkflow,
+  /actions\/upload-artifact@v4/,
+  'release validation must upload the security audit report artifact'
+);
+assert.match(
+  releaseWorkflow,
+  /if:\s*always\(\)/,
+  'release validation must preserve the security audit artifact when audit checks fail'
+);
 
 const securityAudit = await readFile(new URL('docs/security-audit.md', root), 'utf8');
 const requiredSecurityAuditPatterns = [
   /npm run validate:secrets/,
+  /npm run audit:security -- --output security-audit-report\.md/,
+  /security-audit-report\.md/,
+  /Dependency risk/i,
+  /Permission boundaries/i,
+  /Release readiness/i,
   /Credential Inventory/i,
   /Credential Rotation/i,
   /Secure Storage Review/i,

@@ -3,6 +3,7 @@ set -eu
 
 npm test
 npm run validate:secrets
+npm run audit:security
 npm run validate:foundation
 npm run validate:release
 npm run decompose:dry-run
