@@ -149,6 +149,56 @@ test('agent IPC bridge exposes plugin management request helpers', async () => {
   bridge.close();
 });
 
+test('agent IPC bridge rejects pending requests when the agent returns an error envelope', async () => {
+  const transport = createMockAgentIpcTransport();
+  const bridge = createAgentIpcBridge({ transport });
+
+  const responsePromise = bridge.request('agent.task.create', { text: 'summarize chat' });
+  assert.deepEqual(bridge.pendingRequestIds(), ['ui.request.1']);
+
+  transport.deliver({
+    id: 'agent.error.1',
+    kind: 'error',
+    source: 'agent',
+    target: 'ui',
+    replyTo: 'ui.request.1',
+    error: {
+      code: 'agent.permission_denied',
+      message: 'User confirmation is required.'
+    }
+  });
+
+  await assert.rejects(() => responsePromise, /User confirmation is required/);
+  assert.deepEqual(bridge.pendingRequestIds(), []);
+
+  bridge.close();
+});
+
+test('agent IPC bridge reports malformed inbound messages through the error hook', () => {
+  const errors = [];
+  const transport = createMockAgentIpcTransport();
+  const bridge = createAgentIpcBridge({
+    transport,
+    onError: (error) => errors.push(error.message)
+  });
+
+  assert.throws(
+    () =>
+      transport.deliver({
+        id: 'bad-event',
+        kind: 'event',
+        source: 'agent',
+        target: 'ui',
+        eventType: 'agent.unknown'
+      }),
+    /Unsupported IPC event type/
+  );
+
+  assert.deepEqual(errors, ['Unsupported IPC event type: agent.unknown']);
+
+  bridge.close();
+});
+
 test('agent IPC bridge rejects malformed messages before dispatch', () => {
   assert.throws(() => parseAgentIpcEnvelope('{'), /Malformed IPC message JSON/);
   assert.throws(

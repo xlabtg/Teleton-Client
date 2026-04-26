@@ -230,6 +230,83 @@ test('TON adapter validates bridge inputs before provider calls', async () => {
   ]);
 });
 
+test('TON adapter exposes provider failures while blocking invalid status queries before provider calls', async () => {
+  const calls = [];
+  const adapter = createTonWalletAdapter(
+    {
+      async getBalance() {
+        calls.push({ method: 'getBalance' });
+        throw new Error('wallet provider unavailable');
+      },
+      async getReceiveAddress() {
+        calls.push({ method: 'getReceiveAddress' });
+        return { address: 'EQDsenderAddress' };
+      },
+      async prepareTransfer(request) {
+        calls.push({ method: 'prepareTransfer', request });
+        return { id: 'draft-1', ...request, status: 'draft', signed: false, requiresSigningConfirmation: true };
+      },
+      async getTransferStatus(id) {
+        calls.push({ method: 'getTransferStatus', id });
+        return { id, status: 'pending' };
+      }
+    },
+    {
+      address: 'EQDsenderAddress',
+      walletProviderRef: 'wallet:tonkeeper:test-wallet'
+    }
+  );
+
+  await assert.rejects(() => adapter.getBalance(), /wallet provider unavailable/);
+  await assert.rejects(() => adapter.getTransferStatus('   '), /transfer status id/);
+  assert.deepEqual(calls, [{ method: 'getBalance' }]);
+
+  assert.deepEqual(await adapter.getTransferStatus('draft-1'), {
+    id: 'draft-1',
+    status: 'pending'
+  });
+  assert.deepEqual(calls.at(-1), { method: 'getTransferStatus', id: 'draft-1' });
+});
+
+test('TON adapter reports unsupported optional Jetton transfer capability explicitly', async () => {
+  const adapter = createTonWalletAdapter(
+    {
+      async getBalance() {
+        return { balanceNanoTon: 1n };
+      },
+      async getReceiveAddress() {
+        return { address: 'EQDsenderAddress' };
+      },
+      async prepareTransfer(request) {
+        return { id: 'draft-1', ...request, status: 'draft', signed: false, requiresSigningConfirmation: true };
+      },
+      async getTransferStatus(id) {
+        return { id, status: 'draft' };
+      }
+    },
+    {
+      address: 'EQDsenderAddress',
+      walletProviderRef: 'wallet:tonkeeper:test-wallet'
+    }
+  );
+
+  await assert.rejects(
+    () =>
+      adapter.prepareJettonTransfer({
+        jettonMasterAddress: 'EQDjettonMaster',
+        to: 'EQDreceiverAddress',
+        amountAtomic: 100n,
+        confirmed: true
+      }),
+    (error) => {
+      assert.equal(error.name, 'TonWalletAdapterError');
+      assert.equal(error.code, 'unsupported_jetton_transfer');
+      assert.match(error.message, /does not support Jetton transfer/);
+      return true;
+    }
+  );
+});
+
 test('TON transfer validation rejects secret material in transfer requests', () => {
   const validation = validateTonTransferRequest(
     {
