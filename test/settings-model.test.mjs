@@ -72,6 +72,60 @@ test('settings validation rejects invalid proxy, notification, agent, and secret
   assert.match(result.errors.join('\n'), /Quiet hours start/);
 });
 
+test('settings validation enforces agent provider secrets and cloud opt-in', () => {
+  const invalid = validateTeletonSettings({
+    agent: {
+      mode: 'local',
+      allowCloudProcessing: false,
+      providerConfig: {
+        id: 'custom-provider',
+        type: 'custom-endpoint',
+        modelId: 'vendor/model',
+        endpointUrl: 'https://llm.example.test/v1',
+        apiKeyRef: 'env:TELETON_CUSTOM_LLM_KEY'
+      }
+    }
+  });
+
+  assert.equal(invalid.valid, false);
+  assert.match(invalid.errors.join('\n'), /explicit user opt-in/);
+
+  const rawCredential = validateTeletonSettings({
+    agent: {
+      mode: 'cloud',
+      allowCloudProcessing: true,
+      providerConfig: {
+        id: 'custom-provider',
+        type: 'custom-endpoint',
+        modelId: 'vendor/model',
+        endpointUrl: 'https://llm.example.test/v1',
+        apiKeyRef: 'raw-api-key'
+      }
+    }
+  });
+
+  assert.equal(rawCredential.valid, false);
+  assert.match(rawCredential.errors.join('\n'), /secure references/);
+
+  const valid = validateTeletonSettings({
+    agent: {
+      mode: 'cloud',
+      allowCloudProcessing: true,
+      providerConfig: {
+        id: 'teleton-cloud',
+        type: 'cloud',
+        modelId: 'teleton-cloud-default',
+        endpointUrl: 'https://agent.teleton.example/v1',
+        tokenRef: 'keychain:teleton-agent-token'
+      }
+    }
+  });
+
+  assert.equal(valid.valid, true);
+  assert.equal(valid.settings.agent.providerConfig.tokenRef, 'keychain:teleton-agent-token');
+  assert.equal(valid.settings.agent.providerConfig.requiresCloudOptIn, true);
+});
+
 test('settings model produces valid platform snapshots for every wrapper', () => {
   assert.deepEqual(SETTINGS_PLATFORM_WRAPPERS, ['android', 'ios', 'desktop', 'web']);
 

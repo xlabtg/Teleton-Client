@@ -1,4 +1,5 @@
 import { AGENT_MODES, createAgentSettings, normalizeAgentMode, validateAgentSettings } from './agent-settings.mjs';
+import { AGENT_PROVIDER_TYPES, normalizeAgentProviderConfig } from './agent-provider-config.mjs';
 
 export const AGENT_PRIVACY_IMPACT_MODES = Object.freeze(['cloud', 'hybrid']);
 
@@ -135,6 +136,10 @@ export function createAgentSettingsView(options = {}) {
         providers: AGENT_MODEL_PROVIDERS.map((provider) => ({ id: provider })),
         selected: clone(settings.model)
       },
+      providerConfig: {
+        types: AGENT_PROVIDER_TYPES.map((type) => ({ id: type })),
+        selected: clone(settings.providerConfig)
+      },
       privacy: {
         allowCloudProcessing: settings.allowCloudProcessing,
         impacts: clone(PRIVACY_IMPACT)
@@ -192,6 +197,24 @@ export function createAgentSettingsView(options = {}) {
       return save({
         ...settings,
         model: normalizeModelPreference(value)
+      });
+    },
+    setProviderConfig(value) {
+      const validation = normalizeAgentProviderConfig(value);
+
+      if (!validation.valid) {
+        throw new Error(validation.errors.join(' '));
+      }
+
+      return save({
+        ...settings,
+        providerConfig: validation.config
+      });
+    },
+    clearProviderConfig() {
+      return save({
+        ...settings,
+        providerConfig: null
       });
     },
     setRequireConfirmation(value) {

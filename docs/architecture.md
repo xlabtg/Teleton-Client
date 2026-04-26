@@ -17,7 +17,8 @@ Teleton Client is planned as a layered client where protocol, automation, wallet
 - TDLib credentials must be supplied at runtime and never committed.
 - TDLib callers use the shared `authenticate`, `getChatList`, `sendMessage`, and `subscribeUpdates` adapter contract so Android, iOS, desktop, and web-compatible bridges expose the same boundary.
 - Agent mode defaults to `off`; cloud and hybrid modes require explicit activation.
-- Agent settings UI shells use shared view state for mode options, model provider preferences, privacy impact prompts, approval preferences, and autonomous action limits. Cloud and hybrid activation stays pending until the user confirms the privacy impact summary.
+- Agent settings UI shells use shared view state for mode options, model provider preferences, LLM provider configuration, privacy impact prompts, approval preferences, and autonomous action limits. Cloud and hybrid activation stays pending until the user confirms the privacy impact summary.
+- LLM provider credentials use secure references such as `env:NAME`, `keychain:name`, `keystore:name`, or `secret:name`. Local providers cannot persist shared credentials, while cloud and custom HTTPS endpoint providers require explicit cloud processing opt-in before use.
 - Proxy secrets are represented as secure references such as `env:NAME`, `keychain:name`, or `keystore:name`.
 - Proxy settings UI shells use shared view state for list items, edit forms, test status, auto-switch preferences, and active route metadata. Display snapshots expose only configured flags for secrets, while settings persistence keeps secure references for platform storage resolution.
 - Proxy usage statistics are local diagnostics records keyed by proxy id. They track attempts, successes, failures, latency samples, and last-used time separately from proxy configuration and never include proxy secrets or message contents.
@@ -56,7 +57,7 @@ Platform wrappers supply a secure storage provider with `get` and `set` hooks. T
 
 The shared agent settings view state is implemented in `src/foundation/agent-settings-view.mjs`. It exposes the canonical `off`, `local`, `cloud`, and `hybrid` mode controls from the settings model, keeps the default mode off, and blocks cloud-capable mode changes behind an explicit privacy impact confirmation step before enabling cloud processing consent.
 
-The view also carries model provider/model id preferences, confirmation requirements, and the per-hour autonomous action limit. Platform UI shells can render this state directly while persisting only the validated shared agent settings payload.
+The view also carries model provider/model id preferences, provider configuration types, confirmation requirements, and the per-hour autonomous action limit. Provider configuration supports local endpoints, approved cloud providers, and approved custom HTTPS endpoints. Shared validation rejects raw API keys or tokens, requires secure credential references for cloud providers, and blocks cloud-capable providers until the user has opted in to cloud processing. Platform UI shells can render this state directly while persisting only the validated shared agent settings payload.
 
 ## Foundation Status
 

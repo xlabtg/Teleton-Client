@@ -74,3 +74,44 @@ test('agent settings view activates local mode without cloud privacy consent', (
   assert.equal(state.activation.pending, false);
   assert.deepEqual(AGENT_PRIVACY_IMPACT_MODES, ['cloud', 'hybrid']);
 });
+
+test('agent settings view stores validated provider configs and blocks cloud providers without consent', () => {
+  const view = createAgentSettingsView();
+
+  let state = view.setProviderConfig({
+    id: 'local-runtime',
+    type: 'local',
+    modelId: 'llama3.2',
+    endpointUrl: 'http://127.0.0.1:11434'
+  });
+
+  assert.equal(state.providerConfig.selected.id, 'local-runtime');
+  assert.equal(state.settings.providerConfig.type, 'local');
+  assert.throws(
+    () =>
+      view.setProviderConfig({
+        id: 'cloud-runtime',
+        type: 'cloud',
+        modelId: 'remote-model',
+        endpointUrl: 'https://api.example.test/v1',
+        apiKeyRef: 'env:TELETON_AGENT_API_KEY'
+      }),
+    /explicit user opt-in/
+  );
+
+  state = view.selectMode('cloud');
+  assert.equal(state.activation.pending, true);
+  view.confirmPrivacyImpact();
+
+  state = view.setProviderConfig({
+    id: 'cloud-runtime',
+    type: 'cloud',
+    modelId: 'remote-model',
+    endpointUrl: 'https://api.example.test/v1',
+    apiKeyRef: 'env:TELETON_AGENT_API_KEY'
+  });
+
+  assert.equal(state.settings.providerConfig.apiKeyRef, 'env:TELETON_AGENT_API_KEY');
+  state = view.clearProviderConfig();
+  assert.equal(state.settings.providerConfig, null);
+});
