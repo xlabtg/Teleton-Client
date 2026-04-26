@@ -22,6 +22,7 @@ Teleton Client is planned as a layered client where protocol, automation, wallet
 - Proxy usage statistics are local diagnostics records keyed by proxy id. They track attempts, successes, failures, latency samples, and last-used time separately from proxy configuration and never include proxy secrets or message contents.
 - Public MTProto proxy catalog use is opt-in and disabled by default. Catalog entries must include source URL/name, source verification notes, freshness timestamps, and per-entry human review metadata before they can be shipped.
 - Local Teleton Agent startup is represented by the `src/foundation/agent-runtime-supervisor.mjs` lifecycle boundary. Platform wrappers supply start, stop, health, and log hooks; the shared supervisor keeps the default runtime local and never requires cloud credentials for startup.
+- Teleton Agent UI communication is represented by the `src/foundation/agent-ipc-bridge.mjs` contract. It uses versioned IPC envelopes for request, event, response, error, and cancellation flows; UI layers receive incoming message hooks and can distinguish informational events from confirmation-required action proposals.
 - TON signing requires user confirmation and platform secure storage or wallet-provider approval.
 
 ## Local Agent Runtime
@@ -37,6 +38,12 @@ The local Teleton Agent lifecycle has four platform targets:
 
 The shared supervisor exposes `start`, `stop`, `status`, `health`, and `logs` operations. It accepts a platform adapter so each wrapper can own process management while foundation tests verify idempotent lifecycle behavior and failure state handling.
 
+## Agent IPC Bridge
+
+The shared agent IPC bridge is transport-agnostic so desktop pipes, mobile service bindings, browser workers, HTTP, or WebSocket adapters can reuse the same contract. Version 1 envelopes include an id, kind, source, target, timestamp, and object payload. Request envelopes carry an action, event envelopes carry a typed event name, responses and errors reference `replyTo`, and cancellation envelopes reference `cancelId`.
+
+UI-facing agent events are classified by confirmation behavior. Informational updates such as `agent.info`, incoming message hooks such as `agent.message.received`, and task progress events are delivered without confirmation. Action proposals such as `agent.action.proposed` are marked `requiresConfirmation: true` before dispatch so UI shells can route them to consent flows.
+
 ## Foundation Status
 
-This PR implements only the foundation layer, epic decomposition workflow, baseline TDLib adapter boundary, and local agent runtime lifecycle contract. Platform UI shells, live TDLib integration, concrete agent process packaging, and live TON operations remain tracked by the generated subtasks in `config/epic-subtasks.json`.
+This PR implements only the foundation layer, epic decomposition workflow, baseline TDLib adapter boundary, local agent runtime lifecycle contract, and agent IPC bridge contract. Platform UI shells, live TDLib integration, concrete agent process packaging, concrete IPC transports, and live TON operations remain tracked by the generated subtasks in `config/epic-subtasks.json`.
