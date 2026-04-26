@@ -5,6 +5,8 @@ export const AGENT_IPC_EVENT_TYPES = Object.freeze([
   'agent.info',
   'agent.message.received',
   'agent.action.proposed',
+  'agent.action.started',
+  'agent.action.completed',
   'agent.task.updated'
 ]);
 

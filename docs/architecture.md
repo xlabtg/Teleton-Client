@@ -25,6 +25,7 @@ Teleton Client is planned as a layered client where protocol, automation, wallet
 - Public MTProto proxy catalog use is opt-in and disabled by default. Catalog entries must include source URL/name, source verification notes, freshness timestamps, and per-entry human review metadata before they can be shipped.
 - Local Teleton Agent startup is represented by the `src/foundation/agent-runtime-supervisor.mjs` lifecycle boundary. Platform wrappers supply start, stop, health, and log hooks; the shared supervisor keeps the default runtime local and never requires cloud credentials for startup.
 - Teleton Agent UI communication is represented by the `src/foundation/agent-ipc-bridge.mjs` contract. It uses versioned IPC envelopes for request, event, response, error, and cancellation flows; UI layers receive incoming message hooks and can distinguish informational events from confirmation-required action proposals.
+- Teleton Agent action notifications are represented by the `src/foundation/agent-action-notifications.mjs` contract. It converts action lifecycle IPC events into UI and platform notification payloads, always surfaces approval-required actions, filters informational updates through notification settings, and uses redacted lock-screen copy that does not include private message content.
 - Teleton Agent plugins are represented by the `src/foundation/agent-plugin-registry.mjs` contract. Plugins declare permissions, lifecycle defaults, and IPC compatibility before they can be enabled. Disabled plugins cannot receive events or perform actions, and enable, disable, list, and health-check flows are routed through the agent bridge.
 - Local Teleton Agent memory is represented by the `src/foundation/agent-memory-store.mjs` contract. It encrypts memory snapshots, vector index payloads, and local credential references with AES-256-GCM while platform wrappers keep the raw data key in OS secure storage providers such as Keychain or Keystore.
 - TON signing requires user confirmation and platform secure storage or wallet-provider approval.
@@ -47,6 +48,12 @@ The shared supervisor exposes `start`, `stop`, `status`, `health`, and `logs` op
 The shared agent IPC bridge is transport-agnostic so desktop pipes, mobile service bindings, browser workers, HTTP, or WebSocket adapters can reuse the same contract. Version 1 envelopes include an id, kind, source, target, timestamp, and object payload. Request envelopes carry an action, event envelopes carry a typed event name, responses and errors reference `replyTo`, and cancellation envelopes reference `cancelId`.
 
 UI-facing agent events are classified by confirmation behavior. Informational updates such as `agent.info`, incoming message hooks such as `agent.message.received`, and task progress events are delivered without confirmation. Action proposals such as `agent.action.proposed` are marked `requiresConfirmation: true` before dispatch so UI shells can route them to consent flows.
+
+## Agent Action Notifications
+
+The shared agent action notification boundary maps `agent.action.proposed`, `agent.action.started`, `agent.action.completed`, and task update events into normalized notification payloads for UI surfaces and platform notification adapters. Approval-required actions use critical priority and remain visible even when informational notifications are disabled, because they block agent progress until the user responds.
+
+Informational start, completion, and failure notifications respect the shared notification settings, including disabled notifications and mentions-only filtering. Notification bodies use action labels only, while lock-screen text and serialized payloads remove private message text, chat names, sender names, prompts, and context fields before dispatch.
 
 ## Agent Plugin System
 
