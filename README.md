@@ -19,6 +19,7 @@ This repository is in the foundation phase. The current implementation establish
 - Optional public MTProto proxy catalog metadata model that stays disabled by default and requires source freshness plus human review metadata before release.
 - Baseline TDLib client adapter contract with mock-backed tests.
 - Local Teleton Agent runtime supervisor contract with mock lifecycle tests for start, stop, health, and logs.
+- Local Teleton Agent memory encryption contract using platform secure storage key providers, AES-256-GCM payloads, migration, missing-key, locked-store, and key-rotation tests.
 - CI workflow for foundation checks.
 - Documented semantic version source of truth and release metadata validation.
 - Required project documents: `README.md`, `PRIVACY.md`, `LICENSE`, and `BUILD-GUIDE.md`.
