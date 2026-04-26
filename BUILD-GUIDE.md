@@ -21,6 +21,8 @@ Future TDLib build work should produce:
 
 TDLib is distributed under the Boost Software License 1.0 (`BSL-1.0`). Future build scripts must preserve upstream license notices, record the TDLib source revision, and document local patches or packaging changes. See `docs/tdlib-adapter.md` for the adapter boundary and credential-handling rules.
 
+See `docs/license-matrix.md` for the current upstream license matrix covering TDLib, Telegram reference clients, Teleton Agent, TON SDKs, copyleft boundaries, source publication obligations, and human legal review requirements before release readiness.
+
 ## Android Wrapper
 
 The Android wrapper contract in `src/platform/android-wrapper.mjs` selects Kotlin, Jetpack Compose, and the Gradle Android Plugin for the future native shell. The debug artifact contract is an installable APK at:

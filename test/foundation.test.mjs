@@ -31,6 +31,7 @@ test('foundation artifacts required by issue 1 are present', () => {
     'config/epic-subtasks.json',
     'docs/release-strategy.md',
     'docs/security-audit.md',
+    'docs/license-matrix.md',
     'docs/contributing-templates.md',
     'docs/tdlib-adapter.md'
   ];
@@ -126,7 +127,9 @@ test('security audit documents scanning, rotation, secure storage, and human rev
   assert.match(audit, /Agent memory encryption keys/i);
   assert.match(audit, /Settings sync encryption keys/i);
   assert.match(contributing, /docs\/security-audit\.md/);
+  assert.match(contributing, /docs\/license-matrix\.md/);
   assert.match(buildGuide, /Credential Inventory/i);
+  assert.match(buildGuide, /docs\/license-matrix\.md/);
   assert.match(ci, /npm run validate:secrets/);
 });
 

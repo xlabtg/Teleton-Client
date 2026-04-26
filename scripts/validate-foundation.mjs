@@ -24,6 +24,7 @@ const requiredFiles = [
   'docs/architecture.md',
   'docs/release-strategy.md',
   'docs/security-audit.md',
+  'docs/license-matrix.md',
   'docs/backlog.md',
   'docs/tdlib-adapter.md',
   'src/foundation/secret-audit.mjs',
@@ -131,6 +132,7 @@ const requiredContributingPatterns = [
   /docs\/contributing-templates\.md/,
   /BUILD-GUIDE\.md/,
   /PRIVACY\.md/,
+  /docs\/license-matrix\.md/,
   /secrets/i,
   /credentials/i,
   /Telegram API IDs or hashes/i,
@@ -174,6 +176,39 @@ for (const pattern of requiredSecurityAuditPatterns) {
   assert.match(securityAudit, pattern, `docs/security-audit.md must include ${pattern}`);
 }
 
+const licenseMatrix = await readFile(new URL('docs/license-matrix.md', root), 'utf8');
+const requiredLicenseMatrixPatterns = [
+  /tdlib\/td/i,
+  /DrKLO\/Telegram/i,
+  /telegramdesktop\/tdesktop/i,
+  /TelegramMessenger\/Telegram-iOS/i,
+  /TelegramOrg\/Telegram-web-k/i,
+  /TelegramOrg\/Telegram-web-z/i,
+  /TONresistor\/teleton-agent/i,
+  /ton-org\/ton/i,
+  /ton-org\/ton-core/i,
+  /toncenter\/tonweb/i,
+  /ton-connect\/sdk/i,
+  /ston-fi\/sdk/i,
+  /dedust-io\/sdk/i,
+  /xssnick\/tonutils-go/i,
+  /ton-blockchain\/ton/i,
+  /BSL-1\.0/i,
+  /GPL-2\.0/i,
+  /GPL-3\.0/i,
+  /LGPL-2\.0/i,
+  /MIT/i,
+  /Apache-2\.0/i,
+  /OpenSSL exception/i,
+  /source publication/i,
+  /Human legal review/i,
+  /release readiness/i
+];
+
+for (const pattern of requiredLicenseMatrixPatterns) {
+  assert.match(licenseMatrix, pattern, `docs/license-matrix.md must include ${pattern}`);
+}
+
 const docsToScan = [
   'README.md',
   'CONTRIBUTING.md',
@@ -181,6 +216,7 @@ const docsToScan = [
   'BUILD-GUIDE.md',
   'docs/architecture.md',
   'docs/security-audit.md',
+  'docs/license-matrix.md',
   'docs/tdlib-adapter.md'
 ];
 const forbiddenPatterns = [
