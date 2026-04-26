@@ -17,6 +17,7 @@ This repository is in the foundation phase. The current implementation establish
 - Local proxy usage statistics for attempts, successes, failures, latency, and last-used time, stored separately from proxy secrets.
 - Optional public MTProto proxy catalog metadata model that stays disabled by default and requires source freshness plus human review metadata before release.
 - Baseline TDLib client adapter contract with mock-backed tests.
+- Local Teleton Agent runtime supervisor contract with mock lifecycle tests for start, stop, health, and logs.
 - CI workflow for foundation checks.
 - Documented semantic version source of truth and release metadata validation.
 - Required project documents: `README.md`, `PRIVACY.md`, `LICENSE`, and `BUILD-GUIDE.md`.
@@ -46,7 +47,7 @@ The project is intended to evolve through these layers:
 4. TON blockchain integrations for wallet, transfers, swaps, NFTs, staking, and DNS.
 5. Security and privacy controls for credentials, user consent, and auditability.
 
-See `docs/architecture.md`, `docs/backlog.md`, `docs/tdlib-adapter.md`, and `docs/release-strategy.md` for the current foundation plan.
+See `docs/architecture.md`, `docs/backlog.md`, `docs/tdlib-adapter.md`, and `docs/release-strategy.md` for the current foundation plan. The local agent runtime section in `docs/architecture.md` records supported runtime directions and packaging gaps for Android, iOS, desktop, and web wrappers.
 
 ## Contribution Templates
 

@@ -156,6 +156,24 @@ test('agent autonomy modes match the epic acceptance criteria', async () => {
   assert.equal(normalizeAgentMode('Локально'), 'local');
 });
 
+test('local agent runtime lifecycle boundary is documented and credential-free by default', async () => {
+  const { AGENT_RUNTIME_PLATFORMS, describeAgentRuntimeSupport } = await import(
+    '../src/foundation/agent-runtime-supervisor.mjs'
+  );
+  const architecture = await readFile(pathFor('docs/architecture.md'), 'utf8');
+
+  assert.deepEqual(AGENT_RUNTIME_PLATFORMS, ['android', 'ios', 'desktop', 'web']);
+  assert.match(architecture, /`start`, `stop`, `status`, `health`, and `logs`/i);
+  assert.match(architecture, /never requires cloud credentials/i);
+
+  for (const platform of AGENT_RUNTIME_PLATFORMS) {
+    const support = describeAgentRuntimeSupport(platform);
+    assert.equal(support.requiresCloudCredentialsByDefault, false);
+    assert.ok(support.packagingGaps.length > 0);
+    assert.match(architecture, new RegExp(platform, 'i'));
+  }
+});
+
 test('proxy settings model covers supported proxy types without hardcoded secrets', async () => {
   const { PROXY_PROTOCOLS, validateProxyConfig } = await import('../src/foundation/proxy-settings.mjs');
   const { PROXY_ROUTE_TYPES, createProxyManager } = await import('../src/foundation/proxy-manager.mjs');
