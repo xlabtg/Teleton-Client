@@ -19,6 +19,7 @@ This repository is in the foundation phase. The current implementation establish
 - Local proxy usage statistics for attempts, successes, failures, latency, and last-used time, stored separately from proxy secrets.
 - Optional public MTProto proxy catalog metadata model that stays disabled by default and requires source freshness plus human review metadata before release.
 - Optional settings synchronization foundation that stays disabled by default, encrypts opt-in transport snapshots, serializes only safe appearance, notification, and non-activating agent preferences, excludes secret material, and defines deterministic field-level conflict resolution.
+- Shared offline synchronization contract that marks cached offline state, lists unsupported live-only actions, stores queued writes encrypted at rest, and supports retry, conflict, and cancellation states before replay.
 - Baseline TDLib client adapter contract with mock-backed tests.
 - TON wallet adapter contract for balance lookup, receive address display, transfer draft preparation, and status checks without plaintext private keys.
 - TON swap adapter contract for STON.fi and DeDust quote lookup plus confirmation-gated swap transaction draft preparation.
