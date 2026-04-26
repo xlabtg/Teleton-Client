@@ -250,6 +250,45 @@ test('agent IPC bridge exposes versioned envelopes and confirmation-aware UI eve
   assert.equal(proposal.requiresConfirmation, true);
 });
 
+test('agent action notifications redact private content and respect settings', async () => {
+  const { createAgentActionNotification, notifyAgentActionEvent } = await import(
+    '../src/foundation/agent-action-notifications.mjs'
+  );
+  const { createAgentIpcEnvelope } = await import('../src/foundation/agent-ipc-bridge.mjs');
+  const architecture = await readFile(pathFor('docs/architecture.md'), 'utf8');
+
+  const approval = createAgentActionNotification({
+    type: 'agent.action.approvalRequired',
+    action: 'sendMessage',
+    actionLabel: 'Send message',
+    payload: {
+      messageText: 'private message body',
+      chatTitle: 'Private chat'
+    }
+  });
+
+  assert.equal(approval.priority, 'critical');
+  assert.equal(approval.visible, true);
+  assert.equal(approval.requiresUserAction, true);
+  assert.doesNotMatch(JSON.stringify(approval), /private message body|Private chat/);
+
+  const info = createAgentIpcEnvelope({
+    id: 'task-started',
+    kind: 'event',
+    source: 'agent',
+    target: 'ui',
+    eventType: 'agent.task.updated',
+    payload: {
+      action: 'summarizeChat',
+      state: 'started'
+    }
+  });
+
+  assert.equal(notifyAgentActionEvent(info, { settings: { notifications: { enabled: false } } }), null);
+  assert.match(architecture, /Agent Action Notifications/i);
+  assert.match(architecture, /lock-screen/i);
+});
+
 test('agent plugin registry requires permissions and blocks disabled plugins', async () => {
   const { createAgentPluginRegistry, createMockAgentPluginBridge } = await import(
     '../src/foundation/agent-plugin-registry.mjs'
