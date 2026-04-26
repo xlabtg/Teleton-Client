@@ -31,6 +31,7 @@ Teleton Client is planned as a layered client where protocol, automation, wallet
 - Local Teleton Agent memory is represented by the `src/foundation/agent-memory-store.mjs` contract. It encrypts memory snapshots, vector index payloads, and local credential references with AES-256-GCM while platform wrappers keep the raw data key in OS secure storage providers such as Keychain or Keystore.
 - TON wallet operations are represented by the `src/ton/wallet-adapter.mjs` contract. Shared callers can retrieve balance, display a receive address, prepare unsigned transfer drafts, and query transfer status while platform wrappers keep private keys behind wallet providers or secure storage references.
 - TON signing requires user confirmation and platform secure storage or wallet-provider approval. Transfer preparation validates explicit confirmation before provider calls and still returns an unsigned draft for a later signing flow.
+- TON swap operations are represented by the `src/ton/swap-adapter.mjs` contract. Shared callers can request STON.fi or DeDust quotes without signing, while swap transaction draft preparation requires explicit confirmation and provider errors are sanitized before they cross the shared boundary.
 
 ## Local Agent Runtime
 
@@ -85,4 +86,4 @@ The view also carries model provider/model id preferences, provider configuratio
 
 ## Foundation Status
 
-This PR implements only the foundation layer, epic decomposition workflow, baseline TDLib adapter boundary, local agent runtime lifecycle contract, agent IPC bridge contract, local agent memory encryption contract, and mock-backed TON wallet adapter boundary. Platform UI shells, live TDLib integration, concrete agent process packaging, concrete IPC transports, concrete secure storage bindings, and live TON operations remain tracked by the generated subtasks in `config/epic-subtasks.json`.
+This PR implements only the foundation layer, epic decomposition workflow, baseline TDLib adapter boundary, local agent runtime lifecycle contract, agent IPC bridge contract, local agent memory encryption contract, mock-backed TON wallet adapter boundary, and mock-backed TON swap adapter boundary. Platform UI shells, live TDLib integration, concrete agent process packaging, concrete IPC transports, concrete secure storage bindings, and live TON operations remain tracked by the generated subtasks in `config/epic-subtasks.json`.

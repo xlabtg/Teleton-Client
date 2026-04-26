@@ -19,6 +19,7 @@ This repository is in the foundation phase. The current implementation establish
 - Optional public MTProto proxy catalog metadata model that stays disabled by default and requires source freshness plus human review metadata before release.
 - Baseline TDLib client adapter contract with mock-backed tests.
 - TON wallet adapter contract for balance lookup, receive address display, transfer draft preparation, and status checks without plaintext private keys.
+- TON swap adapter contract for STON.fi and DeDust quote lookup plus confirmation-gated swap transaction draft preparation.
 - Local Teleton Agent runtime supervisor contract with mock lifecycle tests for start, stop, health, resource monitoring, and logs.
 - Teleton Agent action notification contract for proposals, starts, completions, approval-required states, and failures with settings-aware delivery and redacted lock-screen text.
 - Teleton Agent action history contract for redacted action records, retention filtering, rollback eligibility, and irreversible action markers.
