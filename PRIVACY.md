@@ -23,7 +23,7 @@ This repository currently contains foundation automation, configuration models, 
 
 Current repository behavior: no code connects to Telegram, stores Telegram sessions, receives messages, or sends messages.
 
-Planned behavior: Telegram traffic is handled through TDLib behind platform adapters. Telegram API credential references, session references, message caches, contact metadata, media metadata, and update streams stay inside the platform boundary or local app storage unless the user starts a flow that intentionally sends data through Telegram services. Shared foundation code must not log message text, chat titles, phone numbers, Telegram credential values, or session secrets.
+Planned behavior: Telegram traffic is handled through TDLib behind platform adapters. Telegram API credential references, session references, message caches, contact metadata, media metadata, and update streams stay inside the platform boundary or local app storage unless the user starts a flow that intentionally sends data through Telegram services. Two-factor passwords and recovery codes are runtime-only prompt values that shared state and logs must reduce to safe metadata such as field length, attempt count, recovery availability, and redacted recovery email pattern. Shared foundation code must not log message text, chat titles, phone numbers, Telegram credential values, two-factor prompt values, or session secrets.
 
 ### Proxy Connectivity
 

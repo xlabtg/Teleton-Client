@@ -146,6 +146,7 @@ test('settings sync payload serializes only syncable settings and excludes local
   assert.ok(SETTINGS_SYNC_SYNCABLE_PATHS.includes('notifications.categories'));
   assert.ok(SETTINGS_SYNC_SYNCABLE_PATHS.includes('notifications.quietHours'));
   assert.ok(SETTINGS_SYNC_DEVICE_LOCAL_PATHS.includes('proxy.entries[]'));
+  assert.ok(SETTINGS_SYNC_DEVICE_LOCAL_PATHS.includes('security.twoFactor'));
   assert.ok(SETTINGS_SYNC_SECRET_PATHS.includes('agent.providerConfig.tokenRef'));
   assert.deepEqual(payload.settings, {
     language: 'en-US',

@@ -22,6 +22,7 @@ This repository is in the foundation phase. The current implementation establish
 - Optional settings synchronization foundation that stays disabled by default, encrypts opt-in transport snapshots, serializes only safe appearance, notification, and non-activating agent preferences, excludes secret material, and defines deterministic field-level conflict resolution.
 - Shared offline synchronization contract that marks cached offline state, lists unsupported live-only actions, stores queued writes encrypted at rest, and supports retry, conflict, and cancellation states before replay.
 - Baseline TDLib client adapter contract with mock-backed tests.
+- TDLib two-factor authentication state controller for password-required, recovery-required, failed, cancelled, and completed flows without storing passwords or recovery codes in shared state.
 - TON wallet adapter contract for balance lookup, receive address display, transfer draft preparation, and status checks without plaintext private keys.
 - TON swap adapter contract for STON.fi and DeDust quote lookup plus confirmation-gated swap transaction draft preparation.
 - TON NFT gallery adapter contract for owned item lookup, collection/item metadata loading, sanitized media metadata, and loading/empty/failed/ready gallery states.

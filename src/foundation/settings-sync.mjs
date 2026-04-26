@@ -41,6 +41,7 @@ export const SETTINGS_SYNC_DEVICE_LOCAL_PATHS = Object.freeze([
   'security.requireDeviceLock',
   'security.biometricUnlock',
   'security.lockAfterMinutes',
+  'security.twoFactor',
   'security.encryptAgentMemory',
   'security.agentMemoryKeyRef',
   'security.secretRefs'
