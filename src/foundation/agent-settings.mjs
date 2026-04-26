@@ -1,3 +1,5 @@
+import { normalizeAgentProviderConfig } from './agent-provider-config.mjs';
+
 export const AGENT_MODES = Object.freeze(['off', 'local', 'cloud', 'hybrid']);
 
 const MODE_ALIASES = new Map([
@@ -26,10 +28,12 @@ export function normalizeAgentMode(value) {
 
 export function createAgentSettings(input = {}) {
   const mode = input.mode === undefined ? 'off' : normalizeAgentMode(input.mode);
+  const providerConfig = input.providerConfig === undefined ? null : input.providerConfig;
 
   return {
     mode,
     model: input.model ?? null,
+    providerConfig,
     requireConfirmation: input.requireConfirmation ?? true,
     allowCloudProcessing: mode === 'cloud' || mode === 'hybrid' ? input.allowCloudProcessing === true : false,
     maxAutonomousActionsPerHour: Number.isInteger(input.maxAutonomousActionsPerHour)
@@ -55,6 +59,23 @@ export function validateAgentSettings(input = {}) {
 
     if ((settings.mode === 'cloud' || settings.mode === 'hybrid') && settings.allowCloudProcessing !== true) {
       errors.push('Cloud and hybrid modes require explicit cloud processing consent.');
+    }
+
+    if (settings.providerConfig !== null) {
+      const providerValidation = normalizeAgentProviderConfig(settings.providerConfig);
+      settings.providerConfig = providerValidation.config;
+
+      for (const error of providerValidation.errors) {
+        errors.push(`Agent provider ${settings.providerConfig?.id || 'configuration'}: ${error}`);
+      }
+
+      if (
+        providerValidation.valid &&
+        settings.providerConfig.requiresCloudOptIn === true &&
+        settings.allowCloudProcessing !== true
+      ) {
+        errors.push('Cloud provider use requires explicit user opt-in.');
+      }
     }
 
     if (settings.maxAutonomousActionsPerHour < 0) {

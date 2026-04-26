@@ -45,6 +45,7 @@ export const DEFAULT_TELETON_SETTINGS = deepFreeze({
   agent: {
     mode: 'off',
     model: null,
+    providerConfig: null,
     requireConfirmation: true,
     allowCloudProcessing: false,
     maxAutonomousActionsPerHour: 0

@@ -175,6 +175,37 @@ test('agent settings view requires consent before cloud-capable modes', async ()
   assert.equal(confirmed.settings.allowCloudProcessing, true);
 });
 
+test('agent provider configuration keeps credentials in secure references', async () => {
+  const { AGENT_PROVIDER_TYPES, validateAgentProviderConfig } = await import(
+    '../src/foundation/agent-provider-config.mjs'
+  );
+  const privacy = await readFile(pathFor('PRIVACY.md'), 'utf8');
+
+  assert.deepEqual(AGENT_PROVIDER_TYPES, ['local', 'cloud', 'custom-endpoint']);
+  assert.equal(
+    validateAgentProviderConfig({
+      id: 'approved-custom',
+      type: 'custom-endpoint',
+      modelId: 'vendor/model-v1',
+      endpointUrl: 'https://llm.example.test/v1',
+      tokenRef: 'secret:approved-custom-token'
+    }).valid,
+    true
+  );
+  assert.equal(
+    validateAgentProviderConfig({
+      id: 'cloud',
+      type: 'cloud',
+      modelId: 'remote-model',
+      endpointUrl: 'https://api.example.test/v1',
+      tokenRef: 'raw-token'
+    }).valid,
+    false
+  );
+  assert.match(privacy, /LLM provider credentials/i);
+  assert.match(privacy, /explicit cloud processing opt-in/i);
+});
+
 test('local agent runtime lifecycle boundary is documented and credential-free by default', async () => {
   const { AGENT_RUNTIME_PLATFORMS, describeAgentRuntimeSupport } = await import(
     '../src/foundation/agent-runtime-supervisor.mjs'
