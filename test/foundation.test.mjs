@@ -244,6 +244,89 @@ test('agent provider configuration keeps credentials in secure references', asyn
   assert.match(privacy, /explicit cloud processing opt-in/i);
 });
 
+test('automatic token refresh inventories credential refs and exposes safe failure states', async () => {
+  const {
+    TOKEN_REFRESH_INTEGRATIONS,
+    createTokenRefreshController,
+    createTokenRefreshPlan,
+    validateTokenRefreshRecord
+  } = await import('../src/foundation/token-refresh.mjs');
+  const architecture = await readFile(pathFor('docs/architecture.md'), 'utf8');
+  const audit = await readFile(pathFor('docs/security-audit.md'), 'utf8');
+
+  assert.deepEqual(TOKEN_REFRESH_INTEGRATIONS, ['telegram', 'agent-provider', 'settings-sync', 'ton']);
+  assert.match(architecture, /Automatic Token Refresh/i);
+  assert.match(audit, /Automatic Token Refresh/i);
+  assert.equal(
+    validateTokenRefreshRecord({
+      id: 'agent-openai',
+      integration: 'agent-provider',
+      credentialField: 'tokenRef',
+      credentialRef: 'keychain:agent-access',
+      refreshTokenRef: 'keychain:agent-refresh',
+      expiresAt: '2026-04-26T12:01:00.000Z'
+    }).valid,
+    true
+  );
+  assert.equal(
+    validateTokenRefreshRecord({
+      id: 'agent-openai',
+      integration: 'agent-provider',
+      credentialRef: 'raw-token',
+      refreshToken: 'raw-refresh-token'
+    }).valid,
+    false
+  );
+
+  const plan = createTokenRefreshPlan(
+    [
+      {
+        id: 'settings-sync',
+        integration: 'settings-sync',
+        credentialField: 'encryptionKeyRef',
+        credentialRef: 'keychain:settings-sync',
+        refreshTokenRef: 'keychain:settings-sync-refresh',
+        expiresAt: '2026-04-26T12:03:00.000Z'
+      },
+      {
+        id: 'ton-wallet',
+        integration: 'ton',
+        credentialField: 'walletProviderRef',
+        credentialRef: 'wallet:tonkeeper:primary',
+        revoked: true,
+        expiresAt: '2026-04-26T13:00:00.000Z'
+      }
+    ],
+    { now: '2026-04-26T12:00:00.000Z' }
+  );
+
+  assert.deepEqual(plan.due.map((entry) => entry.id), ['settings-sync']);
+  assert.deepEqual(plan.reauthenticationRequired.map((entry) => entry.id), ['ton-wallet']);
+
+  const controller = createTokenRefreshController(
+    {
+      async refreshToken() {
+        const error = new Error('invalid_grant for keychain:agent-refresh');
+        error.code = 'invalid_grant';
+        throw error;
+      }
+    },
+    { now: '2026-04-26T12:00:00.000Z' }
+  );
+  const failed = await controller.refresh({
+    id: 'agent-openai',
+    integration: 'agent-provider',
+    credentialField: 'tokenRef',
+    credentialRef: 'keychain:agent-access',
+    refreshTokenRef: 'keychain:agent-refresh',
+    expiresAt: '2026-04-26T11:59:00.000Z'
+  });
+
+  assert.equal(failed.state, 'reauthentication_required');
+  assert.equal(failed.reauthentication.action, 'agent.provider.reauthenticate');
+  assert.doesNotMatch(JSON.stringify(failed), /agent-refresh/);
+});
+
 test('local agent runtime lifecycle boundary is documented and credential-free by default', async () => {
   const { AGENT_RUNTIME_PLATFORMS, describeAgentRuntimeSupport } = await import(
     '../src/foundation/agent-runtime-supervisor.mjs'

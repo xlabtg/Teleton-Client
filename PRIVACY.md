@@ -14,6 +14,7 @@ This repository currently contains foundation automation, configuration models, 
 - Autonomous agent actions must require clear user consent, configurable limits, reviewable history, and approval gates for sensitive actions.
 - LLM provider credentials must be stored as secure references such as `env:NAME`, `keychain:name`, `keystore:name`, or `secret:name`; raw API keys and tokens must not be committed to settings, logs, issues, or pull requests.
 - Telegram, proxy, sync, and TON credentials must be represented by secure references, not hardcoded values.
+- Refreshable credentials must renew through platform secure storage references only; failed or revoked refresh attempts must expose reauthentication states without logging token values.
 - Settings synchronization is opt-in and disabled by default. Sync payloads exclude secure references, proxy credentials, cloud provider credential references, local security controls, and private agent memory.
 - TON private keys and wallet credentials must use platform secure storage or user-approved wallet providers.
 
@@ -24,6 +25,8 @@ This repository currently contains foundation automation, configuration models, 
 Current repository behavior: no code connects to Telegram, stores Telegram sessions, receives messages, or sends messages.
 
 Planned behavior: Telegram traffic is handled through TDLib behind platform adapters. Telegram API credential references, session references, message caches, contact metadata, media metadata, and update streams stay inside the platform boundary or local app storage unless the user starts a flow that intentionally sends data through Telegram services. Two-factor passwords and recovery codes are runtime-only prompt values that shared state and logs must reduce to safe metadata such as field length, attempt count, recovery availability, and redacted recovery email pattern. Shared foundation code must not log message text, chat titles, phone numbers, Telegram credential values, two-factor prompt values, or session secrets.
+
+Refreshable Telegram sessions or bot-token references must use the shared token refresh contract before expiry when a platform bridge supports renewal. Revoked, invalid, or non-refreshable expired Telegram credentials must prompt reauthentication rather than falling back to plaintext credential storage.
 
 ### Proxy Connectivity
 
@@ -43,17 +46,23 @@ Current repository behavior: cloud-capable modes cannot activate without explici
 
 Planned behavior: cloud and hybrid modes require explicit cloud processing opt-in before any selected prompt, message context, action metadata, provider telemetry, or tool result is sent to an approved cloud provider or custom HTTPS endpoint. Provider API keys and bearer tokens are represented only through secure references resolved by platform secure storage at runtime. Users can turn off cloud-capable modes, clear provider references, or replace provider references without exposing credential values through shared settings snapshots.
 
+Agent provider API keys and bearer tokens that support rotation must refresh through secure references and update only the secure storage entry or reference metadata. Revoked provider credentials move the agent integration into a reauthentication state before cloud processing can continue.
+
 ### Settings Synchronization
 
 Current repository behavior: settings synchronization is modeled as disabled by default, accepts only safe shared fields, and excludes secure references plus private agent memory.
 
 Planned behavior: cross-device settings synchronization can move appearance, notification, layout, proxy preference, and non-activating agent preference fields only after explicit user enablement. Platform adapters must encrypt sync envelopes before storage or transport, and each device must resolve its own local encryption key reference. Enabling sync on one device does not enable cloud-capable agent modes or copy sync credentials to another device.
 
+Settings sync encryption keys and transport access tokens remain device-local during refresh. Network refresh failures may retry with bounded backoff, while revoked sync credentials require local reauthentication or reenrollment.
+
 ### TON Blockchain
 
 Current repository behavior: TON adapters prepare and validate mock wallet, transfer, swap, NFT, staking, DNS, confirmation, and testnet workflows without accepting plaintext private keys.
 
 Planned behavior: TON operations use wallet-provider integrations, TON SDKs, or secure storage references for signing material. Balance lookup, receive address display, NFT metadata lookup, swap quotes, staking previews, DNS lookups, and transaction status checks may query TON providers or indexers with public wallet addresses and public transaction identifiers. Transfers, swaps, staking, and other wallet-changing operations must require confirmation before signing or broadcasting, and shared code must never log private keys, seed phrases, mnemonics, wallet provider credentials, or protected CI wallet material.
+
+TON wallet-provider refresh is limited to provider references and secure storage references. Shared refresh state can indicate retry, expiry, revocation, or required wallet reauthentication, but it must not expose signing material or wallet provider secrets.
 
 ## User Controls
 
