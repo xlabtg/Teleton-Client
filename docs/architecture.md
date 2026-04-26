@@ -17,6 +17,7 @@ Teleton Client is planned as a layered client where protocol, automation, wallet
 - TDLib credentials must be supplied at runtime and never committed.
 - TDLib callers use the shared `authenticate`, `getChatList`, `sendMessage`, and `subscribeUpdates` adapter contract so Android, iOS, desktop, and web-compatible bridges expose the same boundary.
 - Agent mode defaults to `off`; cloud and hybrid modes require explicit activation.
+- Agent settings UI shells use shared view state for mode options, model provider preferences, privacy impact prompts, approval preferences, and autonomous action limits. Cloud and hybrid activation stays pending until the user confirms the privacy impact summary.
 - Proxy secrets are represented as secure references such as `env:NAME`, `keychain:name`, or `keystore:name`.
 - Proxy settings UI shells use shared view state for list items, edit forms, test status, auto-switch preferences, and active route metadata. Display snapshots expose only configured flags for secrets, while settings persistence keeps secure references for platform storage resolution.
 - Proxy usage statistics are local diagnostics records keyed by proxy id. They track attempts, successes, failures, latency samples, and last-used time separately from proxy configuration and never include proxy secrets or message contents.
@@ -43,6 +44,12 @@ The shared supervisor exposes `start`, `stop`, `status`, `health`, and `logs` op
 The shared agent IPC bridge is transport-agnostic so desktop pipes, mobile service bindings, browser workers, HTTP, or WebSocket adapters can reuse the same contract. Version 1 envelopes include an id, kind, source, target, timestamp, and object payload. Request envelopes carry an action, event envelopes carry a typed event name, responses and errors reference `replyTo`, and cancellation envelopes reference `cancelId`.
 
 UI-facing agent events are classified by confirmation behavior. Informational updates such as `agent.info`, incoming message hooks such as `agent.message.received`, and task progress events are delivered without confirmation. Action proposals such as `agent.action.proposed` are marked `requiresConfirmation: true` before dispatch so UI shells can route them to consent flows.
+
+## Agent Settings UI
+
+The shared agent settings view state is implemented in `src/foundation/agent-settings-view.mjs`. It exposes the canonical `off`, `local`, `cloud`, and `hybrid` mode controls from the settings model, keeps the default mode off, and blocks cloud-capable mode changes behind an explicit privacy impact confirmation step before enabling cloud processing consent.
+
+The view also carries model provider/model id preferences, confirmation requirements, and the per-hour autonomous action limit. Platform UI shells can render this state directly while persisting only the validated shared agent settings payload.
 
 ## Foundation Status
 

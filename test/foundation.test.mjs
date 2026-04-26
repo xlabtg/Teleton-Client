@@ -156,6 +156,25 @@ test('agent autonomy modes match the epic acceptance criteria', async () => {
   assert.equal(normalizeAgentMode('Локально'), 'local');
 });
 
+test('agent settings view requires consent before cloud-capable modes', async () => {
+  const { AGENT_PRIVACY_IMPACT_MODES, createAgentSettingsView } = await import(
+    '../src/foundation/agent-settings-view.mjs'
+  );
+
+  const view = createAgentSettingsView();
+  assert.equal(view.getState().settings.mode, 'off');
+  assert.deepEqual(AGENT_PRIVACY_IMPACT_MODES, ['cloud', 'hybrid']);
+
+  const pending = view.selectMode('hybrid');
+  assert.equal(pending.settings.mode, 'off');
+  assert.equal(pending.activation.requiresPrivacyConfirmation, true);
+  assert.match(pending.activation.privacyImpact.summary, /cloud processing/i);
+
+  const confirmed = view.confirmPrivacyImpact();
+  assert.equal(confirmed.settings.mode, 'hybrid');
+  assert.equal(confirmed.settings.allowCloudProcessing, true);
+});
+
 test('local agent runtime lifecycle boundary is documented and credential-free by default', async () => {
   const { AGENT_RUNTIME_PLATFORMS, describeAgentRuntimeSupport } = await import(
     '../src/foundation/agent-runtime-supervisor.mjs'
