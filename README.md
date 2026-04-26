@@ -12,6 +12,7 @@ This repository is in the foundation phase. The current implementation establish
 - GitHub issue and pull request templates for reproducible, secret-free contributions.
 - Dry-run and idempotent GitHub issue creation script for decomposing issue `#1`.
 - Shared cross-platform settings model for language, theme, notifications, agent mode, proxy, and secure references.
+- Shared agent settings view state for off, local, cloud, and hybrid modes, model preferences, privacy prompts, approval preferences, and autonomous action limits.
 - ProxyManager route selection for direct, MTProto, and SOCKS5 connectivity using saved preferences, health inputs, latency ranking, and failure cooldowns.
 - Shared proxy settings view state for add, test, enable, disable, edit, remove, reset statistics, and export diagnostics workflows without exposing secure references.
 - Local proxy usage statistics for attempts, successes, failures, latency, and last-used time, stored separately from proxy secrets.
@@ -47,7 +48,7 @@ The project is intended to evolve through these layers:
 4. TON blockchain integrations for wallet, transfers, swaps, NFTs, staking, and DNS.
 5. Security and privacy controls for credentials, user consent, and auditability.
 
-See `docs/architecture.md`, `docs/backlog.md`, `docs/tdlib-adapter.md`, and `docs/release-strategy.md` for the current foundation plan. The local agent runtime section in `docs/architecture.md` records supported runtime directions and packaging gaps for Android, iOS, desktop, and web wrappers.
+See `docs/architecture.md`, `docs/backlog.md`, `docs/tdlib-adapter.md`, and `docs/release-strategy.md` for the current foundation plan. The agent settings and local runtime sections in `docs/architecture.md` record the shared settings UI contract, supported runtime directions, and packaging gaps for Android, iOS, desktop, and web wrappers.
 
 ## Contribution Templates
 
