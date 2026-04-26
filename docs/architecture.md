@@ -32,6 +32,7 @@ Teleton Client is planned as a layered client where protocol, automation, wallet
 - TON wallet operations are represented by the `src/ton/wallet-adapter.mjs` contract. Shared callers can retrieve balance, display a receive address, prepare unsigned transfer drafts, and query transfer status while platform wrappers keep private keys behind wallet providers or secure storage references.
 - TON signing requires user confirmation and platform secure storage or wallet-provider approval. Transfer preparation validates explicit confirmation before provider calls and still returns an unsigned draft for a later signing flow.
 - TON swap operations are represented by the `src/ton/swap-adapter.mjs` contract. Shared callers can request STON.fi or DeDust quotes without signing, while swap transaction draft preparation requires explicit confirmation and provider errors are sanitized before they cross the shared boundary.
+- TON transaction confirmation is represented by the `src/ton/transaction-confirmation.mjs` workflow. It builds review state with amount, recipient, network fee, provider, limit state, and risk indicators, then requires a platform biometric or password approval bridge before callers may continue to signing. The workflow records pending, approved, rejected, and failed history states for audit views.
 
 ## Local Agent Runtime
 
