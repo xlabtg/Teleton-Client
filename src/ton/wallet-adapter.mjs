@@ -61,6 +61,47 @@ function normalizeAddress(value, label, errors) {
   return address;
 }
 
+function normalizeWalletId(value, errors) {
+  const id = String(value ?? '').trim();
+  if (!id) {
+    errors.push('TON wallet id is required.');
+  }
+
+  return id;
+}
+
+function normalizeWalletLabel(value, address) {
+  const label = String(value ?? '').trim();
+  return label || address;
+}
+
+function normalizeWalletIdentity(input = {}, active = false) {
+  const validation = validateTonWalletConfig(input);
+  const errors = [...validation.errors];
+  const id = normalizeWalletId(input.id, errors);
+  const label = normalizeWalletLabel(input.label, validation.config.address);
+
+  if (errors.length > 0) {
+    throw adapterError(errors, 'invalid_wallet_identity');
+  }
+
+  return Object.freeze({
+    id,
+    label,
+    ...validation.config,
+    active
+  });
+}
+
+function toWalletSigningContext(wallet) {
+  return Object.freeze({
+    id: wallet.id,
+    label: wallet.label,
+    address: wallet.address,
+    network: wallet.network
+  });
+}
+
 function normalizeNanoTon(value, errors) {
   let amountNanoTon = value;
   if (typeof amountNanoTon === 'number' && Number.isSafeInteger(amountNanoTon)) {
@@ -302,7 +343,11 @@ export function createTonWalletAdapter(implementation, options = {}) {
     throw adapterError(validation.errors, 'invalid_wallet_config');
   }
 
-  const walletConfig = validation.config;
+  const walletConfig = {
+    ...(options.id === undefined ? {} : { id: String(options.id).trim() }),
+    ...(options.label === undefined ? {} : { label: normalizeWalletLabel(options.label, validation.config.address) }),
+    ...validation.config
+  };
 
   return Object.freeze({
     network: walletConfig.network,
@@ -346,7 +391,13 @@ export function createTonWalletAdapter(implementation, options = {}) {
         throw adapterError(transferValidation.errors, 'invalid_transfer_request');
       }
 
-      return implementation.prepareTransfer(transferValidation.request);
+      const draft = await implementation.prepareTransfer(transferValidation.request);
+      return walletConfig.id
+        ? {
+            ...draft,
+            wallet: toWalletSigningContext(walletConfig)
+          }
+        : draft;
     },
     async prepareJettonTransfer(input = {}) {
       if (typeof implementation.prepareJettonTransfer !== 'function') {
@@ -374,23 +425,132 @@ export function createTonWalletAdapter(implementation, options = {}) {
   });
 }
 
+export function createTonWalletManager(options = {}) {
+  const wallets = new Map();
+  let activeWalletId = null;
+
+  function listWallets() {
+    return [...wallets.values()].map((wallet) => ({ ...wallet, active: wallet.id === activeWalletId }));
+  }
+
+  function getWallet(id) {
+    const walletId = String(id ?? '').trim();
+    const wallet = wallets.get(walletId);
+    if (!wallet) {
+      throw new TonWalletAdapterError(`Unknown TON wallet: ${walletId}`, 'unknown_wallet');
+    }
+
+    return wallet;
+  }
+
+  function setWallet(wallet) {
+    wallets.set(wallet.id, Object.freeze({ ...wallet, active: false }));
+  }
+
+  const manager = {
+    listWallets,
+    getWallet(id) {
+      const wallet = getWallet(id);
+      return { ...wallet, active: wallet.id === activeWalletId };
+    },
+    getActiveWallet() {
+      if (!activeWalletId) {
+        throw new TonWalletAdapterError('No active TON wallet is selected.', 'missing_active_wallet');
+      }
+
+      return manager.getWallet(activeWalletId);
+    },
+    addWallet(input = {}) {
+      const wallet = normalizeWalletIdentity(input, wallets.size === 0);
+      if (wallets.has(wallet.id)) {
+        throw new TonWalletAdapterError(`TON wallet already exists: ${wallet.id}`, 'duplicate_wallet');
+      }
+
+      setWallet(wallet);
+      if (!activeWalletId || input.active === true) {
+        activeWalletId = wallet.id;
+      }
+
+      return manager.getWallet(wallet.id);
+    },
+    switchWallet(id) {
+      const wallet = getWallet(id);
+      activeWalletId = wallet.id;
+      return manager.getWallet(wallet.id);
+    },
+    renameWallet(id, label) {
+      const wallet = getWallet(id);
+      const renamed = Object.freeze({
+        ...wallet,
+        label: normalizeWalletLabel(label, wallet.address)
+      });
+      setWallet(renamed);
+      return manager.getWallet(renamed.id);
+    },
+    removeWallet(id) {
+      const wallet = getWallet(id);
+      wallets.delete(wallet.id);
+
+      if (activeWalletId === wallet.id) {
+        activeWalletId = wallets.size > 0 ? wallets.keys().next().value : null;
+      }
+
+      const secureRefs = [wallet.secureStorageRef, wallet.walletProviderRef].filter(Boolean);
+
+      return Object.freeze({
+        removed: Object.freeze({
+          id: wallet.id,
+          address: wallet.address,
+          secureRefs: Object.freeze(secureRefs)
+        }),
+        activeWallet: activeWalletId ? manager.getActiveWallet() : null
+      });
+    },
+    createActiveWalletAdapter(factory) {
+      if (typeof factory !== 'function') {
+        throw new TonWalletAdapterError('TON wallet manager requires an adapter factory function.', 'invalid_adapter_factory');
+      }
+
+      return factory(manager.getActiveWallet());
+    }
+  };
+
+  for (const wallet of options.wallets ?? []) {
+    manager.addWallet(wallet);
+  }
+
+  if (options.activeWalletId !== undefined) {
+    manager.switchWallet(options.activeWalletId);
+  }
+
+  return Object.freeze(manager);
+}
+
 function cloneValue(value) {
   return structuredClone(value);
 }
 
 export function createMockTonWalletAdapter(seed = {}) {
-  const validation = validateTonWalletConfig({
+  const walletInput = {
     address: seed.address,
     walletProviderRef: seed.walletProviderRef ?? 'wallet:mock-ton-provider',
     secureStorageRef: seed.secureStorageRef,
     network: seed.network ?? 'testnet'
-  });
+  };
+  const validation = validateTonWalletConfig(walletInput);
 
   if (!validation.valid) {
     throw adapterError(validation.errors, 'invalid_wallet_config');
   }
 
-  const walletConfig = validation.config;
+  const walletConfig =
+    seed.id === undefined
+      ? validation.config
+      : {
+          id: String(seed.id).trim(),
+          label: normalizeWalletLabel(seed.label, validation.config.address),
+          ...validation.config
+        };
   const commands = [];
   const transferDrafts = new Map();
   let nextDraftId = 1;
