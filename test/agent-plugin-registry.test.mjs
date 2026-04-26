@@ -94,4 +94,3 @@ test('agent plugin registry gates lifecycle, events, and actions by enabled stat
   assert.equal(registry.canReceiveEvent('summarizer', 'agent.message.received'), false);
   assert.deepEqual(AGENT_PLUGIN_LIFECYCLE_STATES, ['registered', 'enabled', 'disabled', 'error']);
 });
-
