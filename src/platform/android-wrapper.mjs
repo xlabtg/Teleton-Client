@@ -1,4 +1,5 @@
 import { createPushNotificationDeliveryPlan, describePushNotificationPlatform } from '../foundation/push-notifications.mjs';
+import { createMobileGesturePlan, createPlatformInputPlan } from './action-map.mjs';
 
 export const ANDROID_PACKAGE_NAME = 'dev.teleton.client';
 export const ANDROID_ENTRY_ACTIVITY = `${ANDROID_PACKAGE_NAME}.MainActivity`;
@@ -351,6 +352,10 @@ export function describeAndroidBackgroundWork() {
   return clone(ANDROID_BACKGROUND_WORK);
 }
 
+export function describeAndroidGestures(options = {}) {
+  return createMobileGesturePlan('android', options);
+}
+
 export function createAndroidNotificationRequest(notification, options = {}) {
   if (!isPlainObject(notification)) {
     throw new Error('Android notification request requires a shared notification object.');
@@ -441,6 +446,8 @@ export function describeAndroidWrapper() {
     notificationChannels: clone(ANDROID_NOTIFICATION_CHANNELS),
     pushNotifications: describePushNotificationPlatform('android'),
     backgroundWork: describeAndroidBackgroundWork(),
+    gestures: describeAndroidGestures(),
+    inputActions: createPlatformInputPlan('android'),
     deepLinks: {
       schemes: [...ANDROID_DEEP_LINK_SCHEMES],
       entryActivity: ANDROID_ENTRY_ACTIVITY,

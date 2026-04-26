@@ -1,4 +1,5 @@
 import { createPushNotificationDeliveryPlan, describePushNotificationPlatform } from '../foundation/push-notifications.mjs';
+import { createMobileGesturePlan, createPlatformInputPlan } from './action-map.mjs';
 
 export const IOS_BUNDLE_IDENTIFIER = 'dev.teleton.client';
 export const IOS_APP_TARGET = 'TeletonClient';
@@ -552,6 +553,10 @@ export function describeIosComplianceNotes() {
   return clone(IOS_COMPLIANCE_NOTES);
 }
 
+export function describeIosGestures(options = {}) {
+  return createMobileGesturePlan('ios', options);
+}
+
 export function routeIosDeepLink(input) {
   let url;
   try {
@@ -590,6 +595,8 @@ export function describeIosWrapper() {
     notificationCategories: clone(IOS_NOTIFICATION_CATEGORIES),
     pushNotifications: describePushNotificationPlatform('ios'),
     backgroundTasks: describeIosBackgroundTasks(),
+    gestures: describeIosGestures(),
+    inputActions: createPlatformInputPlan('ios'),
     deepLinks: {
       schemes: [...IOS_DEEP_LINK_SCHEMES],
       appDelegateEntry: 'application(_:open:options:)',

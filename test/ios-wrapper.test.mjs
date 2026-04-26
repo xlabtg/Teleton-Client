@@ -11,6 +11,7 @@ import {
   createIosPushNotificationRequest,
   describeIosBackgroundTasks,
   describeIosComplianceNotes,
+  describeIosGestures,
   describeIosKeychainStorage,
   describeIosWrapper,
   routeIosDeepLink
@@ -149,6 +150,20 @@ test('iOS background tasks use BGTaskScheduler with suspension-safe boundaries',
   assert.equal(tasks.tonStatusRefresh.requiresUserInitiatedRefresh, false);
 });
 
+test('iOS gestures map shared actions to SwiftUI gesture metadata', () => {
+  const gestures = describeIosGestures();
+  const disabled = describeIosGestures({ riskyActionBindingsEnabled: false });
+
+  assert.equal(gestures.api, 'SwiftUI Gesture');
+  assert.equal(gestures.gestures.find((gesture) => gesture.actionId === 'messaging.search').gesture, 'pull-down');
+  assert.equal(gestures.gestures.find((gesture) => gesture.actionId === 'agent.quickAction').requiresUserConfirmation, true);
+  assert.equal(gestures.gestures.find((gesture) => gesture.actionId === 'wallet.transferReview').route, 'ton.transfer.review');
+  assert.equal(gestures.collisionReport.conflictCount, 0);
+  assert.match(gestures.accessibility.alternativeControls, /visible controls/i);
+  assert.equal(disabled.gestures.some((gesture) => gesture.actionId === 'agent.quickAction'), false);
+  assert.equal(disabled.disabled.find((gesture) => gesture.actionId === 'wallet.transferReview').reason, 'risky-action-bindings-disabled');
+});
+
 test('iOS deep links route Telegram and TON URIs to shared workflows', () => {
   assert.deepEqual(IOS_DEEP_LINK_SCHEMES, ['teleton', 'tg', 'ton', 'https']);
 
@@ -235,6 +250,8 @@ test('iOS wrapper docs cover the selected stack, approved APIs, and App Store co
   assert.match(iosGuide, /APNs/i);
   assert.match(iosGuide, /Keychain Services/i);
   assert.match(iosGuide, /BGTaskScheduler/i);
+  assert.match(iosGuide, /Gestures/i);
+  assert.match(iosGuide, /visible controls/i);
   assert.match(iosGuide, /App Store review/i);
   assert.match(iosGuide, /AI automation/i);
   assert.match(iosGuide, /crypto/i);

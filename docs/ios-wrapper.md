@@ -2,7 +2,7 @@
 
 The iOS wrapper contract selects a Swift runtime with SwiftUI UI, the Xcode build system, and bundle identifier `dev.teleton.client`. The debug simulator variant is represented by the runnable app bundle contract `ios/build/Build/Products/Debug-iphonesimulator/TeletonClient.app`, launched through the `TeletonClient` scheme and `TeletonClientApp` entry point.
 
-This repository still keeps the implementation dependency-free, so the wrapper is modeled as a shared contract that future native Xcode sources can consume. The contract records the selected stack, runnable debug artifact metadata, Keychain-backed secret references, APNs notification requests, BGTaskScheduler boundaries, URL scheme and Universal Link routing, and App Store review constraints for messaging, AI automation, and crypto behavior.
+This repository still keeps the implementation dependency-free, so the wrapper is modeled as a shared contract that future native Xcode sources can consume. The contract records the selected stack, runnable debug artifact metadata, Keychain-backed secret references, APNs notification requests, BGTaskScheduler boundaries, gesture bindings from the shared input action map, URL scheme and Universal Link routing, and App Store review constraints for messaging, AI automation, and crypto behavior.
 
 ## Keychain
 
@@ -46,6 +46,19 @@ Message synchronization is modeled as a `BGAppRefreshTask` with identifier `dev.
 TON status refresh is modeled as a `BGAppRefreshTask` with identifier `dev.teleton.client.ton.status-refresh`. It requires network connectivity, does not sign transactions, and does not require user-initiated refresh for passive status updates.
 
 Native Xcode sources must declare matching `BGTaskSchedulerPermittedIdentifiers` and background modes before App Store submission.
+
+## Gestures
+
+iOS gesture metadata is generated from the shared input action map and is intended for SwiftUI `Gesture` handlers. Default gestures cover high-frequency workflows without replacing visible controls:
+
+- Pull down from the top of the chat list to search messages.
+- Two-finger vertical swipes in a chat thread to move to the next or previous chat.
+- Long press the agent tab to draft an agent quick action for review.
+- Long press the wallet tab to draft a TON transfer review.
+
+The gesture plan includes a collision report for duplicate gestures in the same context and reserved system gesture notes for iOS edge, Control Center, and Home indicator gestures. Native sources must keep Teleton gestures inside content or tab controls instead of overriding system navigation areas.
+
+Gestures are shortcuts only. The same routes must remain reachable through visible controls, keyboard access where available, and VoiceOver actions. Agent quick actions and TON transfer gestures are `review-required`, preserve explicit confirmation screens, and can be filtered through `input.riskyActionBindings.enabled` or per-action disabled ids.
 
 ## Deep Links
 

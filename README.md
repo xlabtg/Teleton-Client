@@ -13,6 +13,7 @@ This repository is in the foundation phase. The current implementation establish
 - Dry-run and idempotent GitHub issue creation script for decomposing issue `#1`.
 - Shared cross-platform settings model for language, theme, notifications, agent mode, proxy, and secure references.
 - Shared push notification model for messages, Teleton Agent approvals, and TON wallet events with redacted payloads, category preferences, and platform permission failure plans.
+- Shared input action map for desktop shortcuts and mobile gestures, including conflict reports, accessibility alternatives, and user disablement for risky agent or wallet actions.
 - Shared agent settings view state for off, local, cloud, and hybrid modes, model preferences, privacy prompts, approval preferences, and autonomous action limits.
 - ProxyManager route selection for direct, MTProto, and SOCKS5 connectivity using saved preferences, health inputs, latency ranking, and failure cooldowns.
 - Shared proxy settings view state for add, test, enable, disable, edit, remove, reset statistics, and export diagnostics workflows without exposing secure references.
@@ -66,7 +67,7 @@ The project is intended to evolve through these layers:
 4. TON blockchain integrations for wallet, transfers, swaps, NFTs, staking, and DNS.
 5. Security and privacy controls for credentials, user consent, and auditability.
 
-See `docs/architecture.md`, `docs/backlog.md`, `docs/tdlib-adapter.md`, `docs/android-wrapper.md`, `docs/ios-wrapper.md`, `docs/desktop-wrapper.md`, `docs/tablet-layout.md`, `docs/web-pwa-wrapper.md`, and `docs/release-strategy.md` for the current foundation plan. The agent settings, local runtime, Android wrapper, iOS wrapper, desktop wrapper, tablet layout, and PWA sections record the shared settings UI contract, supported runtime directions, platform execution boundaries, responsive tablet behavior, web installability behavior, and remaining packaging gaps for Android, iOS, desktop, and web wrappers.
+See `docs/architecture.md`, `docs/backlog.md`, `docs/tdlib-adapter.md`, `docs/android-wrapper.md`, `docs/ios-wrapper.md`, `docs/desktop-wrapper.md`, `docs/tablet-layout.md`, `docs/web-pwa-wrapper.md`, and `docs/release-strategy.md` for the current foundation plan. The agent settings, local runtime, input action map, Android wrapper, iOS wrapper, desktop wrapper, tablet layout, and PWA sections record the shared settings UI contract, supported runtime directions, platform execution boundaries, shortcut and gesture behavior, responsive tablet behavior, web installability behavior, and remaining packaging gaps for Android, iOS, desktop, and web wrappers.
 
 ## Contribution Templates
 
