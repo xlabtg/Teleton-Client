@@ -59,4 +59,6 @@ The shared push notification plan maps message, agent approval, and wallet categ
 
 Secure storage uses IndexedDB plus WebCrypto non-extractable keys where available. Browser storage remains weaker than OS Keychain or Keystore, so shared code stores only secure references and non-secret metadata. If durable protected storage is unavailable, the web shell falls back to session-only state and reauthentication.
 
+Hardware security key support uses WebAuthn `PublicKeyCredential` only after the page is in a secure context and `navigator.credentials.create()` and `navigator.credentials.get()` can handle public-key credentials. Unsupported browsers must expose the shared fallback state instead of showing a registration or assertion prompt. Challenge creation and verification stay behind server or trusted bridge boundaries, while browser code only performs the authenticator ceremony.
+
 Background sync is best effort. The web shell may request background synchronization where the browser supports it, but queued message sends, agent actions, and wallet signing must reconcile on the next foreground open instead of depending on background execution.

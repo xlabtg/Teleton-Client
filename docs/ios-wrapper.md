@@ -60,6 +60,10 @@ The gesture plan includes a collision report for duplicate gestures in the same 
 
 Gestures are shortcuts only. The same routes must remain reachable through visible controls, keyboard access where available, and VoiceOver actions. Agent quick actions and TON transfer gestures are `review-required`, preserve explicit confirmation screens, and can be filtered through `input.riskyActionBindings.enabled` or per-action disabled ids.
 
+## Hardware Security Keys
+
+iOS hardware key support must pass the shared capability plan before registration, account protection, or high-risk action prompts are shown. Native sources should use AuthenticationServices `ASAuthorizationSecurityKeyPublicKeyCredentialProvider` for external security keys and `ASAuthorizationPlatformPublicKeyCredentialProvider` where platform passkeys are allowed. If those providers are unavailable, the wrapper returns the configured fallback behavior instead of presenting an incomplete security key flow.
+
 ## Deep Links
 
 The iOS wrapper supports the schemes `teleton`, `tg`, `ton`, and `https`. Custom URL schemes enter through SwiftUI scene URL handling, while `https://t.me` and `https://telegram.me` are modeled as Universal Links.

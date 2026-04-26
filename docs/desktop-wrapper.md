@@ -72,6 +72,10 @@ Shortcut accessibility requirements:
 - Global shortcuts must be opt-in and discoverable in settings.
 - Risky agent and TON transfer shortcuts must keep the same confirmation screen as visible controls.
 
+## Hardware Security Keys
+
+Desktop hardware key support must pass the shared capability plan before high-risk approval prompts are enabled. The preferred boundary is renderer WebAuthn `PublicKeyCredential` through Chromium in a secure context. If that is unavailable, the wrapper may expose a native FIDO2 bridge only after human security review confirms OS authenticator behavior, IPC redaction, origin or relying-party binding, and fallback behavior.
+
 ## Autostart
 
 Autostart is disabled by default and must stay user-controlled.
