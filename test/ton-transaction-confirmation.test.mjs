@@ -16,6 +16,12 @@ test('TON transaction review exposes amount, recipient, network fee, provider, a
       recipient: 'EQDreceiverAddress',
       networkFeeNanoTon: 25000000n,
       provider: 'tonkeeper',
+      wallet: {
+        id: 'wallet-primary',
+        label: 'Primary',
+        address: 'EQDsenderAddress',
+        network: null
+      },
       totalNanoTon: 1525000000n
     },
     {
@@ -31,6 +37,12 @@ test('TON transaction review exposes amount, recipient, network fee, provider, a
     recipient: 'EQDreceiverAddress',
     networkFeeNanoTon: 25000000n,
     provider: 'tonkeeper',
+    wallet: {
+      id: 'wallet-primary',
+      label: 'Primary',
+      address: 'EQDsenderAddress',
+      network: null
+    },
     totalNanoTon: 1525000000n,
     memo: null,
     riskIndicators: [
@@ -71,7 +83,8 @@ test('TON transaction confirmation requires biometric or password approval befor
     amountNanoTon: 500000000n,
     recipient: 'EQDreceiverAddress',
     networkFeeNanoTon: 10000000n,
-    provider: 'tonkeeper'
+    provider: 'tonkeeper',
+    wallet: { id: 'wallet-primary', label: 'Primary', address: 'EQDsenderAddress' }
   });
 
   await assert.rejects(() => workflow.approveTransaction(review.id, { approvalMethods: [] }), /biometric or password/);
@@ -105,21 +118,24 @@ test('TON transaction confirmation records approved, rejected, failed, and pendi
     amountNanoTon: 1n,
     recipient: 'EQDreceiverAddress',
     networkFeeNanoTon: 1n,
-    provider: 'tonkeeper'
+    provider: 'tonkeeper',
+    wallet: { id: 'wallet-primary', label: 'Primary', address: 'EQDsenderAddress' }
   });
   const rejectedReview = workflow.createReview({
     id: 'tx-rejected',
     amountNanoTon: 2n,
     recipient: 'EQDreceiverAddress',
     networkFeeNanoTon: 1n,
-    provider: 'tonkeeper'
+    provider: 'tonkeeper',
+    wallet: { id: 'wallet-primary', label: 'Primary', address: 'EQDsenderAddress' }
   });
   const pendingReview = workflow.createReview({
     id: 'tx-pending',
     amountNanoTon: 3n,
     recipient: 'EQDreceiverAddress',
     networkFeeNanoTon: 1n,
-    provider: 'tonkeeper'
+    provider: 'tonkeeper',
+    wallet: { id: 'wallet-primary', label: 'Primary', address: 'EQDsenderAddress' }
   });
 
   await workflow.approveTransaction(approvedReview.id, { approvalMethods: ['password'] });

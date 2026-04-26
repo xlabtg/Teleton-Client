@@ -37,6 +37,25 @@ function normalizeId(value, label, errors) {
   return id;
 }
 
+function normalizeWalletContext(input, errors) {
+  if (input === undefined || input === null) {
+    errors.push('TON transaction signing wallet is required.');
+    return null;
+  }
+
+  if (!isPlainObject(input)) {
+    errors.push('TON transaction signing wallet must be an object.');
+    return null;
+  }
+
+  return {
+    id: normalizeId(input.id, 'wallet id', errors),
+    label: String(input.label ?? '').trim() || normalizeId(input.address, 'wallet address', errors),
+    address: normalizeId(input.address, 'wallet address', errors),
+    network: String(input.network ?? '').trim() || null
+  };
+}
+
 function normalizePositiveNanoTon(value, fieldName, errors) {
   let amount = value;
   if (typeof amount === 'number' && Number.isSafeInteger(amount)) {
@@ -182,6 +201,7 @@ export function validateTonTransactionReview(input = {}, limitInput = {}) {
     recipient: normalizeId(input.recipient ?? input.to, 'recipient', errors),
     networkFeeNanoTon,
     provider: normalizeId(input.provider, 'provider', errors),
+    wallet: normalizeWalletContext(input.wallet, errors),
     totalNanoTon,
     memo: input.memo === undefined || input.memo === null ? null : String(input.memo)
   };

@@ -3,12 +3,99 @@ import { test } from 'node:test';
 
 import {
   createMockTonWalletAdapter,
+  createTonWalletManager,
   createTonWalletAdapter,
   normalizeJettonMetadata,
   validateJettonTransferRequest,
   validateTonTransferRequest,
   validateTonWalletConfig
 } from '../src/ton/wallet-adapter.mjs';
+
+test('TON wallet manager adds, switches, renames, and removes wallet references without exposing secrets', () => {
+  const manager = createTonWalletManager();
+
+  const primary = manager.addWallet({
+    id: 'wallet-primary',
+    label: 'Primary',
+    address: 'EQDprimaryAddress',
+    walletProviderRef: 'wallet:tonkeeper:primary'
+  });
+  const savings = manager.addWallet({
+    id: 'wallet-savings',
+    label: 'Savings',
+    address: 'EQDsavingsAddress',
+    secureStorageRef: 'keystore:ton-wallet-savings',
+    network: 'mainnet'
+  });
+
+  assert.equal(primary.active, true);
+  assert.equal(savings.active, false);
+  assert.equal(manager.getActiveWallet().id, 'wallet-primary');
+
+  manager.switchWallet('wallet-savings');
+  assert.equal(manager.getActiveWallet().id, 'wallet-savings');
+  assert.deepEqual(
+    manager.listWallets().map((wallet) => ({ id: wallet.id, label: wallet.label, active: wallet.active })),
+    [
+      { id: 'wallet-primary', label: 'Primary', active: false },
+      { id: 'wallet-savings', label: 'Savings', active: true }
+    ]
+  );
+
+  assert.deepEqual(manager.renameWallet('wallet-savings', 'Long-term savings'), {
+    id: 'wallet-savings',
+    label: 'Long-term savings',
+    address: 'EQDsavingsAddress',
+    network: 'mainnet',
+    secureStorageRef: 'keystore:ton-wallet-savings',
+    active: true
+  });
+
+  const removal = manager.removeWallet('wallet-savings');
+  assert.deepEqual(removal.removed.secureRefs, ['keystore:ton-wallet-savings']);
+  assert.equal(manager.getActiveWallet().id, 'wallet-primary');
+});
+
+test('TON wallet manager prepares transfers with the selected wallet signing boundary', async () => {
+  const manager = createTonWalletManager({
+    wallets: [
+      {
+        id: 'wallet-primary',
+        label: 'Primary',
+        address: 'EQDprimaryAddress',
+        walletProviderRef: 'wallet:tonkeeper:primary'
+      },
+      {
+        id: 'wallet-savings',
+        label: 'Savings',
+        address: 'EQDsavingsAddress',
+        walletProviderRef: 'wallet:tonkeeper:savings'
+      }
+    ],
+    activeWalletId: 'wallet-savings'
+  });
+
+  const adapter = manager.createActiveWalletAdapter((wallet) =>
+    createMockTonWalletAdapter({
+      id: wallet.id,
+      label: wallet.label,
+      address: wallet.address,
+      walletProviderRef: wallet.walletProviderRef,
+      network: wallet.network
+    })
+  );
+
+  const draft = await adapter.prepareTransfer({
+    to: 'EQDreceiverAddress',
+    amountNanoTon: 25n,
+    confirmed: true
+  });
+
+  assert.equal(draft.from, 'EQDsavingsAddress');
+  assert.equal(draft.wallet.id, 'wallet-savings');
+  assert.equal(draft.wallet.label, 'Savings');
+  assert.equal(draft.wallet.address, 'EQDsavingsAddress');
+});
 
 test('TON wallet config rejects plaintext private keys and accepts provider references', () => {
   const invalid = validateTonWalletConfig({

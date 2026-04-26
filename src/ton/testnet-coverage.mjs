@@ -160,6 +160,12 @@ export function createTonTestnetWalletFlowHarness(options = {}) {
           recipient: transferDraft.to,
           networkFeeNanoTon: options.mockFixture?.networkFeeNanoTon ?? DEFAULT_MOCK_FIXTURE.networkFeeNanoTon,
           provider: mode === 'testnet' ? 'testnet-provider' : 'mock-provider',
+          wallet: transferDraft.wallet ?? {
+            id: 'testnet-coverage-wallet',
+            label: 'Testnet coverage wallet',
+            address: transferDraft.from,
+            network: transferDraft.network
+          },
           memo: transferDraft.memo
         });
         const confirmation = await confirmationWorkflow.approveTransaction(review.id, {
