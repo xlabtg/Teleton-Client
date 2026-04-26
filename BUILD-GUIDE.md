@@ -41,6 +41,18 @@ ios/build/Build/Products/Debug-iphonesimulator/TeletonClient.app
 
 The contract declares bundle identifier `dev.teleton.client`, app target and scheme `TeletonClient`, Keychain Services references for TDLib credentials, agent memory keys, proxy credentials, and TON wallet references, APNs notification request mapping, BGTaskScheduler jobs for agent runtime, message sync, and TON status refresh, and URL scheme or Universal Link routing for Telegram and TON flows. See `docs/ios-wrapper.md` for the platform API mapping and App Store review constraints.
 
+## Desktop Wrapper
+
+The desktop wrapper contract in `src/platform/desktop-wrapper.mjs` selects Electron, an isolated preload bridge, a web renderer, and electron-builder for the future desktop shell. Debug artifact contracts are runnable local outputs at:
+
+```text
+desktop/out/debug/macos-x64/Teleton Client.app
+desktop/out/debug/windows-x64/Teleton Client.exe
+desktop/out/debug/linux-x64/teleton-client
+```
+
+The contract declares app id `dev.teleton.client`, product name `Teleton Client`, tray menu actions, system notification mapping, focused-window and opt-in global shortcuts, launch-at-login configuration for macOS, Windows, and Linux, protocol routing for Telegram and TON flows, and release packaging targets for DMG, EXE, and AppImage. See `docs/desktop-wrapper.md` for the desktop API mapping and packaging plan.
+
 ## Local Checks
 
 Run the same checks used by CI:
