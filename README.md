@@ -29,6 +29,7 @@ This repository is in the foundation phase. The current implementation establish
 - iOS wrapper contract for the SwiftUI/Xcode stack, runnable debug simulator app artifact metadata, Keychain-backed secret references, APNs push notifications, BGTaskScheduler boundaries, Telegram/TON deep-link routing, and App Store compliance notes.
 - Desktop wrapper contract for the Electron stack, runnable debug artifact metadata for Linux, macOS, and Windows, tray menu behavior, system notifications, shortcuts, autostart, protocol routing, and DMG/EXE/AppImage packaging targets.
 - Responsive tablet layout contract for chats, settings, agent, and wallet views, including shared breakpoints, portrait and landscape navigation modes, split-pane frames, and narrow-tablet sheet fallback behavior.
+- PWA wrapper contract for the web app manifest, service worker strategy, offline shell validation, update behavior, installability metadata, and browser fallbacks for unsupported native capabilities.
 - Local Teleton Agent runtime supervisor contract with mock lifecycle tests for start, stop, health, resource monitoring, and logs.
 - Teleton Agent action notification contract for proposals, starts, completions, approval-required states, and failures with settings-aware delivery and redacted lock-screen text.
 - Teleton Agent action history contract for redacted action records, retention filtering, rollback eligibility, and irreversible action markers.
@@ -63,7 +64,7 @@ The project is intended to evolve through these layers:
 4. TON blockchain integrations for wallet, transfers, swaps, NFTs, staking, and DNS.
 5. Security and privacy controls for credentials, user consent, and auditability.
 
-See `docs/architecture.md`, `docs/backlog.md`, `docs/tdlib-adapter.md`, `docs/android-wrapper.md`, `docs/ios-wrapper.md`, `docs/desktop-wrapper.md`, `docs/tablet-layout.md`, and `docs/release-strategy.md` for the current foundation plan. The agent settings, local runtime, Android wrapper, iOS wrapper, desktop wrapper, and tablet layout sections record the shared settings UI contract, supported runtime directions, platform execution boundaries, responsive tablet behavior, and remaining packaging gaps for Android, iOS, desktop, and web wrappers.
+See `docs/architecture.md`, `docs/backlog.md`, `docs/tdlib-adapter.md`, `docs/android-wrapper.md`, `docs/ios-wrapper.md`, `docs/desktop-wrapper.md`, `docs/tablet-layout.md`, `docs/web-pwa-wrapper.md`, and `docs/release-strategy.md` for the current foundation plan. The agent settings, local runtime, Android wrapper, iOS wrapper, desktop wrapper, tablet layout, and PWA sections record the shared settings UI contract, supported runtime directions, platform execution boundaries, responsive tablet behavior, web installability behavior, and remaining packaging gaps for Android, iOS, desktop, and web wrappers.
 
 ## Contribution Templates
 
