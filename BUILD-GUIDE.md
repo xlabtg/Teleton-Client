@@ -138,6 +138,26 @@ Run `npm run audit:security -- --output security-audit-report.md` during release
 
 Use `SECURITY.md` as the security policy source of truth for supported versions, private vulnerability reporting, coordinated disclosure, and the human maintainer review required before release.
 
+## End-to-End Workflow Checks
+
+`test/e2e-workflow-harness.test.mjs` runs the shared auth, messaging, agent reply, and TON transaction workflow harness in mock mode by default. Local validation does not need production Telegram accounts, agent transports, TON wallet providers, or network access.
+
+Protected CI or a trusted local shell can opt into live workflow checks only when all required variables are present:
+
+| Variable | Required for live E2E | Secret | Purpose |
+| --- | --- | --- | --- |
+| `TELETON_E2E_LIVE_ENABLED` | yes | no | Set to `true` to enable live E2E checks. Any other value keeps mock mode. |
+| `TELETON_E2E_TDLIB_API_ID_REF` | yes | yes | Secure reference for the Telegram API id. |
+| `TELETON_E2E_TDLIB_API_HASH_REF` | yes | yes | Secure reference for the Telegram API hash. |
+| `TELETON_E2E_TDLIB_PHONE_NUMBER_REF` | yes | yes | Secure reference for the Telegram phone number. |
+| `TELETON_E2E_AGENT_TRANSPORT_REF` | yes | yes | Secure reference for the protected Teleton Agent transport. |
+| `TELETON_E2E_TON_WALLET_ADDRESS` | yes | no | Public TON wallet address for transaction draft checks. |
+| `TELETON_E2E_TON_PROVIDER_REF` | yes | yes | Secure wallet provider reference for TON checks. |
+| `TELETON_E2E_TON_RECIPIENT_ADDRESS` | yes | no | Public TON recipient address for draft checks. |
+| `TELETON_E2E_TON_TRANSFER_NANOTON` | no | no | Optional positive integer draft amount. Defaults to the mock fixture amount locally. |
+
+Failure artifacts are sanitized before they leave the harness. Logs redact secure references and private message fields, and screenshots are attached only when a platform capture hook is explicitly supplied.
+
 ## TON Testnet Checks
 
 `test/ton-testnet-coverage.test.mjs` runs the TON wallet flow harness in mock mode by default, so local validation never needs wallet secrets or network access. Protected CI can opt into live testnet checks only when all required variables are present:
