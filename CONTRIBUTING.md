@@ -90,6 +90,7 @@ Use these documents as the source of truth for foundation work:
 - `docs/security-audit.md` for secret scanning, credential rotation, and secure storage review requirements.
 - `docs/license-matrix.md` for TDLib, Telegram reference client, Teleton Agent, and TON SDK license obligations before release readiness.
 - `docs/release-packaging.md` for APK, IPA, DMG, EXE, and AppImage artifact targets, public debug manifests, and protected signing boundaries.
+- `docs/release-readiness.md` for the final release checklist covering tests, licenses, source publication, privacy, security, artifacts, documentation completeness, and human release approval.
 - `docs/architecture.md` for planned layers and integration boundaries.
 - `docs/tdlib-adapter.md` for TDLib adapter and credential handling rules.
 - `docs/release-strategy.md` for release metadata policy.

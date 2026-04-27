@@ -16,6 +16,12 @@ The package remains private until a reviewed release workflow is introduced. Pul
 
 See `docs/release-packaging.md` for the artifact paths, runner matrix, protected signing boundary, and publication checklist. Pull requests do not receive signing secrets; signed packages must be produced only from reviewed commits inside the protected `release-signing` environment.
 
+## Release Readiness Gate
+
+`docs/release-readiness.md` is the final source publication, documentation completeness, and release approval checklist. Before public release, a human release approver must confirm test evidence, license and source publication review, privacy review, security audit evidence, artifact review, documentation completeness, and protected signing status for the exact commit being published.
+
+`npm run validate:release` verifies the machine-readable checklist in `src/foundation/release-readiness.mjs`, but automation does not approve a public release. Package publication, release tags, signed artifact uploads, and app-store submissions remain blocked until the human release approval is recorded in the release review.
+
 ## Semantic Versioning
 
 Versions must use stable semantic version format: `MAJOR.MINOR.PATCH`.

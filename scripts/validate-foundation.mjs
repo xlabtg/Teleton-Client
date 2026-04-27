@@ -25,6 +25,7 @@ const requiredFiles = [
   'docs/architecture.md',
   'docs/release-strategy.md',
   'docs/release-packaging.md',
+  'docs/release-readiness.md',
   'docs/security-audit.md',
   'docs/license-matrix.md',
   'docs/backlog.md',
@@ -43,7 +44,9 @@ const requiredFiles = [
   'test/agent-plugin-registry.test.mjs',
   'src/foundation/release-artifacts.mjs',
   'scripts/build-debug-artifacts.mjs',
-  'test/release-artifacts.test.mjs'
+  'test/release-artifacts.test.mjs',
+  'src/foundation/release-readiness.mjs',
+  'test/release-readiness.test.mjs'
 ];
 
 for (const requiredFile of requiredFiles) {
@@ -146,6 +149,7 @@ const requiredContributingPatterns = [
   /PRIVACY\.md/,
   /docs\/license-matrix\.md/,
   /docs\/release-packaging\.md/,
+  /docs\/release-readiness\.md/,
   /secrets/i,
   /credentials/i,
   /Telegram API IDs or hashes/i,
@@ -269,6 +273,26 @@ for (const pattern of requiredLicenseMatrixPatterns) {
   assert.match(licenseMatrix, pattern, `docs/license-matrix.md must include ${pattern}`);
 }
 
+const releaseReadiness = await readFile(new URL('docs/release-readiness.md', root), 'utf8');
+const requiredReleaseReadinessPatterns = [
+  /Tests and Validation Evidence/i,
+  /License and Source Publication Review/i,
+  /Privacy Policy and Data Flow Review/i,
+  /Security Audit and Vulnerability Intake Review/i,
+  /Release Artifact and Signing Review/i,
+  /Documentation Completeness Review/i,
+  /Human Release Approval/i,
+  /source publication/i,
+  /human release approval/i,
+  /npm run validate:release/,
+  /release-signing/,
+  /Current Behavior Inventory/i
+];
+
+for (const pattern of requiredReleaseReadinessPatterns) {
+  assert.match(releaseReadiness, pattern, `docs/release-readiness.md must include ${pattern}`);
+}
+
 const docsToScan = [
   'README.md',
   'CONTRIBUTING.md',
@@ -277,6 +301,7 @@ const docsToScan = [
   'BUILD-GUIDE.md',
   'docs/architecture.md',
   'docs/security-audit.md',
+  'docs/release-readiness.md',
   'docs/license-matrix.md',
   'docs/tdlib-adapter.md'
 ];
