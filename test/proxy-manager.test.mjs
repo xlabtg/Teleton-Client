@@ -194,6 +194,76 @@ test('proxy manager keeps manual active proxy selection when automatic switching
   }).proxyId, 'mtproto-primary');
 });
 
+test('proxy manager ignores proxy health when proxy preferences are disabled', () => {
+  const manager = createProxyManager({
+    proxy: {
+      ...proxySettings,
+      enabled: false,
+      activeProxyId: null
+    }
+  });
+
+  assert.deepEqual(manager.chooseRoute({
+    direct: { reachable: true },
+    proxies: {
+      'mtproto-primary': { healthy: true, latencyMs: 1 }
+    }
+  }), {
+    type: 'direct',
+    proxyId: null
+  });
+
+  assert.equal(manager.chooseRoute({
+    direct: { reachable: false },
+    proxies: {
+      'mtproto-primary': { healthy: true, latencyMs: 1 }
+    }
+  }), null);
+});
+
+test('proxy preferences validation rejects missing active proxy and duplicate entries', () => {
+  const missingActiveProxy = validateProxyPreferences({
+    enabled: true,
+    autoSwitchEnabled: true,
+    activeProxyId: 'missing-proxy',
+    entries: [
+      {
+        id: 'mtproto-primary',
+        protocol: 'mtproto',
+        host: 'mtproto.example',
+        port: 443,
+        secretRef: 'env:TELETON_MTPROTO_SECRET'
+      }
+    ]
+  });
+
+  assert.equal(missingActiveProxy.valid, false);
+  assert.match(missingActiveProxy.errors.join('\n'), /missing activeProxyId: missing-proxy/);
+
+  const duplicateEntries = validateProxyPreferences({
+    enabled: true,
+    autoSwitchEnabled: true,
+    activeProxyId: 'socks-office',
+    entries: [
+      {
+        id: 'socks-office',
+        protocol: 'socks5',
+        host: '127.0.0.1',
+        port: 1080
+      },
+      {
+        id: 'socks-office',
+        protocol: 'socks5',
+        host: '127.0.0.2',
+        port: 1081
+      }
+    ]
+  });
+
+  assert.equal(duplicateEntries.valid, false);
+  assert.match(duplicateEntries.errors.join('\n'), /duplicate id/);
+});
+
 test('proxy manager persists validated user proxy preferences without raw secrets', () => {
   const manager = createProxyManager();
 
