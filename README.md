@@ -32,6 +32,7 @@ This repository is in the foundation phase. The current implementation establish
 - TON staking adapter contract for Tonstakers and Whales previews, explicit risk/fee disclosure, rewards previews, and confirmation-gated unsigned stake/unstake drafts.
 - TON transaction confirmation workflow for review details, biometric or password approval hooks, limit/risk indicators, and status history.
 - TON testnet coverage harness that runs wallet flow checks in mock mode locally and requires explicit protected environment variables before live testnet execution.
+- End-to-end workflow harness that covers TDLib auth, messaging, agent reply proposal/confirmation, and TON transaction draft/confirmation in mock mode, with live checks gated by protected environment variables and redacted failure artifacts.
 - Android wrapper contract for the Kotlin/Jetpack Compose stack, runnable debug APK artifact metadata, notification channels, WorkManager and foreground service boundaries, and Telegram/TON deep-link routing.
 - iOS wrapper contract for the SwiftUI/Xcode stack, runnable debug simulator app artifact metadata, Keychain-backed secret references, APNs push notifications, BGTaskScheduler boundaries, Telegram/TON deep-link routing, and App Store compliance notes.
 - Desktop wrapper contract for the Electron stack, runnable debug artifact metadata for Linux, macOS, and Windows, tray menu behavior, system notifications, shortcuts, autostart, protocol routing, and DMG/EXE/AppImage packaging targets.
