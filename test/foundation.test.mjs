@@ -32,13 +32,16 @@ test('foundation artifacts required by issue 1 are present', () => {
     'config/epic-subtasks.json',
     'docs/release-strategy.md',
     'docs/release-packaging.md',
+    'docs/release-readiness.md',
     'docs/security-audit.md',
     'docs/license-matrix.md',
     'docs/contributing-templates.md',
     'docs/tdlib-adapter.md',
     'src/foundation/security-audit.mjs',
+    'src/foundation/release-readiness.mjs',
     'scripts/audit-security.mjs',
-    'test/security-audit-report.test.mjs'
+    'test/security-audit-report.test.mjs',
+    'test/release-readiness.test.mjs'
   ];
 
   for (const requiredFile of requiredFiles) {

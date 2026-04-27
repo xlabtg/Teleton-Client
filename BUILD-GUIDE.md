@@ -65,6 +65,12 @@ npm run build:debug-artifacts
 
 The generated manifests are written to `dist/debug-artifacts/` and are uploaded by `.github/workflows/release-validation.yml`. They record the expected debug artifact paths without using signing secrets. Signed packages must be produced only in the protected `release-signing` environment after human release review. See `docs/release-packaging.md` for the artifact matrix, signing boundary, and publication steps.
 
+## Release Readiness
+
+Public release is blocked until the checklist in `docs/release-readiness.md` is complete for the reviewed commit. The checklist covers test evidence, license and source publication review, privacy review, security audit evidence, artifact review, documentation completeness, and explicit human release approval.
+
+Run `npm run validate:release` during release preparation to verify release metadata, artifact documentation, and the machine-readable readiness checklist in `src/foundation/release-readiness.mjs`. Automated validation does not replace the final human approval gate; package publication, app-store submission, signed artifact upload, and release tagging must wait until a human release approver records approval.
+
 ## Input Action Map
 
 The shared input action map in `src/platform/action-map.mjs` defines common messaging, Teleton Agent, and TON wallet routes once, then adapts them to desktop shortcuts and mobile gestures. The generated plans include collision reports, reserved mobile system gesture notes, accessibility requirements, and `input.riskyActionBindings.enabled` so risky agent or transaction bindings can be disabled without removing visible workflow controls.
