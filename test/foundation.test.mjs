@@ -31,6 +31,7 @@ test('foundation artifacts required by issue 1 are present', () => {
     '.github/pull_request_template.md',
     'config/epic-subtasks.json',
     'docs/release-strategy.md',
+    'docs/release-packaging.md',
     'docs/security-audit.md',
     'docs/license-matrix.md',
     'docs/contributing-templates.md',
@@ -111,6 +112,7 @@ test('pre-commit hook is installable and runs deterministic local checks', async
   assert.match(hook, /npm run audit:security/, 'pre-commit hook should generate security audit evidence');
   assert.match(hook, /npm run validate:foundation/, 'pre-commit hook should run foundation validation');
   assert.match(hook, /npm run validate:release/, 'pre-commit hook should run release metadata validation');
+  assert.match(hook, /npm run build:debug-artifacts/, 'pre-commit hook should build debug artifact manifests');
   assert.match(hook, /npm run decompose:dry-run/, 'pre-commit hook should run the deterministic dry run');
 });
 

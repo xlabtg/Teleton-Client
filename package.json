@@ -11,6 +11,7 @@
     "validate:secrets": "node scripts/validate-secrets.mjs",
     "validate:foundation": "node scripts/validate-foundation.mjs",
     "validate:release": "node scripts/validate-release.mjs",
+    "build:debug-artifacts": "node scripts/build-debug-artifacts.mjs",
     "changelog": "node scripts/generate-changelog.mjs",
     "changelog:write": "node scripts/generate-changelog.mjs --write",
     "changelog:check": "node scripts/generate-changelog.mjs --check",

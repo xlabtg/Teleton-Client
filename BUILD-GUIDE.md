@@ -55,6 +55,16 @@ desktop/out/debug/linux-x64/teleton-client
 
 The contract declares app id `dev.teleton.client`, product name `Teleton Client`, tray menu actions, system notification mapping, focused-window and opt-in global shortcuts from the shared input action map, launch-at-login configuration for macOS, Windows, and Linux, protocol routing for Telegram and TON flows, and release packaging targets for DMG, EXE, and AppImage. See `docs/desktop-wrapper.md` for the desktop API mapping and packaging plan.
 
+## Release Packaging
+
+The release artifact matrix in `src/foundation/release-artifacts.mjs` covers Android APK, iOS IPA, macOS DMG, Windows EXE, and Linux AppImage release targets. Public CI builds unsigned debug artifact manifests for Android, iOS, macOS, Windows, and Linux with:
+
+```sh
+npm run build:debug-artifacts
+```
+
+The generated manifests are written to `dist/debug-artifacts/` and are uploaded by `.github/workflows/release-validation.yml`. They record the expected debug artifact paths without using signing secrets. Signed packages must be produced only in the protected `release-signing` environment after human release review. See `docs/release-packaging.md` for the artifact matrix, signing boundary, and publication steps.
+
 ## Input Action Map
 
 The shared input action map in `src/platform/action-map.mjs` defines common messaging, Teleton Agent, and TON wallet routes once, then adapts them to desktop shortcuts and mobile gestures. The generated plans include collision reports, reserved mobile system gesture notes, accessibility requirements, and `input.riskyActionBindings.enabled` so risky agent or transaction bindings can be disabled without removing visible workflow controls.
@@ -87,6 +97,7 @@ npm run validate:secrets
 npm run audit:security
 npm run validate:foundation
 npm run validate:release
+npm run build:debug-artifacts
 npm run decompose:dry-run
 ```
 
@@ -105,6 +116,8 @@ The pre-commit hook runs the same foundation checks as CI before allowing a comm
 ## Release Metadata
 
 `package.json` is the only version source of truth for the current package, application, and release metadata. Run `npm run validate:release` before changing release metadata so CI can verify stable semantic version format and consistency with `src/foundation/release-metadata.mjs`.
+
+Run `npm run build:debug-artifacts` before release packaging changes so CI can verify the public debug artifact matrix without accessing signing credentials.
 
 ## Epic Decomposition
 
