@@ -27,7 +27,7 @@ export const SECURITY_AUDIT_MANUAL_REVIEW_ITEMS = Object.freeze([
     title: 'Human security reviewer',
     owner: 'security maintainer',
     evidence:
-      'Record the latest npm test, npm run validate:secrets, npm run audit:security, npm run validate:foundation, and npm run validate:release results.'
+      'Record the latest npm test, npm run validate:secrets, npm run audit:security, npm run validate:foundation, npm run validate:release, and npm run build:debug-artifacts results.'
   },
   {
     id: 'human-legal-reviewer',
@@ -291,14 +291,21 @@ export async function createSecurityAudit({
       title: 'Release Readiness',
       requiredEvidence: [
         'Release metadata and changelog checks pass before a release review.',
+        'Unsigned debug artifact manifests are built and uploaded by public CI without signing secrets.',
         'Security audit output is generated as Markdown and uploaded or attached to the release review.'
       ],
       checks: [
         createCheck({
           id: 'release-package-state',
           title: 'Package release state',
-          status: packageJson.private === true && packageJson.scripts?.['validate:release'] ? 'pass' : 'blocked',
-          evidence: 'package.json remains private and exposes npm run validate:release for metadata validation.',
+          status:
+            packageJson.private === true &&
+            packageJson.scripts?.['validate:release'] &&
+            packageJson.scripts?.['build:debug-artifacts']
+              ? 'pass'
+              : 'blocked',
+          evidence:
+            'package.json remains private and exposes npm run validate:release plus npm run build:debug-artifacts for release validation.',
           command: 'npm run validate:release'
         }),
         createCheck({
@@ -313,14 +320,16 @@ export async function createSecurityAudit({
           title: 'Release validation workflow',
           status:
             /npm run validate:release/.test(releaseWorkflow) &&
+            /npm run build:debug-artifacts/.test(releaseWorkflow) &&
             /npm run audit:security -- --output security-audit-report\.md/.test(releaseWorkflow) &&
             /actions\/upload-artifact@v4/.test(releaseWorkflow) &&
             /if:\s*always\(\)/.test(releaseWorkflow) &&
+            !/\bsecrets\./.test(releaseWorkflow) &&
             !/npm\s+publish/.test(releaseWorkflow)
               ? 'pass'
               : 'blocked',
           evidence:
-            '.github/workflows/release-validation.yml validates metadata, preserves the security audit report artifact, and does not publish.'
+            '.github/workflows/release-validation.yml validates metadata, uploads unsigned debug artifact manifests, preserves the security audit report artifact, and does not publish.'
         })
       ]
     })

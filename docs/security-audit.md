@@ -29,7 +29,7 @@ The generated Markdown report records the release gate status, automated securit
 | Secrets | `npm run validate:secrets` scans git-tracked text files and fails on common secret patterns. | Security reviewer confirms credential rotation, secure storage, logs, screenshots, fixtures, pull request text, and release notes are redacted. |
 | Dependency risk | `package.json` dependency metadata and lockfile coverage are checked, and `docs/license-matrix.md` must track upstream license and source publication obligations. | Legal or release reviewer confirms selected dependencies match the license matrix and approves TDLib, Telegram reference, Teleton Agent, TON SDK, copyleft, notice, and app-store obligations. |
 | Permission boundaries | CODEOWNERS coverage, workflow `contents: read` permissions, secure storage review language, and non-publishing release validation are checked. | Security reviewer confirms platform bridges resolve secrets locally, redact diagnostics, and keep elevated permissions out of unreviewed pull request workflows. |
-| Release readiness | `npm run validate:release`, package private state, the audit command, and release workflow artifact generation are checked. | Release manager attaches the report, records validation results, confirms changelog redaction, and keeps publication disabled until public release approval. |
+| Release readiness | `npm run validate:release`, `npm run build:debug-artifacts`, package private state, the audit command, and release workflow artifact generation are checked. | Release manager attaches the report, records validation results, confirms changelog redaction, and keeps publication disabled until public release approval. |
 
 Manual review items must be completed before public release even when automated checks pass.
 
@@ -97,7 +97,7 @@ The secure deletion workflow must describe filesystem limitations before release
 
 Security and privacy changes require CODEOWNERS review by a human maintainer. Before release, request a human security review that covers:
 
-- The latest `npm run validate:secrets`, `npm test`, `npm run validate:foundation`, and `npm run validate:release` results.
+- The latest `npm run validate:secrets`, `npm test`, `npm run validate:foundation`, `npm run validate:release`, and `npm run build:debug-artifacts` results.
 - Any changes to secret patterns or allowlisted fixtures.
 - Platform secure storage bindings and diagnostic redaction behavior.
 - Hardware security key platform capability detection, relying-party id and origin binding, registration and assertion verification boundaries, explicit fallback behavior, and release enablement flags.

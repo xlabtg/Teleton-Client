@@ -10,6 +10,12 @@ Teleton Client uses `package.json` as the single source of truth for package, ap
 
 The package remains private until a reviewed release workflow is introduced. Pull requests and issue branches can validate metadata, but they do not publish packages.
 
+## Package Artifact Matrix
+
+`src/foundation/release-artifacts.mjs` defines the reviewed package matrix for Android APK, iOS IPA, macOS DMG, Windows EXE, and Linux AppImage targets. Public pull request CI builds unsigned debug artifact manifests for every supported platform runner and uploads those manifests as review evidence.
+
+See `docs/release-packaging.md` for the artifact paths, runner matrix, protected signing boundary, and publication checklist. Pull requests do not receive signing secrets; signed packages must be produced only from reviewed commits inside the protected `release-signing` environment.
+
 ## Semantic Versioning
 
 Versions must use stable semantic version format: `MAJOR.MINOR.PATCH`.
@@ -24,6 +30,7 @@ The helper `classifyVersionBump(previousVersion, nextVersion)` records these rul
 ## Automation Rules
 
 - CI runs `npm run validate:release` for pull requests and pushes to `main` or `issue-*` branches.
+- CI runs `npm run build:debug-artifacts` for Android, iOS, macOS, Windows, and Linux debug artifact manifests, then uploads the unsigned manifests for review.
 - CI previews generated changelog notes with `npm run changelog` so reviewers can inspect the release-note format before publication.
 - Release validation checks metadata consistency and stable semantic version syntax.
 - Publishing is intentionally absent from pull request workflows, so unreviewed pull request code cannot publish packages.

@@ -24,6 +24,7 @@ const requiredFiles = [
   'docs/contributing-templates.md',
   'docs/architecture.md',
   'docs/release-strategy.md',
+  'docs/release-packaging.md',
   'docs/security-audit.md',
   'docs/license-matrix.md',
   'docs/backlog.md',
@@ -39,7 +40,10 @@ const requiredFiles = [
   'src/foundation/agent-action-history.mjs',
   'test/agent-action-history.test.mjs',
   'src/foundation/agent-plugin-registry.mjs',
-  'test/agent-plugin-registry.test.mjs'
+  'test/agent-plugin-registry.test.mjs',
+  'src/foundation/release-artifacts.mjs',
+  'scripts/build-debug-artifacts.mjs',
+  'test/release-artifacts.test.mjs'
 ];
 
 for (const requiredFile of requiredFiles) {
@@ -134,12 +138,14 @@ const requiredContributingPatterns = [
   /npm run audit:security/,
   /npm run validate:foundation/,
   /npm run validate:release/,
+  /npm run build:debug-artifacts/,
   /npm run decompose:dry-run/,
   /docs\/contributing-templates\.md/,
   /BUILD-GUIDE\.md/,
   /SECURITY\.md/,
   /PRIVACY\.md/,
   /docs\/license-matrix\.md/,
+  /docs\/release-packaging\.md/,
   /secrets/i,
   /credentials/i,
   /Telegram API IDs or hashes/i,
@@ -163,9 +169,16 @@ assert.equal(
   'package.json must expose the secret validation command'
 );
 
+assert.equal(
+  packageJson.scripts['build:debug-artifacts'],
+  'node scripts/build-debug-artifacts.mjs',
+  'package.json must expose the debug artifact manifest build command'
+);
+
 const preCommitHook = await readFile(new URL('.githooks/pre-commit', root), 'utf8');
 assert.match(preCommitHook, /npm run validate:secrets/, 'pre-commit hook must run the secret scan');
 assert.match(preCommitHook, /npm run audit:security/, 'pre-commit hook must generate security audit evidence');
+assert.match(preCommitHook, /npm run build:debug-artifacts/, 'pre-commit hook must build debug artifact manifests');
 
 const ciWorkflow = await readFile(new URL('.github/workflows/ci.yml', root), 'utf8');
 assert.match(ciWorkflow, /npm run validate:secrets/, 'CI must run the secret scan');
@@ -186,6 +199,16 @@ assert.match(
   releaseWorkflow,
   /if:\s*always\(\)/,
   'release validation must preserve the security audit artifact when audit checks fail'
+);
+assert.match(
+  releaseWorkflow,
+  /npm run build:debug-artifacts/,
+  'release validation must build public debug artifact manifests'
+);
+assert.doesNotMatch(
+  releaseWorkflow,
+  /\bsecrets\./,
+  'pull request release validation must not reference signing secrets'
 );
 
 const securityAudit = await readFile(new URL('docs/security-audit.md', root), 'utf8');

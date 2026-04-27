@@ -40,3 +40,43 @@ jobs:
         run: npm run changelog
         env:
           GH_TOKEN: ${{ github.token }}
+
+  debug-artifacts:
+    name: Debug artifact contracts (${{ matrix.target_id }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target_id: android-debug-apk
+            artifact_name: android-debug-apk
+            runner: ubuntu-latest
+          - target_id: ios-debug-app-bundle
+            artifact_name: ios-debug-app-bundle
+            runner: macos-latest
+          - target_id: desktop-macos-debug-app-bundle
+            artifact_name: desktop-macos-debug-app-bundle
+            runner: macos-latest
+          - target_id: desktop-windows-debug-exe
+            artifact_name: desktop-windows-debug-exe
+            runner: windows-latest
+          - target_id: desktop-linux-debug-executable
+            artifact_name: desktop-linux-debug-executable
+            runner: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build unsigned debug artifact manifest
+        run: npm run build:debug-artifacts -- --target ${{ matrix.target_id }} --build-id ${{ github.sha }} --output dist/debug-artifacts
+
+      - name: Upload unsigned debug artifact manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: dist/debug-artifacts/${{ matrix.target_id }}.json
