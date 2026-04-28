@@ -1,9 +1,14 @@
 node_modules/
 coverage/
 dist/
+*.tsbuildinfo
 ci-logs/
 *.log
 .DS_Store
 .env
 .env.*
 !.env.example
+web/public/tdweb.js
+web/public/*.worker.js
+web/public/*.wasm
+web/public/*.mem
