@@ -21,6 +21,7 @@ test('alpha web client release project is scaffolded with the required runtime c
     'web/.env.example',
     'web/README.md',
     'web/deploy.sh',
+    'docs/AUTH.md',
     'web/public/manifest.webmanifest',
     'web/public/service-worker.js',
     'web/public/offline.html',
@@ -47,7 +48,7 @@ test('alpha web client release project is scaffolded with the required runtime c
   assert.equal(packageJson.scripts.build, 'tsc -b && vite build');
   assert.equal(packageJson.scripts.test, 'vitest run');
 
-  for (const dependency of ['@tonconnect/ui-react', 'react', 'react-router-dom', 'tdweb', 'zustand']) {
+  for (const dependency of ['@tonconnect/ui-react', 'qrcode', 'react', 'react-router-dom', 'tdweb', 'zustand']) {
     assert.ok(packageJson.dependencies[dependency], `web/package.json must depend on ${dependency}`);
   }
 
@@ -61,6 +62,7 @@ test('alpha web client release project is scaffolded with the required runtime c
 
   const tdlibService = await readFile(pathFor('web/src/services/tdlib.service.ts'), 'utf8');
   assert.match(tdlibService, /authPhone/);
+  assert.match(tdlibService, /requestQrCodeAuthentication/);
   assert.match(tdlibService, /authCode/);
   assert.match(tdlibService, /getChats/);
   assert.match(tdlibService, /sendMessage/);
@@ -84,10 +86,21 @@ test('alpha web client release project is scaffolded with the required runtime c
 
   const store = await readFile(pathFor('web/src/shared/store/useTeletonStore.ts'), 'utf8');
   assert.doesNotMatch(store, /localStorage\.setItem\([^)]*session/i, 'Telegram sessions must not be persisted to localStorage');
+  assert.match(store, /authorizationStateWaitOtherDeviceConfirmation/);
+  assert.match(store, /qrLoginLink/);
+
+  const authScreen = await readFile(pathFor('web/src/features/auth/AuthScreen.tsx'), 'utf8');
+  assert.match(authScreen, /QRCode\.toDataURL/);
+  assert.match(authScreen, /requestQrLogin/);
 
   const webReadme = await readFile(pathFor('web/README.md'), 'utf8');
   assert.match(webReadme, /npm install/);
   assert.match(webReadme, /npm run build/);
   assert.match(webReadme, /teleton-agent/i);
   assert.match(webReadme, /encrypted/i);
+
+  const authDocs = await readFile(pathFor('docs/AUTH.md'), 'utf8');
+  assert.match(authDocs, /QR/i);
+  assert.match(authDocs, /requestQrCodeAuthentication/);
+  assert.match(authDocs, /authorizationStateWaitOtherDeviceConfirmation/);
 });

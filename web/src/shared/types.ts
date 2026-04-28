@@ -2,6 +2,7 @@ export type AuthStatus =
   | 'idle'
   | 'initializing'
   | 'phone-required'
+  | 'qr-required'
   | 'code-required'
   | 'password-required'
   | 'ready'

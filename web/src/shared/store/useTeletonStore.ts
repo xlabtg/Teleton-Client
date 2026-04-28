@@ -20,6 +20,8 @@ import type {
 interface TeletonState {
   authStatus: AuthStatus;
   authError?: string;
+  qrLoginLink?: string;
+  qrLoginUpdatedAt?: string;
   sessionId: string;
   chats: ChatSummary[];
   messagesByChat: Record<number, ChatMessage[]>;
@@ -32,6 +34,8 @@ interface TeletonState {
   bootstrapped: boolean;
   bootstrap: () => Promise<void>;
   initializeTelegram: () => Promise<void>;
+  restartTelegramAuth: () => Promise<void>;
+  requestQrLogin: () => Promise<void>;
   submitPhone: (phoneNumber: string) => Promise<void>;
   submitCode: (code: string) => Promise<void>;
   submitPassword: (password: string) => Promise<void>;
@@ -84,6 +88,8 @@ function authStatusFromTdlibState(stateType: unknown): AuthStatus | null {
   switch (stateType) {
     case 'authorizationStateWaitPhoneNumber':
       return 'phone-required';
+    case 'authorizationStateWaitOtherDeviceConfirmation':
+      return 'qr-required';
     case 'authorizationStateWaitCode':
       return 'code-required';
     case 'authorizationStateWaitPassword':
@@ -131,7 +137,7 @@ export const useTeletonStore = create<TeletonState>((set, get) => ({
   },
 
   async initializeTelegram() {
-    set({ authStatus: 'initializing', authError: undefined });
+    set({ authStatus: 'initializing', authError: undefined, qrLoginLink: undefined, qrLoginUpdatedAt: undefined });
 
     const apiId = Number(import.meta.env.VITE_TELEGRAM_API_ID);
     const apiHash = import.meta.env.VITE_TELEGRAM_API_HASH?.trim() ?? '';
@@ -146,7 +152,19 @@ export const useTeletonStore = create<TeletonState>((set, get) => ({
           const nextAuthStatus = authStatusFromTdlibState(authorizationState?.['@type']);
 
           if (nextAuthStatus) {
-            set({ authStatus: nextAuthStatus });
+            const nextAuthState: Partial<TeletonState> = { authStatus: nextAuthStatus };
+            if (nextAuthStatus === 'qr-required') {
+              const qrLink = authorizationState?.link;
+              if (typeof qrLink === 'string') {
+                nextAuthState.qrLoginLink = qrLink;
+                nextAuthState.qrLoginUpdatedAt = new Date().toISOString();
+              }
+            } else {
+              nextAuthState.qrLoginLink = undefined;
+              nextAuthState.qrLoginUpdatedAt = undefined;
+            }
+
+            set(nextAuthState);
             if (nextAuthStatus === 'ready') void get().loadChats();
           }
 
@@ -164,10 +182,32 @@ export const useTeletonStore = create<TeletonState>((set, get) => ({
         }
       });
 
-      set({ authStatus: 'phone-required' });
+      set({ authStatus: 'phone-required', qrLoginLink: undefined, qrLoginUpdatedAt: undefined });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'TDLib initialization failed.';
-      set({ authStatus: 'error', authError: message });
+      set({ authStatus: 'error', authError: message, qrLoginLink: undefined, qrLoginUpdatedAt: undefined });
+      addNotice(set, get, notice('error', message));
+    }
+  },
+
+  async restartTelegramAuth() {
+    tdlibService.close();
+    set({ authStatus: 'initializing', authError: undefined, qrLoginLink: undefined, qrLoginUpdatedAt: undefined });
+    await get().initializeTelegram();
+  },
+
+  async requestQrLogin() {
+    try {
+      if (get().authStatus === 'qr-required') {
+        tdlibService.close();
+        await get().initializeTelegram();
+      }
+
+      set({ authStatus: 'qr-required', authError: undefined, qrLoginLink: undefined, qrLoginUpdatedAt: undefined });
+      await tdlibService.requestQrCodeAuthentication();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'QR authentication failed.';
+      set({ authStatus: 'phone-required', authError: message, qrLoginLink: undefined, qrLoginUpdatedAt: undefined });
       addNotice(set, get, notice('error', message));
     }
   },
@@ -175,7 +215,7 @@ export const useTeletonStore = create<TeletonState>((set, get) => ({
   async submitPhone(phoneNumber) {
     try {
       await tdlibService.authPhone(phoneNumber);
-      set({ authStatus: 'code-required', authError: undefined });
+      set({ authStatus: 'code-required', authError: undefined, qrLoginLink: undefined, qrLoginUpdatedAt: undefined });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Phone authentication failed.';
       set({ authStatus: 'error', authError: message });

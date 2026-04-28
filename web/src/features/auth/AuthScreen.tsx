@@ -1,4 +1,5 @@
-import { KeyRound, Loader2, Phone, ShieldCheck } from 'lucide-react';
+import { KeyRound, Loader2, Phone, QrCode, RefreshCw, ShieldCheck } from 'lucide-react';
+import QRCode from 'qrcode';
 import { FormEvent, useEffect, useState } from 'react';
 
 import { persistEncryptedSession } from '../../services/crypto.service';
@@ -7,14 +8,20 @@ import { useTeletonStore } from '../../shared/store/useTeletonStore';
 export function AuthScreen() {
   const authStatus = useTeletonStore((state) => state.authStatus);
   const authError = useTeletonStore((state) => state.authError);
+  const qrLoginLink = useTeletonStore((state) => state.qrLoginLink);
+  const qrLoginUpdatedAt = useTeletonStore((state) => state.qrLoginUpdatedAt);
   const sessionId = useTeletonStore((state) => state.sessionId);
   const initializeTelegram = useTeletonStore((state) => state.initializeTelegram);
+  const restartTelegramAuth = useTeletonStore((state) => state.restartTelegramAuth);
+  const requestQrLogin = useTeletonStore((state) => state.requestQrLogin);
   const submitPhone = useTeletonStore((state) => state.submitPhone);
   const submitCode = useTeletonStore((state) => state.submitCode);
   const submitPassword = useTeletonStore((state) => state.submitPassword);
+  const [authMethod, setAuthMethod] = useState<'phone' | 'qr'>('phone');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState('');
   const [rememberSession, setRememberSession] = useState(false);
   const [persisted, setPersisted] = useState(false);
 
@@ -30,6 +37,37 @@ export function AuthScreen() {
     }
   }, [authStatus, persisted, rememberSession, sessionId]);
 
+  useEffect(() => {
+    let active = true;
+    setQrCodeDataUrl('');
+
+    if (!qrLoginLink) {
+      return () => {
+        active = false;
+      };
+    }
+
+    void QRCode.toDataURL(qrLoginLink, {
+      errorCorrectionLevel: 'M',
+      margin: 2,
+      width: 224,
+      color: {
+        dark: '#102027',
+        light: '#ffffff'
+      }
+    })
+      .then((dataUrl) => {
+        if (active) setQrCodeDataUrl(dataUrl);
+      })
+      .catch(() => {
+        if (active) setQrCodeDataUrl('');
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [qrLoginLink]);
+
   const submit = (event: FormEvent) => {
     event.preventDefault();
 
@@ -38,8 +76,20 @@ export function AuthScreen() {
     if (authStatus === 'password-required') void submitPassword(password);
   };
 
+  const selectPhoneLogin = () => {
+    setAuthMethod('phone');
+    if (authStatus === 'qr-required') void restartTelegramAuth();
+  };
+
+  const selectQrLogin = () => {
+    setAuthMethod('qr');
+    if (authStatus === 'phone-required' || authStatus === 'qr-required') void requestQrLogin();
+  };
+
   const icon =
-    authStatus === 'phone-required' ? (
+    authStatus === 'qr-required' ? (
+      <QrCode size={20} />
+    ) : authStatus === 'phone-required' ? (
       <Phone size={20} />
     ) : authStatus === 'password-required' ? (
       <ShieldCheck size={20} />
@@ -49,7 +99,7 @@ export function AuthScreen() {
 
   return (
     <section className="grid min-h-screen grid-cols-1 lg:grid-cols-[minmax(0,1fr)_420px]">
-      <div className="flex min-h-[360px] flex-col bg-ink px-6 py-7 text-white sm:px-10 lg:min-h-screen">
+      <div className="flex min-h-[300px] flex-col bg-ink px-6 py-7 text-white sm:min-h-[360px] sm:px-10 lg:min-h-screen">
         <div className="flex items-center gap-3">
           <img src="/icons/icon-192.png" alt="" className="h-10 w-10" />
           <div>
@@ -71,7 +121,7 @@ export function AuthScreen() {
           ))}
         </div>
 
-        <div className="mt-auto grid max-w-xl grid-cols-3 gap-3 pt-10">
+        <div className="mt-auto hidden max-w-xl grid-cols-3 gap-3 pt-10 sm:grid">
           <div className="h-24 border border-white/14 bg-white/8" />
           <div className="h-24 border border-white/14 bg-mint/25" />
           <div className="h-24 border border-white/14 bg-saffron/25" />
@@ -88,10 +138,76 @@ export function AuthScreen() {
             </div>
           </div>
 
+          {(authStatus === 'phone-required' || authStatus === 'qr-required') && (
+            <div className="mb-5 grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                aria-pressed={authMethod === 'phone'}
+                className={`flex h-10 items-center justify-center gap-2 border px-3 text-sm font-semibold ${
+                  authMethod === 'phone'
+                    ? 'border-teal bg-teal text-white'
+                    : 'border-mist bg-white text-ink hover:border-teal'
+                }`}
+                onClick={selectPhoneLogin}
+              >
+                <Phone size={16} />
+                <span>Phone</span>
+              </button>
+              <button
+                type="button"
+                aria-pressed={authMethod === 'qr'}
+                className={`flex h-10 items-center justify-center gap-2 border px-3 text-sm font-semibold ${
+                  authMethod === 'qr' ? 'border-teal bg-teal text-white' : 'border-mist bg-white text-ink hover:border-teal'
+                }`}
+                onClick={selectQrLogin}
+              >
+                <QrCode size={16} />
+                <span>QR code</span>
+              </button>
+            </div>
+          )}
+
           {authStatus === 'initializing' && (
             <div className="mb-5 flex items-center gap-2 text-sm text-ink/64">
               <Loader2 className="animate-spin" size={16} />
               <span>Starting web TDLib runtime</span>
+            </div>
+          )}
+
+          {authStatus === 'qr-required' && (
+            <div className="mb-5">
+              <div className="grid min-h-[256px] place-items-center border border-mist bg-paper p-4">
+                {qrCodeDataUrl ? (
+                  <img src={qrCodeDataUrl} alt="Telegram login QR code" className="h-56 w-56" />
+                ) : (
+                  <div className="flex items-center gap-2 text-sm text-ink/64">
+                    <Loader2 className="animate-spin" size={16} />
+                    <span>Waiting for QR link</span>
+                  </div>
+                )}
+              </div>
+              <p className="mt-3 text-sm text-ink/64">Scan with Telegram on a signed-in device.</p>
+              <p className="mt-1 text-xs text-ink/48">
+                {qrLoginUpdatedAt ? `Updated ${new Date(qrLoginUpdatedAt).toLocaleTimeString()}` : 'Awaiting TDLib update'}
+              </p>
+              <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <button
+                  type="button"
+                  className="flex h-10 items-center justify-center gap-2 border border-mist px-3 text-sm font-semibold text-ink hover:border-teal"
+                  onClick={() => void requestQrLogin()}
+                >
+                  <RefreshCw size={16} />
+                  <span>Refresh</span>
+                </button>
+                <button
+                  type="button"
+                  className="flex h-10 items-center justify-center gap-2 border border-mist px-3 text-sm font-semibold text-ink hover:border-teal"
+                  onClick={selectPhoneLogin}
+                >
+                  <Phone size={16} />
+                  <span>Use phone</span>
+                </button>
+              </div>
             </div>
           )}
 
@@ -148,13 +264,15 @@ export function AuthScreen() {
 
           {authError && <p className="mb-4 border border-coral/40 bg-coral/10 px-3 py-2 text-sm text-coral">{authError}</p>}
 
-          <button
-            type="submit"
-            className="flex h-11 w-full items-center justify-center gap-2 bg-teal px-4 font-semibold text-white hover:bg-ink disabled:cursor-not-allowed disabled:bg-ink/30"
-            disabled={authStatus === 'initializing' || authStatus === 'error' || authStatus === 'ready'}
-          >
-            {authStatus === 'phone-required' ? 'Send code' : authStatus === 'ready' ? 'Signed in' : 'Continue'}
-          </button>
+          {authStatus !== 'qr-required' && (
+            <button
+              type="submit"
+              className="flex h-11 w-full items-center justify-center gap-2 bg-teal px-4 font-semibold text-white hover:bg-ink disabled:cursor-not-allowed disabled:bg-ink/30"
+              disabled={authStatus === 'initializing' || authStatus === 'error' || authStatus === 'ready'}
+            >
+              {authStatus === 'phone-required' ? 'Send code' : authStatus === 'ready' ? 'Signed in' : 'Continue'}
+            </button>
+          )}
         </form>
       </div>
     </section>

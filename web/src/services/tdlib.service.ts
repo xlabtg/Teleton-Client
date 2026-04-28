@@ -142,6 +142,14 @@ export class TdlibService {
     });
   }
 
+  async requestQrCodeAuthentication(otherUserIds: number[] = []) {
+    await this.ensureParameters();
+    return this.send({
+      '@type': 'requestQrCodeAuthentication',
+      other_user_ids: otherUserIds
+    });
+  }
+
   authCode(code: string) {
     return this.send({
       '@type': 'checkAuthenticationCode',
@@ -238,6 +246,7 @@ export class TdlibService {
   close() {
     this.client?.close?.();
     this.client = null;
+    this.parametersSent = false;
   }
 
   private async handleUpdate(update: Record<string, unknown>) {

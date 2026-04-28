@@ -21,6 +21,8 @@ VITE_TELEGRAM_API_ID=123456
 VITE_TELEGRAM_API_HASH=your_hash
 ```
 
+The sign-in screen supports both phone/code authorization and Telegram QR login. QR login calls TDLib `requestQrCodeAuthentication` and renders the `authorizationStateWaitOtherDeviceConfirmation.link` payload locally; no QR token is stored in `localStorage`.
+
 The default Teleton Agent endpoints are:
 
 ```sh

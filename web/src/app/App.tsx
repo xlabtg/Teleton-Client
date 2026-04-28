@@ -66,6 +66,7 @@ export function App() {
   const bootstrap = useTeletonStore((state) => state.bootstrap);
   const authStatus = useTeletonStore((state) => state.authStatus);
   const view = isView(searchParams.get('view')) ? searchParams.get('view') : 'chats';
+  const showMobileNav = view !== 'chats' || authStatus === 'ready';
 
   useEffect(() => {
     void bootstrap();
@@ -114,36 +115,38 @@ export function App() {
             </nav>
           </aside>
 
-          <main className="min-w-0 pb-20 md:pb-0">
+          <main className={`min-w-0 ${showMobileNav ? 'pb-20' : 'pb-0'} md:pb-0`}>
             {view === 'chats' && (authStatus === 'ready' ? <ChatScreen /> : <AuthScreen />)}
             {view === 'agent' && <AgentPanel />}
             {view === 'ton' && <TonPanel />}
             {view === 'settings' && <SettingsScreen />}
           </main>
 
-          <nav
-            className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-4 border-t border-mist bg-white md:hidden"
-            aria-label="Primary"
-          >
-            {views.map((item) => {
-              const Icon = item.icon;
-              const active = view === item.id;
+          {showMobileNav && (
+            <nav
+              className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-4 border-t border-mist bg-white md:hidden"
+              aria-label="Primary"
+            >
+              {views.map((item) => {
+                const Icon = item.icon;
+                const active = view === item.id;
 
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  className={`grid h-16 place-items-center text-xs font-medium ${
-                    active ? 'text-teal' : 'text-ink/62 hover:text-ink'
-                  }`}
-                  onClick={() => setView(item.id)}
-                >
-                  <Icon size={20} />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </nav>
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={`grid h-16 place-items-center text-xs font-medium ${
+                      active ? 'text-teal' : 'text-ink/62 hover:text-ink'
+                    }`}
+                    onClick={() => setView(item.id)}
+                  >
+                    <Icon size={20} />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
+          )}
         </div>
       </div>
     </TonConnectUIProvider>
